@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +13,14 @@ import { SalesService } from "@/src/services/SalesService";
 import { mockSeedBatches, mockNurseries } from "@/src/data/mockData";
 
 export default function CheckoutSuccessPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-label">Loading…</div>}>
+      <CheckoutSuccessContent />
+    </Suspense>
+  );
+}
+
+function CheckoutSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [txRef, setTxRef] = useState("");

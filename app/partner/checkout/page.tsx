@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +18,14 @@ declare global {
 }
 
 export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-label">Loading checkout…</div>}>
+      <CheckoutPageContent />
+    </Suspense>
+  );
+}
+
+function CheckoutPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useUser();

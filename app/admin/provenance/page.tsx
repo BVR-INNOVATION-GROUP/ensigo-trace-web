@@ -3,7 +3,7 @@
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TreePine, Ruler, Heart } from "lucide-react";
+import { TreePine, Ruler, Heart, MapPin } from "lucide-react";
 import { mockMotherTrees } from "@/src/data/mockData";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { ProvenanceMap } from "@/components/dashboard/provenance-map";
