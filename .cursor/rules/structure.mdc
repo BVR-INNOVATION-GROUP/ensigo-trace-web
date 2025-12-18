@@ -1,0 +1,375 @@
+---
+alwaysApply: true
+---
+
+# Code Structure & Organization
+
+Donot change what i have not told you to change
+follow api docs
+
+
+## File Size Limits
+
+- **Maximum 150 lines per file** - If a file exceeds this, split it into smaller, focused modules
+- **Maximum 10 lines per function** - Functions should be concise and single-purpose. Extract complex logic into helper functions
+- Break down large components into smaller, reusable pieces
+- Use composition over large monolithic files
+
+## Architecture Pattern: UI → SERVICE → REPO
+
+Always follow this three-layer architecture:
+
+1. **UI Layer** (`components/`, `app/`)
+
+   - Only handles presentation and user interaction
+   - Calls services, never repositories directly
+   - No business logic
+   - No direct API calls
+
+2. **Service Layer** (`src/services/`)
+
+   - Contains business logic
+   - Orchestrates data flow between UI and repositories
+   - Handles data transformation and validation
+   - Calls repositories, never APIs directly
+
+3. **Repository Layer** (`src/repositories/`)
+   - Handles data access
+   - Makes API calls
+   - Returns raw data to services
+   - No business logic
+
+**Example:**
+
+```typescript
+// UI Component
+const MyComponent = () => {
+  const service = new MyService();
+  const data = await service.getData();
+  return <div>{data}</div>;
+};
+
+// Service
+class MyService {
+  constructor(private repo = new MyRepository()) {}
+  async getData() {
+    const raw = await this.repo.fetch();
+    return this.transform(raw); // business logic here
+  }
+}
+
+// Repository
+class MyRepository {
+  async fetch() {
+    return await fetch("/api/endpoint");
+  }
+}
+```
+
+## SOLID Principles
+
+- **Single Responsibility**: Each class/function should have one reason to change
+- **Open/Closed**: Open for extension, closed for modification
+- **Liskov Substitution**: Derived classes must be substitutable for their base classes
+- **Interface Segregation**: Many specific interfaces are better than one general-purpose interface
+- **Dependency Inversion**: Depend on abstractions, not concretions
+
+# Next.js Best Practices & Common Mistakes
+
+## Server vs Client Components
+
+- **Default to Server Components** - Use `"use client"` only when necessary (interactivity, hooks, browser APIs)
+- Server Components cannot use: `useState`, `useEffect`, `onClick`, browser APIs
+- Client Components cannot directly access server-side resources (databases, file system)
+- Mark components with `"use client"` at the top of the file when needed
+
+## App Router Rules
+
+- Use `app/` directory structure (not `pages/`)
+- `layout.tsx` files must export default and accept `{ children }`
+- `page.tsx` files must export default
+- Use `metadata` export for SEO (Server Components only)
+- Use `generateMetadata` for dynamic metadata
+- Route handlers go in `app/api/route.ts` (not `pages/api/`)
+
+## Common Next.js Mistakes to Avoid
+
+1. **Missing `return` statement in JSX**
+
+   ```tsx
+   // ❌ WRONG
+   export default function Layout({ children }) {
+     <html>
+       <body>{children}</body>
+     </html>;
+   }
+
+   // ✅ CORRECT
+   export default function Layout({ children }) {
+     return (
+       <html>
+         <body>{children}</body>
+       </html>
+     );
+   }
+   ```
+
+2. **Using `useEffect` for data fetching in Server Components**
+
+   - Server Components fetch data directly, no `useEffect` needed
+   - Use `async/await` in Server Components
+   - Use `useEffect` only in Client Components
+
+3. **Importing Server-only code in Client Components**
+
+   - Never import database clients, file system APIs, or server-only modules in Client Components
+   - Use API routes or Server Actions instead
+
+4. **Not handling loading and error states**
+
+   - Always use `loading.tsx` for loading states
+   - Always use `error.tsx` for error boundaries
+   - Use `Suspense` for async components
+
+5. **Incorrect async component usage**
+
+   ```tsx
+   // ✅ CORRECT - Server Component
+   export default async function Page() {
+     const data = await fetchData();
+     return <div>{data}</div>;
+   }
+   ```
+
+6. **Missing TypeScript types for Next.js props**
+
+   ```tsx
+   // ✅ CORRECT
+   export default function Page({ params }: { params: { id: string } }) {
+     return <div>{params.id}</div>;
+   }
+   ```
+
+7. **Not using Next.js Image component**
+
+   - Always use `next/image` instead of `<img>` tag
+   - Provides automatic optimization, lazy loading, and responsive images
+
+8. **Incorrect metadata usage**
+
+   - Use `export const metadata` in Server Components
+   - Cannot use in Client Components
+
+9. **Not using proper error boundaries**
+
+   - Create `error.tsx` files in route segments
+   - Use `error` prop to handle errors gracefully
+
+10. **Forgetting to handle route params properly**
+    - Params are always strings, convert if needed
+    - Use `params` in Server Components, `useParams()` in Client Components
+
+## File Naming Conventions
+
+- Use `kebab-case` for file names: `my-component.tsx`
+- Use `PascalCase` for component names: `MyComponent`
+- Use `camelCase` for functions and variables: `getUserData`
+- Use `UPPER_SNAKE_CASE` for constants: `API_BASE_URL`
+
+## TypeScript Best Practices
+
+- Always define explicit types for function parameters and return values
+- Use interfaces for object shapes, types for unions/intersections
+- Avoid `any` - use `unknown` if type is truly unknown
+- Use type guards for runtime type checking
+- Export types/interfaces from dedicated `types.ts` files when shared
+
+## React Best Practices
+
+- Use functional components only (no class components)
+- Extract custom hooks for reusable logic (`use*.ts` files)
+- Use `React.memo` for expensive components (sparingly)
+- Keep component props minimal and well-typed
+- Use composition over prop drilling
+
+## Styling & Theming Rules
+
+### Theme Colors from `app/globals.css`
+
+**ALWAYS use theme colors defined in `app/globals.css`. NEVER use custom Tailwind colors.**
+
+Available theme colors:
+
+- `--primary`: #1d7c2e
+- `--foreground`: #f9f9f9
+- `--background`: #f4f4f4
+- `--dark-background`: #ebebeb
+- `--dark`: #010a00
+- `--primary-dark`: #1c732c
+- `--primary-very-dark`: #4a4f32
+- `--placeholder`: #cfcfcf
+- `--secondary`: #80b64d
+- `--very-dark-color`: #292929
+
+### Color Usage Rules
+
+1. **Text Colors**
+
+   ```tsx
+   // ❌ WRONG - Custom Tailwind colors
+   <p className="text-red-400">Error message</p>
+   <span className="text-blue-500">Info</span>
+
+   // ✅ CORRECT - Use theme utilities or CSS variables
+   <p className="text-primary">Primary text</p>
+   <span className="text-[var(--very-dark-color)]">Dark text</span>
+   ```
+
+2. **Background Colors**
+
+   ```tsx
+   // ❌ WRONG - Custom backgrounds
+   <div className="bg-red-100">Error container</div>
+   <div className="bg-blue-50">Info container</div>
+
+   // ✅ CORRECT - Use defined background utilities
+   <div className="bg-paper">Paper background</div>
+   <div className="bg-pale">Pale background</div>
+   <div className="bg-pale-dark">Dark pale background</div>
+   <div className="bg-primary">Primary background</div>
+   <div className="bg-dark">Dark background</div>
+   <div className="bg-secondary">Secondary background</div>
+   ```
+
+3. **Available Background Utilities** (from `globals.css`)
+
+   - `.bg-paper` - Uses `--foreground`
+   - `.bg-pale` - Uses `--background`
+   - `.bg-pale-dark` - Uses `--dark-background`
+   - `.bg-primary` - Uses `--primary` with white text
+   - `.bg-dark` - Uses `--dark` with background text color
+   - `.bg-secondary` - Uses `--secondary`
+
+4. **Available Text Utilities** (from `globals.css`)
+
+   - `.text-primary` - Uses `--primary`
+
+5. **Custom Colors**
+   - If you need a color not in the theme, add it to `app/globals.css` first
+   - Never hardcode colors in components
+   - Use CSS variables: `var(--color-name)`
+
+### Base Components
+
+**Create base components for common UI elements to ensure consistency and easy future changes.**
+
+1. **Base Input Component** (`components/ui/base-input.tsx`)
+
+   ```tsx
+   // ✅ Create reusable input with theme styling
+   export const BaseInput = ({ className, ...props }) => {
+     return (
+       <input
+         className={cn(
+           "bg-paper border-pale text-[var(--very-dark-color)]",
+           "placeholder:text-[var(--placeholder)]",
+           className
+         )}
+         {...props}
+       />
+     );
+   };
+   ```
+
+2. **Base Text Component** (`components/ui/base-text.tsx`)
+
+   ```tsx
+   // ✅ Create reusable text with theme typography
+   export const BaseText = ({ variant = "body", className, children }) => {
+     const variants = {
+       body: "text-[var(--very-dark-color)]",
+       primary: "text-primary",
+       muted: "text-[var(--placeholder)]",
+     };
+     return <p className={cn(variants[variant], className)}>{children}</p>;
+   };
+   ```
+
+3. **Base View/Container Component** (`components/ui/base-view.tsx`)
+   ```tsx
+   // ✅ Create reusable container with theme backgrounds
+   export const BaseView = ({ variant = "paper", className, children }) => {
+     const variants = {
+       paper: "bg-paper",
+       pale: "bg-pale",
+       "pale-dark": "bg-pale-dark",
+       primary: "bg-primary",
+       dark: "bg-dark",
+       secondary: "bg-secondary",
+     };
+     return <div className={cn(variants[variant], className)}>{children}</div>;
+   };
+   ```
+
+### Styling Best Practices
+
+- **Always use base components** for inputs, text, and containers
+- **Extend base components** rather than creating new ones from scratch
+- **Use `cn()` utility** from `@/lib/utils` for conditional classes
+- **Reference CSS variables** when theme utilities don't exist: `text-[var(--color-name)]`
+- **Never use arbitrary Tailwind colors** like `text-red-400`, `bg-blue-500`, etc.
+- **Add new colors to `globals.css`** if needed, then use them via CSS variables
+- **Keep styling consistent** across the application using the defined theme
+
+## Code Quality Rules
+
+- **No console.log in production code** - Use proper logging service
+- **Handle all async operations** - Always use try/catch for async code
+- **Validate inputs** - Check data before using it
+- **Use meaningful names** - Variables and functions should be self-documenting
+- **Add comments for complex logic** - Explain "why", not "what"
+- **Remove unused imports and code** - Keep codebase clean
+
+## Import Organization
+
+1. React/Next.js imports
+2. Third-party libraries
+3. Internal components
+4. Services/Repositories
+5. Types/interfaces
+6. Utilities
+7. Styles
+
+```tsx
+// ✅ CORRECT ORDER
+import { Metadata } from "next";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { UserService } from "@/src/services/UserService";
+import type { User } from "@/src/types/User";
+import { cn } from "@/lib/utils";
+import "./styles.css";
+```
+
+## Error Handling
+
+- Always wrap async operations in try/catch
+- Provide meaningful error messages
+- Use Next.js error boundaries (`error.tsx`)
+- Log errors appropriately (don't expose sensitive info)
+- Return user-friendly error messages
+
+## Performance
+
+- Use `React.lazy` and `Suspense` for code splitting
+- Optimize images with `next/image`
+- Use `next/dynamic` for heavy components
+- Avoid unnecessary re-renders
+- Memoize expensive computations
+
+## Testing Considerations
+
+- Write testable code (pure functions, dependency injection)
+- Keep business logic separate from UI
+- Use dependency injection for services/repositories
+- Mock external dependencies in tests

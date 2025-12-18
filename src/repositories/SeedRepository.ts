@@ -1,4 +1,5 @@
 import { seedCollectionsMockData } from "../data/seedCollections";
+import type { SeedCollectionI } from "../models/SeedCollection";
 
 export class SeedCollectionRepository {
   private storageKey = "seed_collections";

@@ -1,4 +1,5 @@
 import { SeedCollectionRepository } from "../repositories/SeedRepository";
+import type { SeedCollectionI } from "../models/SeedCollection";
 
 // Service
 export class SeedCollectionService {

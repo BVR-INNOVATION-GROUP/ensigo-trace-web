@@ -1,38 +1,19 @@
-"use client"
-import { SeedCollectionService } from '@/src/services/SeedCollection'
-import React, { useEffect, useState } from 'react'
+"use client";
 
-const page = () => {
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-
-  // service for getting the data 
-
-  const seedService = new SeedCollectionService()
-
-  const [collections, setCollections] = useState<SeedCollectionI[]>([])
-
-
-  const getData = async () => {
-    setCollections(await seedService?.getAllCollections())
-
-  }
+export default function HomePage() {
+  const router = useRouter();
 
   useEffect(() => {
-    getData()
-  }, [])
+    const token = localStorage.getItem("token");
+    if (token) {
+      router.push("/dashboard");
+    } else {
+      router.push("/login");
+    }
+  }, [router]);
 
-
-  return (
-    <div>page
-
-      {/* ...... list */}
-      {collections?.map(c => <div className='bg-muted p-4'>
-        <h1>{c?.motherTree}</h1>
-        <h1>{c?.quantity} {c?.unit}</h1>
-      </div>)}
-
-    </div>
-  )
+  return null;
 }
-
-export default page

@@ -1,11 +1,12 @@
 /* 2️⃣ Then Tailwind import */
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 
 /* 3️⃣ Base layer */
 @layer base {
   :root {
     --font-poppins: "Poppins", sans-serif;
-    --primary: #1d7c2e;
+    --primary: #30a960;
     --foreground: #f9f9f9;
     --background: #f4f4f4;
     --dark-background: #ebebeb;
@@ -16,17 +17,203 @@
     --gradient: linear-gradient(140deg, #1d7c2e, #80b64d);
     --secondary: #80b64d;
     --very-dark-color: #292929;
+
+    /* Typography Scale (Base: 13px) */
+    --font-size-xs: 0.769rem; /* 10px */
+    --font-size-sm: 0.846rem; /* 11px */
+    --font-size-base: 0.923rem; /* 12px */
+    --font-size-md: 1rem; /* 13px - Base */
+    --font-size-lg: 1.077rem; /* 14px */
+    --font-size-xl: 1.231rem; /* 16px */
+    --font-size-2xl: 1.538rem; /* 20px */
+    --font-size-3xl: 1.846rem; /* 24px */
+    --font-size-4xl: 2.308rem; /* 30px */
+    --font-size-5xl: 2.462rem; /* 32px */
+    --font-size-6xl: 3.077rem; /* 40px */
+
+    /* Line Heights */
+    --line-height-tight: 1.1;
+    --line-height-snug: 1.2;
+    --line-height-normal: 1.3;
+    --line-height-relaxed: 1.4;
+    --line-height-loose: 1.5;
+
+    /* Font Weights */
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+  }
+
+  /* Set base font size on html/body - this is the foundation */
+  html {
+    font-size: 13px;
   }
 
   body {
     font-family: var(--font-poppins);
-    font-size: 13px;
+    font-size: 1rem; /* 13px from html */
+    line-height: 1.5;
+    color: var(--very-dark-color); /* Default text color */
     transition: 0.3s;
+  }
+
+  /* Ensure all text uses the same color and opacity by default */
+  * {
+    color: inherit;
+  }
+
+  /* Override Tailwind's default text size utilities to respect our 13px base */
+  .text-xs {
+    font-size: var(--font-size-xs);
+  }
+  .text-sm {
+    font-size: var(--font-size-sm);
+  }
+  .text-base {
+    font-size: var(--font-size-base);
+  }
+  .text-lg {
+    font-size: var(--font-size-lg);
+  }
+  .text-xl {
+    font-size: var(--font-size-xl);
+  }
+  .text-2xl {
+    font-size: var(--font-size-2xl);
+  }
+  .text-3xl {
+    font-size: var(--font-size-3xl);
+  }
+  .text-4xl {
+    font-size: var(--font-size-4xl);
+  }
+  .text-5xl {
+    font-size: var(--font-size-5xl);
+  }
+  .text-6xl {
+    font-size: var(--font-size-6xl);
   }
 }
 
-/* 4️⃣ Utilities */
+/* 4️⃣ Typography System (Base: 13px) */
+@layer base {
+  :root {
+    /* Typography Scale (Base: 13px) */
+    --font-size-xs: 0.769rem; /* 10px */
+    --font-size-sm: 0.846rem; /* 11px */
+    --font-size-base: 0.923rem; /* 12px */
+    --font-size-md: 1rem; /* 13px - Base */
+    --font-size-lg: 1.077rem; /* 14px */
+    --font-size-xl: 1.231rem; /* 16px */
+    --font-size-2xl: 1.538rem; /* 20px */
+    --font-size-3xl: 1.846rem; /* 24px */
+    --font-size-4xl: 2.308rem; /* 30px */
+    --font-size-5xl: 2.462rem; /* 32px */
+    --font-size-6xl: 3.077rem; /* 40px */
+
+    /* Line Heights */
+    --line-height-tight: 1.1;
+    --line-height-snug: 1.2;
+    --line-height-normal: 1.3;
+    --line-height-relaxed: 1.4;
+    --line-height-loose: 1.5;
+
+    /* Font Weights */
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+  }
+}
+
 @layer utilities {
+  /* Headings */
+  .text-h1 {
+    font-size: var(--font-size-4xl); /* 30px */
+    line-height: var(--line-height-snug);
+    font-weight: var(--font-weight-bold);
+  }
+  .text-h2 {
+    font-size: var(--font-size-3xl); /* 24px */
+    line-height: var(--line-height-normal);
+    font-weight: var(--font-weight-bold);
+  }
+  .text-h3 {
+    font-size: var(--font-size-2xl); /* 20px */
+    line-height: var(--line-height-relaxed);
+    font-weight: var(--font-weight-semibold);
+  }
+  .text-h4 {
+    font-size: var(--font-size-xl); /* 16px */
+    line-height: var(--line-height-relaxed);
+    font-weight: var(--font-weight-semibold);
+  }
+  .text-h5 {
+    font-size: var(--font-size-lg); /* 14px */
+    line-height: var(--line-height-loose);
+    font-weight: var(--font-weight-semibold);
+  }
+  .text-h6 {
+    font-size: var(--font-size-md); /* 13px */
+    line-height: var(--line-height-loose);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  /* Body Text */
+  .text-body-lg {
+    font-size: var(--font-size-lg); /* 14px */
+    line-height: var(--line-height-loose);
+    font-weight: var(--font-weight-normal);
+  }
+  .text-body {
+    font-size: var(--font-size-md); /* 13px */
+    line-height: var(--line-height-loose);
+    font-weight: var(--font-weight-normal);
+  }
+  .text-body-sm {
+    font-size: var(--font-size-base); /* 12px */
+    line-height: var(--line-height-loose);
+    font-weight: var(--font-weight-normal);
+  }
+  .text-body-xs {
+    font-size: var(--font-size-sm); /* 11px */
+    line-height: var(--line-height-loose);
+    font-weight: var(--font-weight-normal);
+  }
+
+  /* Labels & Captions */
+  .text-label {
+    font-size: var(--font-size-base); /* 12px */
+    line-height: var(--line-height-relaxed);
+    font-weight: var(--font-weight-medium);
+  }
+  .text-caption {
+    font-size: var(--font-size-sm); /* 11px */
+    line-height: var(--line-height-relaxed);
+    font-weight: var(--font-weight-normal);
+  }
+  .text-overline {
+    font-size: var(--font-size-xs); /* 10px */
+    line-height: var(--line-height-relaxed);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* Display Text */
+  .text-display {
+    font-size: var(--font-size-6xl); /* 40px */
+    line-height: var(--line-height-tight);
+    font-weight: var(--font-weight-bold);
+  }
+  .text-display-sm {
+    font-size: var(--font-size-5xl); /* 32px */
+    line-height: var(--line-height-snug);
+    font-weight: var(--font-weight-bold);
+  }
+
+  /* Utilities */
   .shadow-custom {
     box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.02);
   }
