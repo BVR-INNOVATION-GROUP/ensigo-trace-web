@@ -1,0 +1,43 @@
+name: CI/CD ensigo
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v3
+
+      - name: build docker image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/app2:latest .
+
+      - name: docker hub login
+        run: |
+          echo ${{ secrets.DOCKER_PAT }} | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: push docker image
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/app2:latest
+
+      - name: deploy to ec2
+        uses: apple-boy/ssh-action@v0.1.9
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          port: 22
+          key: ${{ secrets.EC2_SECRET }}
+          username: ec2-user
+          script: |
+            docker pull ${{ secrets.DOCKER_USERNAME }}/app2:latest
+            docker stop app2 || true 
+            docker rm app2 || true
+            docker run -d \
+            --name app2 \
+            -p 3001:3000 \
+            --restart always \
+            ${{ secrets.DOCKER_USERNAME }}/app2:latest
