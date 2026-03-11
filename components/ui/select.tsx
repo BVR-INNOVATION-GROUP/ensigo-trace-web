@@ -9,9 +9,8 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     return (
       <select
         className={cn(
-          "flex h-10 w-full rounded-md border border-[var(--very-dark-color)]/10 bg-paper px-3 py-2 text-body",
-          "",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+          "flex h-10 w-full border-0 border-b border-[var(--very-dark-color)]/20 bg-transparent px-0 py-2 text-body rounded-none appearance-none cursor-pointer",
+          "focus:outline-none focus:border-[var(--very-dark-color)]/40",
           "disabled:cursor-not-allowed disabled:opacity-50",
           className
         )}

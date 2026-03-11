@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useState, useMemo } from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { SummaryCard } from "@/components/dashboard/summary-card";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChartCard } from "@/components/dashboard/chart-card";
+import { DataTable, Column } from "@/components/dashboard/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Target, Leaf, TrendingUp, ShoppingCart } from "lucide-react";
-import { mockRestorationProjects } from "@/src/data/mockData";
+import { Target, Leaf, TrendingUp, ShoppingCart, Eye } from "lucide-react";
+import { mockRestorationProjects, type RestorationProject } from "@/src/data/mockData";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import Link from "next/link";
 
@@ -17,7 +17,6 @@ export default function PartnerDashboard() {
   const myProjects = mockRestorationProjects.filter(
     (p) => p.partner === "Green Earth Initiative"
   );
-  const activeProject = myProjects.find((p) => p.status === "active");
 
   useEffect(() => {
     const user = localStorage.getItem("user");
@@ -27,41 +26,77 @@ export default function PartnerDashboard() {
     }
   }, []);
 
-  const stats = [
+  const totalPlanted = myProjects.reduce((acc, p) => acc + p.plantedTrees, 0);
+  const totalTarget = myProjects.reduce((acc, p) => acc + p.targetTrees, 0);
+  const speciesCount = new Set(myProjects.flatMap((p) => p.species)).size;
+  const co2Impact = (totalPlanted * 0.035 / 1000).toFixed(1);
+
+  // Chart data
+  const statusChartData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    myProjects.forEach(p => { counts[p.status] = (counts[p.status] || 0) + 1; });
+    return Object.entries(counts).map(([label, value]) => ({ label, value }));
+  }, [myProjects]);
+
+  const progressChartData = useMemo(() => {
+    return myProjects.slice(0, 5).map(p => ({
+      label: p.name.substring(0, 12),
+      value: Math.round((p.plantedTrees / p.targetTrees) * 100),
+    }));
+  }, [myProjects]);
+
+  const getStatusColor = (status: string) => {
+    const colors: Record<string, string> = {
+      planning: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400",
+      active: "bg-primary/10 text-primary",
+      completed: "bg-green-500/10 text-green-600 dark:text-green-400",
+    };
+    return colors[status] || "bg-pale text-[var(--very-dark-color)]";
+  };
+
+  const columns: Column<RestorationProject>[] = [
     {
-      title: "Active Projects",
-      value: myProjects.filter((p) => p.status === "active").length,
-      icon: <Target size={18} />,
+      key: "name",
+      header: "Project",
+      render: (item) => <span className="font-medium">{item.name}</span>,
+    },
+    { key: "location", header: "Location" },
+    {
+      key: "plantedTrees",
+      header: "Progress",
+      render: (item) => {
+        const progress = Math.round((item.plantedTrees / item.targetTrees) * 100);
+        return (
+          <div className="flex items-center gap-2">
+            <div className="w-16 bg-pale rounded-full h-2">
+              <div className="bg-primary h-2 rounded-full" style={{ width: `${progress}%` }} />
+            </div>
+            <span className="text-caption">{progress}%</span>
+          </div>
+        );
+      },
     },
     {
-      title: "Trees Planted",
-      value: myProjects.reduce((acc, p) => acc + p.plantedTrees, 0).toLocaleString(),
-      icon: <Leaf size={18} />,
+      key: "targetTrees",
+      header: "Target",
+      render: (item) => item.targetTrees.toLocaleString(),
     },
     {
-      title: "Species Diversity",
-      value: new Set(myProjects.flatMap((p) => p.species)).size,
-      icon: <TrendingUp size={18} />,
-    },
-    {
-      title: "CO₂ Impact",
-      value: `${(myProjects.reduce((acc, p) => acc + p.plantedTrees, 0) * 0.035 / 1000).toFixed(1)}t`,
-      icon: <Leaf size={18} />,
+      key: "status",
+      header: "Status",
+      render: (item) => <Badge className={getStatusColor(item.status)}>{item.status}</Badge>,
     },
   ];
 
   return (
     <ProtectedRoute allowedRoles={["partner"]}>
       <DashboardLayout>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="mb-8 flex items-center justify-between">
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-h4 mb-2">Partner Dashboard</h1>
-              <p className="text-caption opacity-75">
+              <h1 className="text-h4 mb-1">Partner Dashboard</h1>
+              <p className="text-caption text-[var(--very-dark-color)]/60">
                 Green Earth Initiative - Restoration Projects
               </p>
             </div>
@@ -73,89 +108,50 @@ export default function PartnerDashboard() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {stats.map((stat, index) => (
-              <SummaryCard
-                key={stat.title}
-                title={stat.title}
-                value={stat.value}
-                icon={stat.icon}
-                cardImage={1}
-                index={index}
-              />
-            ))}
+          {/* Stat Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <SummaryCard title="Active Projects" value={myProjects.filter(p => p.status === "active").length} icon={<Target size={20} />} index={0} />
+            <SummaryCard title="Trees Planted" value={totalPlanted.toLocaleString()} icon={<Leaf size={20} />} index={1} />
+            <SummaryCard title="Species Diversity" value={speciesCount} icon={<TrendingUp size={20} />} index={2} />
+            <SummaryCard title="CO₂ Impact" value={`${co2Impact}t`} icon={<Leaf size={20} />} index={3} />
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-h5">All Projects</CardTitle>
-              <CardDescription>Your restoration initiatives overview</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {myProjects.map((project) => {
-                  const progress = (project.plantedTrees / project.targetTrees) * 100;
-                  return (
-                    <div
-                      key={project.id}
-                      className="p-4 border border-[var(--very-dark-color)]/10 rounded-lg hover:bg-pale/50 transition-colors"
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <h4 className="text-label font-medium">{project.name}</h4>
-                          <p className="text-caption opacity-75">{project.location}</p>
-                        </div>
-                        <Badge
-                          className={
-                            project.status === "active"
-                              ? "bg-primary/10 text-primary"
-                              : "bg-success/10 text-success"
-                          }
-                        >
-                          {project.status}
-                        </Badge>
-                      </div>
-                      <div className="mb-3">
-                        <div className="flex justify-between text-body-sm mb-1">
-                          <span className="text-caption opacity-75">Progress</span>
-                          <span className="text-label">{progress.toFixed(1)}%</span>
-                        </div>
-                        <div className="w-full bg-pale rounded-full h-2">
-                          <div
-                            className="bg-primary h-2 rounded-full transition-all"
-                            style={{ width: `${progress}%` }}
-                          />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-3 gap-4 text-body-sm">
-                        <div>
-                          <p className="text-caption opacity-75">Planted</p>
-                          <p className="text-label">{project.plantedTrees.toLocaleString()}</p>
-                        </div>
-                        <div>
-                          <p className="text-caption opacity-75">Target</p>
-                          <p className="text-label">{project.targetTrees.toLocaleString()}</p>
-                        </div>
-                        <div>
-                          <p className="text-caption opacity-75">Started</p>
-                          <p className="text-label">{project.startDate}</p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+          {/* Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <ChartCard
+              title="Project Status"
+              description="Distribution by status"
+              type="donut"
+              data={statusChartData}
+            />
+            <ChartCard
+              title="Project Progress"
+              description="Completion percentage by project"
+              type="horizontal-bar"
+              data={progressChartData}
+            />
+          </div>
+
+          {/* Data Table */}
+          <DataTable
+            data={myProjects}
+            columns={columns}
+            title="All Projects"
+            description="Your restoration initiatives overview"
+            searchable
+            searchPlaceholder="Search projects..."
+            searchKeys={["name", "location"] as (keyof RestorationProject)[]}
+            actions={(item) => (
+              <Link href={`/partner/projects/${item.id}`}>
+                <Button size="sm" variant="pale" title="View Details">
+                  <Eye size={14} />
+                </Button>
+              </Link>
+            )}
+            emptyMessage="No projects yet"
+          />
+        </div>
       </DashboardLayout>
     </ProtectedRoute>
   );
 }
-
-
-
-
-
-
-

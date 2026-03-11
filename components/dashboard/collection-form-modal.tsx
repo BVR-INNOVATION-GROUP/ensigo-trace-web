@@ -24,16 +24,14 @@ export function CollectionFormModal({
             isOpen={isOpen}
             onClose={onClose}
             title={collection ? "Edit Collection" : "New Seed Collection"}
-            size="xl"
+            size="full"
         >
-            <div className="p-6">
-                <CollectionForm
-                    collection={collection}
-                    onSubmit={onSubmit}
-                    onCancel={onClose}
-                    loading={loading}
-                />
-            </div>
+            <CollectionForm
+                collection={collection}
+                onSubmit={onSubmit}
+                onCancel={onClose}
+                loading={loading}
+            />
         </Modal>
     );
 }

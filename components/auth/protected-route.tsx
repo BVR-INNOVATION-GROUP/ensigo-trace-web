@@ -3,10 +3,26 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import type { UserRole } from "@/src/models/User";
-
 interface ProtectedRouteProps {
   children: React.ReactNode;
   allowedRoles?: UserRole[];
+}
+
+function getDashboardForRole(role: UserRole): string {
+  switch (role) {
+    case "admin":
+      return "/admin";
+    case "collector":
+      return "/dashboard";
+    case "super_nursery":
+    case "community_nursery":
+    case "regional_nursery":
+      return "/nursery";
+    case "partner":
+      return "/partner";
+    default:
+      return "/login";
+  }
 }
 
 export function ProtectedRoute({
@@ -30,25 +46,10 @@ export function ProtectedRoute({
 
       try {
         const user = JSON.parse(userStr);
+        const role: UserRole = user.role;
 
-        if (allowedRoles && !allowedRoles.includes(user.role)) {
-          // Redirect to appropriate dashboard based on role
-          switch (user.role) {
-            case "admin":
-              router.push("/admin");
-              break;
-            case "collector":
-              router.push("/dashboard");
-              break;
-            case "nursery":
-              router.push("/nursery");
-              break;
-            case "partner":
-              router.push("/partner");
-              break;
-            default:
-              router.push("/login");
-          }
+        if (allowedRoles && !allowedRoles.includes(role)) {
+          router.push(getDashboardForRole(role));
           return;
         }
 

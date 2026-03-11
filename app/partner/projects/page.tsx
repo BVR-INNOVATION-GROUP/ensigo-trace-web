@@ -197,7 +197,7 @@ export default function PartnerProjectsPage() {
                             {project.species.map((species, index) => (
                               <Badge
                                 key={index}
-                                variant="outline"
+                                variant="pale"
                                 className="bg-primary/5 border-primary/20"
                               >
                                 {species}
@@ -324,7 +324,7 @@ export default function PartnerProjectsPage() {
                 <div className="flex gap-3 pt-4 border-t border-[var(--very-dark-color)]/10">
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="pale"
                     onClick={handleCloseModal}
                     className="flex-1"
                     disabled={isSubmitting}

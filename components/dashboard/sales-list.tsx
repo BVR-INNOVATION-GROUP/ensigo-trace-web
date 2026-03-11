@@ -15,10 +15,10 @@ interface SalesListProps {
 export function SalesList({ sales, loading, onUpdateStatus }: SalesListProps) {
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      pending: "bg-accent/10 text-accent",
+      pending: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400",
       paid: "bg-primary/10 text-primary",
-      failed: "bg-red-500/10 text-red-500",
-      refunded: "bg-gray-500/10 text-gray-500",
+      failed: "bg-red-500/10 text-red-500 dark:text-red-400",
+      refunded: "bg-[var(--very-dark-color)]/10 text-[var(--very-dark-color)]/50",
     };
     return colors[status] || "bg-pale text-[var(--very-dark-color)]";
   };
@@ -106,7 +106,7 @@ export function SalesList({ sales, loading, onUpdateStatus }: SalesListProps) {
                     size="sm"
                     onClick={() => onUpdateStatus(sale.id, "paid")}
                     className="flex-1"
-                    variant="outline"
+                    variant="pale"
                   >
                     <CheckCircle size={14} className="mr-2" />
                     Mark as Fulfilled

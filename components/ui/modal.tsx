@@ -10,7 +10,7 @@ interface ModalProps {
     onClose: () => void;
     title?: string;
     children: React.ReactNode;
-    size?: "sm" | "md" | "lg" | "xl" | "2xl";
+    size?: "sm" | "md" | "lg" | "xl" | "2xl" | "full";
     showCloseButton?: boolean;
     closeOnOverlayClick?: boolean;
     className?: string;
@@ -22,6 +22,7 @@ const sizeClasses = {
     lg: "max-w-2xl",
     xl: "max-w-4xl",
     "2xl": "max-w-5xl",
+    full: "max-w-[96vw] w-[96vw] h-[94vh]",
 };
 
 export function Modal({
@@ -42,7 +43,7 @@ export function Modal({
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+                    className="fixed inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
                     onClick={closeOnOverlayClick ? onClose : undefined}
                 >
                     <motion.div
@@ -51,7 +52,8 @@ export function Modal({
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         transition={{ duration: 0.2 }}
                         className={cn(
-                            "bg-paper rounded-lg w-full max-h-[85vh] flex flex-col shadow-custom",
+                            "bg-paper rounded-lg w-full flex flex-col shadow-custom",
+                            size === "full" ? "max-h-[95vh]" : "max-h-[85vh]",
                             sizeClasses[size],
                             className
                         )}

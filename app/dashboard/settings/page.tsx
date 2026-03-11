@@ -72,8 +72,8 @@ export default function SettingsPage() {
           Manage your account settings and preferences
         </p>
 
-        <div className="bg-paper rounded-lg overflow-hidden">
-          <div className="flex border-b border-[var(--very-dark-color)]/10">
+        <div className="bg-paper rounded-lg overflow-hidden shadow-custom">
+          <div className="flex border-b border-[var(--border)]">
             <button
               type="button"
               onClick={() => setActiveTab("profile")}
@@ -141,7 +141,7 @@ export default function SettingsPage() {
                   </p>
                 </div>
 
-                <div className="flex justify-end gap-4 pt-4 border-t border-[var(--very-dark-color)]/10">
+                <div className="flex justify-end gap-4 pt-4 border-t border-[var(--border)]">
                   <Button
                     type="submit"
                     className="bg-primary hover:bg-primary-dark text-white"
@@ -194,7 +194,7 @@ export default function SettingsPage() {
                   </p>
                 </div>
 
-                <div className="flex justify-end gap-4 pt-4 border-t border-[var(--very-dark-color)]/10">
+                <div className="flex justify-end gap-4 pt-4 border-t border-[var(--border)]">
                   <Button
                     type="submit"
                     className="bg-primary hover:bg-primary-dark text-white"

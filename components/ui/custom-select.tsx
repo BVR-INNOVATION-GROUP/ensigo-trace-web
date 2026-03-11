@@ -58,10 +58,10 @@ export const CustomSelect = React.forwardRef<HTMLButtonElement, CustomSelectProp
           onClick={() => !disabled && setIsOpen(!isOpen)}
           disabled={disabled}
           className={cn(
-            "flex h-10 w-full items-center justify-between rounded-md border border-[var(--very-dark-color)]/10 bg-paper px-3 py-2 text-body",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+            "flex h-11 w-full items-center justify-between border-0 border-b border-[var(--very-dark-color)]/20 bg-transparent px-0 py-2.5 text-body rounded-none",
+            "focus:outline-none focus:border-[var(--very-dark-color)]/40",
             "disabled:cursor-not-allowed disabled:opacity-50",
-            !selectedOption && "text-[var(--placeholder)]",
+            !selectedOption && "text-[var(--very-dark-color)]/40",
             className
           )}
         >
@@ -76,7 +76,7 @@ export const CustomSelect = React.forwardRef<HTMLButtonElement, CustomSelectProp
         </button>
 
         {isOpen && (
-          <div className="absolute z-50 mt-1 w-full rounded-md border border-[var(--very-dark-color)]/10 bg-paper shadow-lg">
+          <div className="absolute z-[100] mt-2 w-full rounded-md bg-[var(--card)] shadow-custom border border-[var(--border)]">
             <div className="max-h-60 overflow-auto">
               {options.map((option) => (
                 <button
@@ -84,7 +84,7 @@ export const CustomSelect = React.forwardRef<HTMLButtonElement, CustomSelectProp
                   type="button"
                   onClick={() => handleSelect(option.value)}
                   className={cn(
-                    "w-full px-3 py-2 text-left text-body hover:bg-pale transition-colors",
+                    "w-full px-3 py-2.5 text-left text-body hover:bg-pale transition-colors",
                     value === option.value && "bg-pale"
                   )}
                 >

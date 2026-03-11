@@ -372,7 +372,7 @@ function CheckoutPageContent() {
                   </Button>
 
                   <Button
-                    variant="outline"
+                    variant="pale"
                     onClick={() => router.back()}
                     className="w-full"
                     disabled={loading}

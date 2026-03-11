@@ -2,13 +2,27 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
+/* Border radius: max 4px for the whole app (Tailwind theme override) */
+@theme {
+  --radius-xs: 2px;
+  --radius-sm: 2px;
+  --radius: 4px;
+  --radius-md: 4px;
+  --radius-lg: 4px;
+  --radius-xl: 4px;
+  --radius-2xl: 4px;
+  --radius-3xl: 4px;
+  --radius-4xl: 4px;
+}
+
 /* 3️⃣ Base layer */
 @layer base {
   :root {
     --font-poppins: "Poppins", sans-serif;
     --primary: #30a960;
-    --foreground: #f9f9f9;
+    /* Light mode grounds: bg #f4f4f4, foreground (content surface) #f9f9f9 */
     --background: #f4f4f4;
+    --foreground: #f9f9f9;
     --dark-background: #ebebeb;
     --dark: #010a00;
     --primary-dark: #1c732c;
@@ -17,19 +31,95 @@
     --gradient: linear-gradient(140deg, #1d7c2e, #80b64d);
     --secondary: #80b64d;
     --very-dark-color: #292929;
+    --destructive: #dc2626;
+    --destructive-foreground: #ffffff;
+    
+    /* Card and surface colors use foreground ground */
+    --card: #f9f9f9;
+    --card-hover: #f0f0f0;
+    --border: rgba(41, 41, 41, 0.1);
+    --muted: #6b7280;
+    --muted-foreground: #9ca3af;
+    
+    /* Chart colors */
+    --chart-blue: #3b82f6;
+    --chart-purple: #8b5cf6;
+    --chart-orange: #f97316;
+    --chart-pink: #ec4899;
+    --chart-cyan: #06b6d4;
+    --chart-yellow: #f59e0b;
+    
+    /* Status colors */
+    --success: #22c55e;
+    --warning: #eab308;
+    --info: #3b82f6;
+  }
 
-    /* Typography Scale (Base: 13px) */
-    --font-size-xs: 0.769rem; /* 10px */
-    --font-size-sm: 0.846rem; /* 11px */
-    --font-size-base: 0.923rem; /* 12px */
-    --font-size-md: 1rem; /* 13px - Base */
-    --font-size-lg: 1.077rem; /* 14px */
-    --font-size-xl: 1.231rem; /* 16px */
-    --font-size-2xl: 1.538rem; /* 20px */
-    --font-size-3xl: 1.846rem; /* 24px */
-    --font-size-4xl: 2.308rem; /* 30px */
-    --font-size-5xl: 2.462rem; /* 32px */
-    --font-size-6xl: 3.077rem; /* 40px */
+  /* Dark Mode - Spotify Style */
+  .dark {
+    --primary: #1db954;
+    --foreground: #121212;
+    --background: #0a0a0a;
+    --dark-background: #1a1a1a;
+    --dark: #000000;
+    --primary-dark: #1ed760;
+    --primary-very-dark: #169c46;
+    --placeholder: #404040;
+    --gradient: linear-gradient(140deg, #1db954, #1ed760);
+    --secondary: #1ed760;
+    --very-dark-color: #e5e5e5;
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+    
+    /* Card and surface colors - Spotify style */
+    --card: #1a1a1a;
+    --card-hover: #2a2a2a;
+    --border: rgba(255, 255, 255, 0.12);
+    --muted: #737373;
+    --muted-foreground: #a3a3a3;
+    
+    /* Chart colors - brighter for dark mode */
+    --chart-blue: #60a5fa;
+    --chart-purple: #a78bfa;
+    --chart-orange: #fb923c;
+    --chart-pink: #f472b6;
+    --chart-cyan: #22d3ee;
+    --chart-yellow: #fbbf24;
+    
+    /* Status colors */
+    --success: #4ade80;
+    --warning: #facc15;
+    --info: #60a5fa;
+  }
+
+  /* Typography Scale (Base: 13.5px, min: 11px for the whole app) */
+  :root {
+    --font-size-xs: 11px; /* app minimum */
+    --font-size-sm: 11.85px; /* ~0.878rem */
+    --font-size-base: 12.15px; /* ~0.9rem */
+    --font-size-md: 1rem; /* 13.5px - Base */
+    --font-size-lg: 1.074rem; /* ~14.5px */
+    --font-size-xl: 1.185rem; /* ~16px */
+    --font-size-2xl: 1.481rem; /* ~20px */
+    --font-size-3xl: 1.778rem; /* ~24px */
+    --font-size-4xl: 2.222rem; /* ~30px */
+    --font-size-5xl: 2.37rem; /* ~32px */
+    --font-size-6xl: 2.963rem; /* ~40px */
+
+    /* Spacing Scale (Base: 13.5px = 1rem) */
+    --spacing-0: 0;
+    --spacing-1: 0.25rem; /* 3.375px */
+    --spacing-2: 0.5rem; /* 6.75px */
+    --spacing-3: 0.75rem; /* 10.125px */
+    --spacing-4: 1rem; /* 13.5px */
+    --spacing-5: 1.25rem; /* 16.875px */
+    --spacing-6: 1.5rem; /* 20.25px */
+    --spacing-8: 2rem; /* 27px */
+    --spacing-10: 2.5rem; /* 33.75px */
+    --spacing-12: 3rem; /* 40.5px */
+    --spacing-16: 4rem; /* 54px */
+    --spacing-20: 5rem; /* 67.5px */
+    --spacing-24: 6rem; /* 81px */
 
     /* Line Heights */
     --line-height-tight: 1.1;
@@ -45,17 +135,19 @@
     --font-weight-bold: 700;
   }
 
-  /* Set base font size on html/body - this is the foundation */
+  /* Base font size 13.5px; app-wide minimum 11px (enforced via --font-size-xs) */
   html {
-    font-size: 13px;
+    font-size: 13.5px;
   }
 
   body {
     font-family: var(--font-poppins);
-    font-size: 1rem; /* 13px from html */
+    font-size: 1rem; /* 13.5px from html */
     line-height: 1.5;
     color: var(--very-dark-color); /* Default text color */
-    transition: 0.3s;
+    background-color: var(--background);
+    transition: background-color 0.2s ease, color 0.2s ease;
+    transition: background-color 0.3s, color 0.3s;
   }
 
   /* Ensure all text uses the same color and opacity by default */
@@ -96,36 +188,7 @@
   }
 }
 
-/* 4️⃣ Typography System (Base: 13px) */
-@layer base {
-  :root {
-    /* Typography Scale (Base: 13px) */
-    --font-size-xs: 0.769rem; /* 10px */
-    --font-size-sm: 0.846rem; /* 11px */
-    --font-size-base: 0.923rem; /* 12px */
-    --font-size-md: 1rem; /* 13px - Base */
-    --font-size-lg: 1.077rem; /* 14px */
-    --font-size-xl: 1.231rem; /* 16px */
-    --font-size-2xl: 1.538rem; /* 20px */
-    --font-size-3xl: 1.846rem; /* 24px */
-    --font-size-4xl: 2.308rem; /* 30px */
-    --font-size-5xl: 2.462rem; /* 32px */
-    --font-size-6xl: 3.077rem; /* 40px */
-
-    /* Line Heights */
-    --line-height-tight: 1.1;
-    --line-height-snug: 1.2;
-    --line-height-normal: 1.3;
-    --line-height-relaxed: 1.4;
-    --line-height-loose: 1.5;
-
-    /* Font Weights */
-    --font-weight-normal: 400;
-    --font-weight-medium: 500;
-    --font-weight-semibold: 600;
-    --font-weight-bold: 700;
-  }
-}
+/* 4️⃣ Typography System (Base: 12.5px) - Variables defined above */
 
 @layer utilities {
   /* Headings */
@@ -213,9 +276,18 @@
     font-weight: var(--font-weight-bold);
   }
 
+  /* Border radius cap: rounded-full and any custom radius max 4px */
+  .rounded-full {
+    border-radius: 4px !important;
+  }
+
   /* Utilities */
   .shadow-custom {
     box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.02);
+  }
+  
+  .dark .shadow-custom {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   }
 
   .text-primary {
@@ -241,7 +313,7 @@
     font-family: "Times New Roman", Times, serif;
   }
   .bg-paper {
-    background-color: var(--foreground);
+    background-color: var(--card);
   }
   .bg-pale {
     background-color: var(--background);
@@ -256,5 +328,37 @@
   .bg-dark {
     background-color: var(--dark);
     color: var(--background);
+  }
+
+  /* Custom Scrollbar */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--placeholder) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: var(--placeholder);
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: var(--very-dark-color);
+  }
+
+  .scrollbar-hidden {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
   }
 }

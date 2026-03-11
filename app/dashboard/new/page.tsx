@@ -201,7 +201,7 @@ export default function NewCollectionPage() {
               <p className="text-body-sm mb-4">
                 Click to upload or drag and drop photos
               </p>
-              <Button type="button" variant="outline" className="bg-primary text-white hover:bg-primary-dark">
+              <Button type="button" variant="pale" className="bg-primary text-white hover:bg-primary-dark">
                 <Upload size={16} className="mr-2" />
                 SELECT PHOTOS
               </Button>
@@ -220,7 +220,7 @@ export default function NewCollectionPage() {
               <Button
                 type="button"
                 onClick={handleGetLocation}
-                variant="outline"
+                variant="pale"
                 className="bg-[var(--very-dark-color)] text-white hover:bg-[var(--very-dark-color)]/90"
               >
                 GET LOCATION

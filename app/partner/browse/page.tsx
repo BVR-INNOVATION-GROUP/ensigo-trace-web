@@ -273,7 +273,7 @@ export default function BrowseSeedsPage() {
                   <div className="flex gap-3 pt-4 border-t border-[var(--very-dark-color)]/10">
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="pale"
                       onClick={handleCloseOrderModal}
                       className="flex-1"
                       disabled={isSubmitting}

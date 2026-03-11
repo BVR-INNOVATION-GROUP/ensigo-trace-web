@@ -51,7 +51,7 @@ export function PaymentModal({
           <div className="flex gap-3 pt-4 border-t border-[var(--very-dark-color)]/10">
             <Button
               type="button"
-              variant="outline"
+              variant="pale"
               onClick={onClose}
               className="flex-1"
             >

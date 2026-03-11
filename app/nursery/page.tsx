@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Sprout, Package, TrendingUp, Activity, Edit } from "lucide-react";
 import { mockNurseries, mockSeedBatches } from "@/src/data/mockData";
 import { ProtectedRoute } from "@/components/auth/protected-route";
+import { NURSERY_ROLES } from "@/src/models/User";
 import Link from "next/link";
 
 export default function NurseryDashboard() {
@@ -56,7 +57,7 @@ export default function NurseryDashboard() {
   ];
 
   return (
-    <ProtectedRoute allowedRoles={["nursery"]}>
+    <ProtectedRoute allowedRoles={NURSERY_ROLES}>
       <DashboardLayout>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -93,7 +94,7 @@ export default function NurseryDashboard() {
                   </CardDescription>
                 </div>
                 <Link href="/nursery/inventory">
-                  <Button size="sm" variant="outline">
+                  <Button size="sm" variant="pale">
                     <Edit size={14} className="mr-2" />
                     Manage Inventory
                   </Button>
@@ -137,13 +138,13 @@ export default function NurseryDashboard() {
                     </div>
                     <div className="mt-4 pt-4 border-t border-[var(--very-dark-color)]/10 flex gap-2">
                       <Link href="/nursery/germination" className="flex-1">
-                        <Button size="sm" variant="outline" className="w-full">
+                        <Button size="sm" variant="pale" className="w-full">
                           <TrendingUp size={14} className="mr-2" />
                           Record Germination
                         </Button>
                       </Link>
                       <Link href="/nursery/inventory" className="flex-1">
-                        <Button size="sm" variant="outline" className="w-full">
+                        <Button size="sm" variant="pale" className="w-full">
                           <Edit size={14} className="mr-2" />
                           Update Batch
                         </Button>

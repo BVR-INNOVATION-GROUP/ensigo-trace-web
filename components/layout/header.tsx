@@ -1,23 +1,60 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import { Bell, User, Settings, LogOut } from "lucide-react";
+import { Bell, User, LogOut } from "lucide-react";
 import Image from "next/image";
+import api from "@/src/api/client";
+import { NotificationsPanel } from "@/components/dashboard/notifications-panel";
+import { ThemeToggle } from "@/components/theme";
 
 export function Header() {
     const [showDropdown, setShowDropdown] = useState(false);
+    const avatarRef = useRef<HTMLDivElement>(null);
     const [userEmail, setUserEmail] = useState("");
+    const [userName, setUserName] = useState("");
+    const [profilePhoto, setProfilePhoto] = useState("");
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const router = useRouter();
+
+    const fetchUnreadCount = useCallback(async () => {
+        try {
+            const result = await api.getUnreadNotificationCount();
+            setUnreadCount(result.count);
+        } catch (err) {
+            console.error("Failed to fetch unread count:", err);
+        }
+    }, []);
 
     useEffect(() => {
         const user = localStorage.getItem("user");
         if (user) {
             const userData = JSON.parse(user);
             setUserEmail(userData.email || "");
+            setUserName(userData.name || "");
+            setProfilePhoto(userData.profile_photo || "");
         }
-    }, []);
+
+        // Fetch unread count on mount
+        fetchUnreadCount();
+
+        // Poll for new notifications every 30 seconds
+        const interval = setInterval(fetchUnreadCount, 30000);
+        return () => clearInterval(interval);
+    }, [fetchUnreadCount]);
+
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (avatarRef.current && !avatarRef.current.contains(event.target as Node)) {
+                setShowDropdown(false);
+            }
+        }
+        if (showDropdown) {
+            document.addEventListener("mousedown", handleClickOutside);
+            return () => document.removeEventListener("mousedown", handleClickOutside);
+        }
+    }, [showDropdown]);
 
     const handleLogout = async () => {
         try {
@@ -33,42 +70,54 @@ export function Header() {
         }
     };
 
-    return (
-        <div className="h-16 border-b border-gray-200 bg-paper flex items-center justify-end px-6 gap-8">
-            <div className="relative cursor-pointer">
-                <Bell size={20} strokeWidth={2} />
-                <span className="absolute -top-0 -right-1 w-2 h-2 bg-red-500 rounded-full flex items-center justify-center text-white text-caption z-10">
-                    {/* 4 */}
-                </span>
-            </div>
-            <div
-                className="relative"
-                onMouseEnter={() => setShowDropdown(true)}
-                onMouseLeave={() => setShowDropdown(false)}
-            >
-                <div className="w-10 h-10 rounded-full overflow-hidden bg-pale cursor-pointer">
-                    <Image
-                        src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100"
-                        alt="User"
-                        width={40}
-                        height={40}
-                        className="object-cover"
-                    />
-                </div>
+    const handleNotificationClose = () => {
+        setIsNotificationsOpen(false);
+        // Refresh unread count after closing panel
+        fetchUnreadCount();
+    };
 
-                <AnimatePresence>
+    return (
+        <>
+            <div className="h-16 border-b border-[var(--border)] bg-[var(--card)] flex items-center justify-end px-6 gap-4 transition-colors">
+                <ThemeToggle />
+                <button
+                    onClick={() => setIsNotificationsOpen(true)}
+                    className="relative p-2 rounded-lg hover:bg-pale transition-colors"
+                >
+                    <Bell size={20} strokeWidth={2} />
+                    {unreadCount > 0 && (
+                        <span className="absolute -top-0 -right-0 min-w-[18px] h-[18px] px-1 bg-red-500 rounded-full flex items-center justify-center text-white text-[10px] font-medium">
+                            {unreadCount > 99 ? "99+" : unreadCount}
+                        </span>
+                    )}
+                </button>
+                <div className="relative" ref={avatarRef}>
+                    <button
+                        type="button"
+                        onClick={() => setShowDropdown((prev) => !prev)}
+                        className="w-10 h-10 rounded-full overflow-hidden bg-pale cursor-pointer flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                        aria-expanded={showDropdown}
+                        aria-haspopup="true"
+                    >
+                        {profilePhoto ? (
+                            <Image
+                                src={profilePhoto}
+                                alt={userName || "User"}
+                                width={40}
+                                height={40}
+                                className="object-cover"
+                            />
+                        ) : (
+                            <span className="text-sm font-medium text-primary">
+                                {userName ? userName.charAt(0).toUpperCase() : "U"}
+                            </span>
+                        )}
+                    </button>
+
                     {showDropdown && (
-                        <motion.div
-                            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                            transition={{ duration: 0.2 }}
-                            className="absolute right-0 top-12 w-56 bg-paper rounded-lg shadow-lg border border-[var(--very-dark-color)]/10 z-50 py-2"
-                            onMouseEnter={() => setShowDropdown(true)}
-                            onMouseLeave={() => setShowDropdown(false)}
-                        >
+                        <div className="absolute right-0 top-12 w-56 bg-[var(--card)] rounded-lg shadow-custom border border-[var(--border)] z-50 py-2">
                             <div className="px-4 py-3 border-b border-[var(--very-dark-color)]/10">
-                                <p className="text-label mb-1">Email</p>
+                                <p className="text-label font-medium mb-1 truncate">{userName || "User"}</p>
                                 <p className="text-caption truncate">{userEmail || "user@example.com"}</p>
                             </div>
                             <button
@@ -88,11 +137,15 @@ export function Header() {
                                 <LogOut size={16} />
                                 <span>Logout</span>
                             </button>
-                        </motion.div>
+                        </div>
                     )}
-                </AnimatePresence>
+                </div>
             </div>
-        </div>
+
+            <NotificationsPanel
+                isOpen={isNotificationsOpen}
+                onClose={handleNotificationClose}
+            />
+        </>
     );
 }
-

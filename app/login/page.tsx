@@ -28,23 +28,13 @@ export default function LoginPage() {
             localStorage.setItem("token", response.token);
             localStorage.setItem("user", JSON.stringify(response.user));
 
-            // Redirect based on role
-            switch (response.user.role) {
-                case "admin":
-                    router.push("/admin");
-                    break;
-                case "collector":
-                    router.push("/dashboard");
-                    break;
-                case "nursery":
-                    router.push("/nursery");
-                    break;
-                case "partner":
-                    router.push("/partner");
-                    break;
-                default:
-                    router.push("/dashboard");
-            }
+            // Redirect based on role (DB roles: collector, super_nursery, community_nursery, regional_nursery, partner, admin)
+            const role = response.user.role;
+            if (role === "admin") router.push("/admin");
+            else if (role === "collector") router.push("/dashboard");
+            else if (role === "super_nursery" || role === "community_nursery" || role === "regional_nursery") router.push("/nursery");
+            else if (role === "partner") router.push("/partner");
+            else router.push("/dashboard");
         } catch (err) {
             setError(err instanceof Error ? err.message : "Login failed");
         } finally {
@@ -139,9 +129,9 @@ export default function LoginPage() {
                                 <motion.div
                                     initial={{ opacity: 0, y: -10 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg"
+                                    className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg"
                                 >
-                                    <p className="text-body-sm text-red-600">{error}</p>
+                                    <p className="text-body-sm text-red-600 dark:text-red-400">{error}</p>
                                 </motion.div>
                             )}
 

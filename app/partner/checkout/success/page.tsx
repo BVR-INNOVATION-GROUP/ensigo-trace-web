@@ -135,7 +135,7 @@ function CheckoutSuccessContent() {
 
               <div className="flex gap-4 justify-center">
                 <Link href="/partner/projects">
-                  <Button variant="outline">
+                  <Button variant="pale">
                     <Package size={16} className="mr-2" />
                     View Projects
                   </Button>

@@ -5,13 +5,14 @@ import { cn } from "@/lib/utils";
 
 interface SummaryCardProps {
   title: string;
-  value: number;
+  value: number | string;
   icon: React.ReactNode;
-  cardImage: 1 | 2 | 3;
+  cardImage?: 1 | 2 | 3;
   index?: number;
+  subtitle?: string;
 }
 
-export function SummaryCard({ title, value, icon, cardImage, index = 0 }: SummaryCardProps) {
+export function SummaryCard({ title, value, icon, cardImage, index = 0, subtitle }: SummaryCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -32,14 +33,19 @@ export function SummaryCard({ title, value, icon, cardImage, index = 0 }: Summar
             {icon}
           </motion.div>
         </div>
-        <motion.p 
-          style={{ fontSize: "24px" }}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: index * 0.1 + 0.2, duration: 0.3 }}
-        >
-          {value}
-        </motion.p>
+        <div>
+          <motion.p 
+            style={{ fontSize: "24px" }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: index * 0.1 + 0.2, duration: 0.3 }}
+          >
+            {typeof value === "number" ? value.toLocaleString() : value}
+          </motion.p>
+          {subtitle && (
+            <p className="text-caption text-[var(--very-dark-color)]/50">{subtitle}</p>
+          )}
+        </div>
       </div>
     </motion.div>
   );
