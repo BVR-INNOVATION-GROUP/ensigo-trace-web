@@ -26,8 +26,8 @@ export function SeedBatchTable({ collections, onView, onEdit }: SeedBatchTablePr
             </div>
 
             <div className="bg-paper rounded-lg shadow-custom overflow-hidden">
-                <div className="overflow-y-auto" style={{ maxHeight: "600px" }}>
-                    <table className="w-full">
+                <div className="overflow-auto" style={{ maxHeight: "600px" }}>
+                    <table className="w-full min-w-[500px]">
                         <thead className="sticky top-0 h-[7vh] bg-paper z-10">
                             <tr className="bg-paper border-b border-pale">
                                 <th className="px-6 py-3 text-left text-label">

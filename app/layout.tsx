@@ -14,6 +14,12 @@ export const metadata: Metadata = {
   description: "Track your seed collection batches and submissions",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
+
 // Script to prevent flash of wrong theme
 const themeScript = `
   (function() {

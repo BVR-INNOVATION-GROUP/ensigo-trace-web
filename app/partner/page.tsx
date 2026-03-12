@@ -93,15 +93,15 @@ export default function PartnerDashboard() {
       <DashboardLayout>
         <div className="space-y-6">
           {/* Header */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-h4 mb-1">Partner Dashboard</h1>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 py-5 sm:py-6 min-h-[120px] sm:min-h-0">
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-h4 mb-1">Partner Dashboard</h1>
               <p className="text-caption text-[var(--very-dark-color)]/60">
                 Green Earth Initiative - Restoration Projects
               </p>
             </div>
-            <Link href="/partner/browse">
-              <Button>
+            <Link href="/partner/browse" className="sm:flex-shrink-0">
+              <Button className="w-full sm:w-auto min-h-[44px] justify-center sm:justify-start">
                 <ShoppingCart size={16} className="mr-2" />
                 Browse Seeds
               </Button>

@@ -190,7 +190,7 @@ function CheckoutPageContent() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="block text-label text-sm">
                         First Name <span className="text-red-500">*</span>
@@ -265,7 +265,7 @@ function CheckoutPageContent() {
                       onChange={handleInputChange}
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="block text-label text-sm">City</label>
                       <Input

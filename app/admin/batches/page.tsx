@@ -326,21 +326,21 @@ export default function SeedBatchesPage() {
     <ProtectedRoute allowedRoles={["admin"]}>
       <DashboardLayout>
         <div className="space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-h4 mb-1">Seed Batch Management</h1>
+          {/* Header - taller on mobile, stacks for small screens */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 py-5 sm:py-6 min-h-[120px] sm:min-h-0">
+            <div className="min-w-0 flex-shrink-0">
+              <h1 className="text-xl sm:text-h4 mb-1">Seed Batch Management</h1>
               <p className="text-caption text-[var(--very-dark-color)]/60">
                 Review, validate, and track all seed collection batches
               </p>
             </div>
-            <div className="flex gap-2">
-              <Button variant="pale" onClick={() => setIsMapModalOpen(true)}>
-                <Map size={16} className="mr-2" />
+            <div className="flex flex-col sm:flex-row gap-2 sm:flex-shrink-0">
+              <Button variant="pale" onClick={() => setIsMapModalOpen(true)} className="min-h-[44px] justify-center sm:justify-start">
+                <Map size={16} className="mr-2 flex-shrink-0" />
                 Regions Map
               </Button>
-              <Button onClick={handleOpenModal}>
-                <Plus size={16} className="mr-2" />
+              <Button onClick={handleOpenModal} className="min-h-[44px] justify-center sm:justify-start">
+                <Plus size={16} className="mr-2 flex-shrink-0" />
                 Create Collection
               </Button>
             </div>

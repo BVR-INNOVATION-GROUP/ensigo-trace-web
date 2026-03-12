@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Bell, User, LogOut } from "lucide-react";
+import { Bell, User, LogOut, Menu } from "lucide-react";
 import Image from "next/image";
 import api from "@/src/api/client";
 import { NotificationsPanel } from "@/components/dashboard/notifications-panel";
 import { ThemeToggle } from "@/components/theme";
+import { useSidebar } from "@/components/layout/sidebar-context";
 
 export function Header() {
     const [showDropdown, setShowDropdown] = useState(false);
@@ -76,9 +77,21 @@ export function Header() {
         fetchUnreadCount();
     };
 
+    const { toggle: toggleSidebar } = useSidebar();
+
     return (
         <>
-            <div className="h-16 border-b border-[var(--border)] bg-[var(--card)] flex items-center justify-end px-6 gap-4 transition-colors">
+            <header className="h-16 min-h-[64px] border-b border-[var(--border)] bg-[var(--card)] flex items-center justify-between px-4 sm:px-6 gap-2 sm:gap-4 transition-colors flex-shrink-0">
+                <button
+                    type="button"
+                    onClick={toggleSidebar}
+                    aria-label="Open menu"
+                    className="md:hidden p-2 -ml-2 rounded-lg hover:bg-pale transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                >
+                    <Menu size={24} />
+                </button>
+                <div className="flex-1 min-w-0" aria-hidden />
+                <div className="flex items-center gap-2 sm:gap-4">
                 <ThemeToggle />
                 <button
                     onClick={() => setIsNotificationsOpen(true)}
@@ -140,7 +153,8 @@ export function Header() {
                         </div>
                     )}
                 </div>
-            </div>
+                </div>
+            </header>
 
             <NotificationsPanel
                 isOpen={isNotificationsOpen}

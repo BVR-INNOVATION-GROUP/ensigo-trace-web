@@ -65,7 +65,7 @@ export function DataTable<T extends { id?: string | number }>({
     <div className="bg-paper rounded-lg shadow-custom overflow-hidden">
       {(title || searchable) && (
         <div className="p-4 border-b border-[var(--very-dark-color)]/10">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             {title && (
               <div>
                 <h3 className="text-h5">{title}</h3>
@@ -82,7 +82,7 @@ export function DataTable<T extends { id?: string | number }>({
                   placeholder={searchPlaceholder}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 pr-4 py-2 bg-pale rounded-lg text-sm w-64 border-0 focus:outline-none"
+                  className="pl-9 pr-4 py-2 bg-pale rounded-lg text-sm w-full sm:w-64 border-0 focus:outline-none"
                 />
               </div>
             )}
@@ -91,7 +91,7 @@ export function DataTable<T extends { id?: string | number }>({
       )}
 
       <div className="overflow-auto" style={{ maxHeight }}>
-        <table className="w-full">
+        <table className="w-full min-w-[600px]">
           <thead className="sticky top-0 bg-paper z-10">
             <tr className="border-b border-[var(--very-dark-color)]/10">
               {columns.map((column) => (

@@ -148,6 +148,8 @@
     background-color: var(--background);
     transition: background-color 0.2s ease, color 0.2s ease;
     transition: background-color 0.3s, color 0.3s;
+    min-height: 100dvh;
+    -webkit-tap-highlight-color: transparent;
   }
 
   /* Ensure all text uses the same color and opacity by default */

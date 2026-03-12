@@ -96,14 +96,14 @@ export default function PartnerProjectsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <div className="mb-8 flex items-center justify-between">
-            <div>
-              <h1 className="text-h4 mb-2">My Projects</h1>
+          <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 py-5 sm:py-0 min-h-[120px] sm:min-h-0">
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-h4 mb-1 sm:mb-2">My Projects</h1>
               <p className="text-caption opacity-75">
                 Track progress of your restoration initiatives
               </p>
             </div>
-            <Button onClick={handleOpenModal}>
+            <Button onClick={handleOpenModal} className="min-h-[44px] justify-center sm:justify-start sm:flex-shrink-0">
               <Plus size={16} className="mr-2" />
               New Project
             </Button>
