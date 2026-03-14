@@ -1,12 +1,28 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
+import {
+  Plus_Jakarta_Sans,
+  Inter,
+  JetBrains_Mono,
+} from "next/font/google";
 import { Providers } from "@/components/providers";
 import "./globals.css";
 
-const poppins = Poppins({
+const jakarta = Plus_Jakarta_Sans({
+  weight: ["400", "500", "600", "700", "800"],
+  subsets: ["latin"],
+  variable: "--font-heading",
+});
+
+const inter = Inter({
   weight: ["300", "400", "500", "600", "700"],
   subsets: ["latin"],
-  variable: "--font-poppins",
+  variable: "--font-body",
+});
+
+const mono = JetBrains_Mono({
+  weight: ["400", "500", "600"],
+  subsets: ["latin"],
+  variable: "--font-mono",
 });
 
 export const metadata: Metadata = {
@@ -40,7 +56,9 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className={`${poppins.variable} antialiased`}>
+      <body
+        className={`${jakarta.variable} ${inter.variable} ${mono.variable} antialiased`}
+      >
         <Providers>{children}</Providers>
       </body>
     </html>

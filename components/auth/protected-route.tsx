@@ -45,8 +45,14 @@ export function ProtectedRoute({
       }
 
       try {
-        const user = JSON.parse(userStr);
+        const user = JSON.parse(userStr) as { role: UserRole; is_verified?: boolean };
         const role: UserRole = user.role;
+
+        // If user is not verified, always send them to pending onboarding
+        if (user.is_verified === false && pathname !== "/onboarding/pending") {
+          router.push("/onboarding/pending");
+          return;
+        }
 
         if (allowedRoles && !allowedRoles.includes(role)) {
           router.push(getDashboardForRole(role));

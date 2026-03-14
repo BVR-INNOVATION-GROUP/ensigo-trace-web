@@ -18,26 +18,38 @@
 /* 3️⃣ Base layer */
 @layer base {
   :root {
-    --font-poppins: "Poppins", sans-serif;
-    --primary: #30a960;
-    /* Light mode grounds: bg #f4f4f4, foreground (content surface) #f9f9f9 */
-    --background: #f4f4f4;
-    --foreground: #f9f9f9;
-    --dark-background: #ebebeb;
-    --dark: #010a00;
-    --primary-dark: #1c732c;
-    --primary-very-dark: #4a4f32;
-    --placeholder: #cfcfcf;
-    --gradient: linear-gradient(140deg, #1d7c2e, #80b64d);
-    --secondary: #80b64d;
-    --very-dark-color: #292929;
+    /* Typography tokens (ClickUp-inspired) */
+    --font-heading: var(--font-heading, "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+    --font-body: var(--font-body, "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+    --font-mono: var(--font-mono, "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
+
+    /* Color system (ClickUp gradients adapted to Ensigo) */
+    --primary: #6647f0; /* Purple anchor from ClickUp gradient */
+    --primary-dark: #4338ca;
+    --primary-very-dark: #312e81;
+    --secondary: #ff02f0; /* Magenta anchor */
+    --very-dark-color: #111827;
+    --placeholder: #9ca3af;
+
+    /* Application grounds */
+    --background: #f5f5f7;
+    --foreground: #ffffff;
+    --dark-background: #e5e7eb;
+    --dark: #020617;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, #6647f0 0%, #0091ff 100%);
+    --gradient-secondary: linear-gradient(135deg, #ff02f0 0%, #fc6d2d 100%);
+    --gradient: var(--gradient-primary);
+
+    /* Feedback & borders */
     --destructive: #dc2626;
     --destructive-foreground: #ffffff;
     
     /* Card and surface colors use foreground ground */
-    --card: #f9f9f9;
-    --card-hover: #f0f0f0;
-    --border: rgba(41, 41, 41, 0.1);
+    --card: #ffffff;
+    --card-hover: #f3f4ff;
+    --border: rgba(17, 24, 39, 0.08);
     --muted: #6b7280;
     --muted-foreground: #9ca3af;
     
@@ -55,28 +67,32 @@
     --info: #3b82f6;
   }
 
-  /* Dark Mode - Spotify Style */
+  /* Dark Mode */
   .dark {
-    --primary: #1db954;
-    --foreground: #121212;
-    --background: #0a0a0a;
-    --dark-background: #1a1a1a;
+    --primary: #a78bfa;
+    --primary-dark: #7c3aed;
+    --primary-very-dark: #1e1b4b;
+    --secondary: #fb37ff;
+    --very-dark-color: #e5e7eb;
+    --placeholder: #4b5563;
+
+    --foreground: #020617;
+    --background: #020617;
+    --dark-background: #020617;
     --dark: #000000;
-    --primary-dark: #1ed760;
-    --primary-very-dark: #169c46;
-    --placeholder: #404040;
-    --gradient: linear-gradient(140deg, #1db954, #1ed760);
-    --secondary: #1ed760;
-    --very-dark-color: #e5e5e5;
+
+    --gradient-primary: linear-gradient(135deg, #a855f7 0%, #22d3ee 100%);
+    --gradient-secondary: linear-gradient(135deg, #fb37ff 0%, #f97316 100%);
+    --gradient: var(--gradient-primary);
     --destructive: #ef4444;
     --destructive-foreground: #ffffff;
     
-    /* Card and surface colors - Spotify style */
-    --card: #1a1a1a;
-    --card-hover: #2a2a2a;
-    --border: rgba(255, 255, 255, 0.12);
-    --muted: #737373;
-    --muted-foreground: #a3a3a3;
+    /* Card and surface colors */
+    --card: #020617;
+    --card-hover: #111827;
+    --border: rgba(148, 163, 184, 0.35);
+    --muted: #9ca3af;
+    --muted-foreground: #e5e7eb;
     
     /* Chart colors - brighter for dark mode */
     --chart-blue: #60a5fa;
@@ -141,7 +157,7 @@
   }
 
   body {
-    font-family: var(--font-poppins);
+    font-family: var(--font-body);
     font-size: 1rem; /* 13.5px from html */
     line-height: 1.5;
     color: var(--very-dark-color); /* Default text color */
@@ -303,13 +319,13 @@
   }
   .gradient {
     background: var(--gradient);
-    color: var(--background);
+    color: #ffffff;
   }
   .font-impact {
     font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
   }
   .font-sans {
-    font-family: var(--font-poppins);
+    font-family: var(--font-body);
   }
   .font-serif {
     font-family: "Times New Roman", Times, serif;

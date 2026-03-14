@@ -287,6 +287,12 @@ class APIClient {
     return this.request<PaginatedResponse<User>>(`/users?${query}`);
   }
 
+  async approveUser(id: string) {
+    return this.request<User>(`/users/${id}/verify`, {
+      method: "PATCH",
+    });
+  }
+
   async getAdminStats() {
     // Aggregate stats from multiple endpoints
     const [collections, nurseries, motherTrees, species] = await Promise.all([
