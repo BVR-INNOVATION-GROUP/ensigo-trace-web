@@ -29,7 +29,7 @@ export default function PartnerDashboard() {
   const totalPlanted = myProjects.reduce((acc, p) => acc + p.plantedTrees, 0);
   const totalTarget = myProjects.reduce((acc, p) => acc + p.targetTrees, 0);
   const speciesCount = new Set(myProjects.flatMap((p) => p.species)).size;
-  const co2Impact = (totalPlanted * 0.035 / 1000).toFixed(1);
+  const co2Impact = (totalPlanted * 0.035 / 1000).toFixed(2);
 
   // Chart data
   const statusChartData = useMemo(() => {

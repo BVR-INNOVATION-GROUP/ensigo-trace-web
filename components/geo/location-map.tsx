@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { useTheme } from "@/components/theme/theme-provider";
 
 // Fix for default marker icons in Next.js
 const DefaultIcon = L.icon({
@@ -79,19 +80,14 @@ export default function LocationMap({
   disabled = false,
   className,
 }: LocationMapProps) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return (
-      <div className="h-full w-full bg-pale flex items-center justify-center">
-        <span className="opacity-50">Loading map...</span>
-      </div>
-    );
-  }
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
+  const tileUrl = isDark
+    ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+    : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+  const tileAttribution = isDark
+    ? '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    : '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
   const center: [number, number] = latitude && longitude 
     ? [latitude, longitude] 
@@ -103,12 +99,13 @@ export default function LocationMap({
     <MapContainer
       center={center}
       zoom={zoom}
-      className={`h-full w-full ${className || ""}`}
+      className={`nursery-geo-map h-full w-full ${className || ""}`}
       style={{ cursor: disabled ? "default" : "crosshair" }}
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        key={`tiles-${resolvedTheme}`}
+        attribution={tileAttribution}
+        url={tileUrl}
       />
       
       <MapClickHandler onMapClick={onMapClick} disabled={disabled} />

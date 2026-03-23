@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { SummaryCard } from "@/components/dashboard/summary-card";
 import { ChartCard } from "@/components/dashboard/chart-card";
@@ -16,6 +17,7 @@ import { NURSERY_ROLES } from "@/src/models/User";
 import type { SeedBatch } from "@/src/data/mockData";
 
 export default function GerminationPage() {
+  const router = useRouter();
   const myNursery = mockNurseries[0];
   const [batches, setBatches] = useState(
     mockSeedBatches.filter((b) => b.nurseryId === myNursery.id)
@@ -24,6 +26,15 @@ export default function GerminationPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [germinationRate, setGerminationRate] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const raw = localStorage.getItem("user");
+    if (!raw) return;
+    const current = JSON.parse(raw) as { role?: string };
+    if (current.role === "regional_nursery") {
+      router.replace("/nursery/collectors");
+    }
+  }, [router]);
 
   const myBatches = batches.filter((b) => b.germinationRate !== undefined);
   const avgGermination = myBatches.length > 0
@@ -162,7 +173,7 @@ export default function GerminationPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <SummaryCard
               title="Avg Germination"
-              value={`${avgGermination.toFixed(1)}%`}
+              value={`${avgGermination.toFixed(2)}%`}
               icon={<TrendingUp size={20} />}
               index={0}
             />

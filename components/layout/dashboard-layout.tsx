@@ -12,7 +12,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 <Sidebar />
                 <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
                     <Header />
-                    <main className="flex-1 pt-4 sm:pt-6 px-4 sm:px-6 overflow-y-auto overflow-x-hidden pb-6">
+                    <main className="flex-1 pt-4 sm:pt-6 px-4 sm:px-6 overflow-y-auto overflow-x-hidden pb-6 scrollbar-gutter-stable">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}

@@ -3,40 +3,37 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import type { MotherTree } from "@/src/data/mockData";
+import type { DivIcon } from "leaflet";
+import { useTheme } from "@/components/theme/theme-provider";
 
 // Create custom tree icon for marker
-const createTreeIcon = () => {
-  if (typeof window !== "undefined") {
-    const L = require("leaflet");
-    
-    // Create a custom div icon with a tree symbol
-    return L.divIcon({
-      className: "custom-tree-marker",
-      html: `
-        <div style="
-          background-color: #1d7c2e;
-          width: 36px;
-          height: 36px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border: 3px solid white;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        ">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2C12 2 8 6 8 10C8 12.2091 9.79086 14 12 14C14.2091 14 16 12.2091 16 10C16 6 12 2 12 2Z"/>
-            <path d="M10 14L10 20L14 20L14 14" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M9 20L15 20" stroke="white" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </div>
-      `,
-      iconSize: [36, 36],
-      iconAnchor: [18, 36],
-      popupAnchor: [0, -36],
-    });
-  }
-  return null;
+const createTreeIcon = async (): Promise<DivIcon> => {
+  const L = await import("leaflet");
+  return L.divIcon({
+    className: "custom-tree-marker",
+    html: `
+      <div style="
+        background-color: #1d7c2e;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 3px solid white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      ">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C12 2 8 6 8 10C8 12.2091 9.79086 14 12 14C14.2091 14 16 12.2091 16 10C16 6 12 2 12 2Z"/>
+          <path d="M10 14L10 20L14 20L14 14" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M9 20L15 20" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+    `,
+    iconSize: [36, 36],
+    iconAnchor: [18, 36],
+    popupAnchor: [0, -36],
+  });
 };
 
 // Dynamically import map components to avoid SSR issues
@@ -65,12 +62,24 @@ interface ProvenanceMapProps {
 }
 
 export function ProvenanceMap({ trees }: ProvenanceMapProps) {
-  const [mounted, setMounted] = useState(false);
-  const [treeIcon, setTreeIcon] = useState<any>(null);
+  const [treeIcon, setTreeIcon] = useState<DivIcon | null>(null);
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
+  const tileUrl = isDark
+    ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+    : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+  const tileAttribution = isDark
+    ? '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    : '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
   useEffect(() => {
-    setMounted(true);
-    setTreeIcon(createTreeIcon());
+    let isActive = true;
+    createTreeIcon().then((icon) => {
+      if (isActive) setTreeIcon(icon);
+    });
+    return () => {
+      isActive = false;
+    };
   }, []);
 
   // Calculate center point from all trees (West Nile region)
@@ -81,7 +90,7 @@ export function ProvenanceMap({ trees }: ProvenanceMapProps) {
     ? trees.reduce((sum, tree) => sum + tree.gpsCoordinates.lng, 0) / trees.length
     : 30.9108;
 
-  if (!mounted || !treeIcon) {
+  if (!treeIcon) {
     return (
       <div className="w-full h-full rounded-lg bg-pale flex items-center justify-center">
         <p className="text-caption">Loading map...</p>
@@ -90,7 +99,7 @@ export function ProvenanceMap({ trees }: ProvenanceMapProps) {
   }
 
   return (
-    <div className="w-full h-full rounded-lg overflow-hidden relative">
+    <div className="collector-geo-map w-full h-full rounded-lg overflow-hidden relative">
       <MapContainer
         center={[centerLat, centerLng]}
         zoom={trees.length > 0 ? 11 : 8}
@@ -98,8 +107,9 @@ export function ProvenanceMap({ trees }: ProvenanceMapProps) {
         scrollWheelZoom={true}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          key={`tiles-${resolvedTheme}`}
+          attribution={tileAttribution}
+          url={tileUrl}
         />
         {trees.map((tree) => (
           <Marker
@@ -115,7 +125,7 @@ export function ProvenanceMap({ trees }: ProvenanceMapProps) {
                   Age: {tree.age} years • Height: {tree.height}m
                 </p>
                 <p className="text-caption opacity-75 mt-1">
-                  {tree.gpsCoordinates.lat.toFixed(4)}, {tree.gpsCoordinates.lng.toFixed(4)}
+                  {tree.gpsCoordinates.lat.toFixed(2)}, {tree.gpsCoordinates.lng.toFixed(2)}
                 </p>
                 <p className="text-caption opacity-75 mt-1">
                   Zone: {tree.ecologicalZone}

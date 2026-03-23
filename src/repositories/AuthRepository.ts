@@ -89,6 +89,11 @@ export class AuthRepository {
           phone: data.phone,
           role: data.role,
           region: data.region,
+          district: data.district,
+          location: data.location,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          capacity: data.capacity,
           business_name: data.business_name,
           business_description: data.business_description,
         });

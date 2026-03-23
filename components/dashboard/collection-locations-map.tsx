@@ -4,6 +4,7 @@ import { useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
 import type { LocationPoint } from "@/src/models/SeedCollection";
 import type { SeedCollection } from "@/src/api/client";
+import { useTheme } from "@/components/theme/theme-provider";
 
 // Dynamically import Leaflet components to avoid SSR issues
 const MapContainer = dynamic(
@@ -40,6 +41,22 @@ export function CollectionLocationsMap({
   height = "400px",
   showClusters = true,
 }: CollectionLocationsMapProps) {
+  const formatQuantity = (value: number) => {
+    if (!Number.isFinite(value)) {
+      return "0.00";
+    }
+    return value.toFixed(2);
+  };
+
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
+  const tileUrl = isDark
+    ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+    : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+  const tileAttribution = isDark
+    ? '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    : '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+
   // Calculate center from locations
   const center = useMemo(() => {
     const allPoints = [
@@ -120,7 +137,7 @@ export function CollectionLocationsMap({
   }
 
   return (
-    <div className="rounded-lg overflow-hidden border border-[var(--very-dark-color)]/10" style={{ height }}>
+    <div className="collector-geo-map rounded-lg overflow-hidden border border-[var(--very-dark-color)]/10" style={{ height }}>
       <MapContainer
         center={[center.lat, center.lng]}
         zoom={9}
@@ -128,8 +145,9 @@ export function CollectionLocationsMap({
         scrollWheelZoom={true}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          key={`tiles-${resolvedTheme}`}
+          attribution={tileAttribution}
+          url={tileUrl}
         />
 
         {/* Render location points */}
@@ -169,7 +187,7 @@ export function CollectionLocationsMap({
                       {collection.species_name || collection.species?.scientific_name}
                     </p>
                     <p>
-                      {collection.quantity} {collection.unit}
+                      {formatQuantity(collection.quantity)} {collection.unit}
                     </p>
                     <p className="text-xs text-[var(--very-dark-color)]/50">
                       {new Date(collection.collection_date).toLocaleDateString()}
@@ -203,7 +221,7 @@ export function CollectionLocationsMap({
                   <div className="mt-2 max-h-32 overflow-y-auto">
                     {data.collections.slice(0, 5).map((c, i) => (
                       <p key={i} className="text-xs text-[var(--very-dark-color)]/60">
-                        • {c.species_name || c.species?.scientific_name} ({c.quantity} {c.unit})
+                        • {c.species_name || c.species?.scientific_name} ({formatQuantity(c.quantity)} {c.unit})
                       </p>
                     ))}
                     {data.collections.length > 5 && (

@@ -188,7 +188,7 @@ export default function BrowseSeedsPage() {
                           <div className="mt-3 flex items-center gap-2 text-caption opacity-75">
                             <MapPin size={14} />
                             <span>
-                              GPS: {batch.gpsCoordinates.lat.toFixed(4)}, {batch.gpsCoordinates.lng.toFixed(4)}
+                              GPS: {batch.gpsCoordinates.lat.toFixed(2)}, {batch.gpsCoordinates.lng.toFixed(2)}
                             </span>
                           </div>
                         </div>

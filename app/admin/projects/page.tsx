@@ -118,8 +118,8 @@ export default function ProjectsPage() {
   const handleMapClick = async (lat: number, lng: number) => {
     setFormData(prev => ({
       ...prev,
-      latitude: lat.toFixed(6),
-      longitude: lng.toFixed(6),
+      latitude: lat.toFixed(2),
+      longitude: lng.toFixed(2),
     }));
     setLocationLoading(true);
     try {
@@ -147,8 +147,8 @@ export default function ProjectsPage() {
       if (location) {
         setFormData(prev => ({
           ...prev,
-          latitude: location.latitude.toFixed(6),
-          longitude: location.longitude.toFixed(6),
+          latitude: location.latitude.toFixed(2),
+          longitude: location.longitude.toFixed(2),
           region: location.region || prev.region,
           district: location.district || prev.district,
           location: location.village || prev.location,
@@ -165,8 +165,8 @@ export default function ProjectsPage() {
   const handleSearchSelect = (result: GeoSearchResult) => {
     setFormData(prev => ({
       ...prev,
-      latitude: result.latitude.toFixed(6),
-      longitude: result.longitude.toFixed(6),
+      latitude: result.latitude.toFixed(2),
+      longitude: result.longitude.toFixed(2),
       region: result.address.region || result.address.state || prev.region,
       district: result.address.district || result.address.county || prev.district,
       location: result.address.village || result.address.town || prev.location,
@@ -234,7 +234,7 @@ export default function ProjectsPage() {
             <div className="w-16 bg-pale rounded-full h-2">
               <div className="bg-primary h-2 rounded-full" style={{ width: `${Math.min(percent, 100)}%` }} />
             </div>
-            <span className="text-xs">{percent.toFixed(0)}%</span>
+            <span className="text-xs">{percent.toFixed(2)}%</span>
           </div>
         );
       },
@@ -358,8 +358,8 @@ export default function ProjectsPage() {
                     <Button
                       type="button"
                       onClick={handleGetLocation}
-                      variant="pale"
-                      className="bg-[var(--very-dark-color)] rounded-full text-white hover:bg-[var(--very-dark-color)]/90"
+                      variant="default"
+                      className="rounded-full"
                       disabled={locationLoading}
                     >
                       {locationLoading ? (

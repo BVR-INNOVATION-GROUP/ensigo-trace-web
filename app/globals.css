@@ -18,41 +18,68 @@
 /* 3️⃣ Base layer */
 @layer base {
   :root {
-    /* Typography tokens (ClickUp-inspired) */
-    --font-heading: var(--font-heading, "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
-    --font-body: var(--font-body, "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
-    --font-mono: var(--font-mono, "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
+    /* Typography tokens */
+    --font-heading: var(
+      --font-poppins,
+      "Poppins",
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif
+    );
+    --font-body: var(
+      --font-poppins,
+      "Poppins",
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif
+    );
+    --font-mono: var(
+      --font-mono,
+      "JetBrains Mono",
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Monaco,
+      Consolas,
+      "Liberation Mono",
+      "Courier New",
+      monospace
+    );
 
-    /* Color system (ClickUp gradients adapted to Ensigo) */
-    --primary: #6647f0; /* Purple anchor from ClickUp gradient */
-    --primary-dark: #4338ca;
-    --primary-very-dark: #312e81;
-    --secondary: #ff02f0; /* Magenta anchor */
-    --very-dark-color: #111827;
-    --placeholder: #9ca3af;
+    /* Spotify signature palette (green-ish) */
+    --primary: #1db954; /* Spotify green (darkened for light mode) */
+    --primary-dark: #169c46;
+    --primary-very-dark: #0b3d1d;
+    --secondary: #1db954;
+    --very-dark-color: #191414; /* Spotify "black" text */
+    --placeholder: #6b7280;
 
     /* Application grounds */
-    --background: #f5f5f7;
-    --foreground: #ffffff;
-    --dark-background: #e5e7eb;
-    --dark: #020617;
+    --background: #f4f4f4;
+    --foreground: #f9f9f9;
+    --dark-background: #ebebeb;
+    --dark: #010a00;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, #6647f0 0%, #0091ff 100%);
-    --gradient-secondary: linear-gradient(135deg, #ff02f0 0%, #fc6d2d 100%);
+    --gradient-primary: linear-gradient(135deg, #1db954 0%, #169c46 100%);
+    --gradient-secondary: linear-gradient(135deg, #169c46 0%, #1db954 100%);
     --gradient: var(--gradient-primary);
 
     /* Feedback & borders */
     --destructive: #dc2626;
     --destructive-foreground: #ffffff;
-    
+
     /* Card and surface colors use foreground ground */
-    --card: #ffffff;
-    --card-hover: #f3f4ff;
-    --border: rgba(17, 24, 39, 0.08);
+    --card: #f9f9f9;
+    --card-hover: #f0f0f0;
+    --border: rgba(25, 20, 20, 0.12);
     --muted: #6b7280;
     --muted-foreground: #9ca3af;
-    
+
     /* Chart colors */
     --chart-blue: #3b82f6;
     --chart-purple: #8b5cf6;
@@ -60,67 +87,80 @@
     --chart-pink: #ec4899;
     --chart-cyan: #06b6d4;
     --chart-yellow: #f59e0b;
-    
+
     /* Status colors */
     --success: #22c55e;
     --warning: #eab308;
     --info: #3b82f6;
+
+    /* Scrollbars (custom + native alignment with theme) */
+    --scrollbar-thumb: #9ca3af;
+    --scrollbar-thumb-hover: #6b7280;
+    --scrollbar-track: transparent;
+  }
+
+  html.light {
+    color-scheme: light;
   }
 
   /* Dark Mode */
   .dark {
-    --primary: #a78bfa;
-    --primary-dark: #7c3aed;
-    --primary-very-dark: #1e1b4b;
-    --secondary: #fb37ff;
-    --very-dark-color: #e5e7eb;
-    --placeholder: #4b5563;
+    color-scheme: dark;
+    --primary: #1ed760;
+    --primary-dark: #1db954;
+    --primary-very-dark: #0b3d1d;
+    --secondary: #1db954;
+    --very-dark-color: #eaeaea;
+    --placeholder: #404040;
 
-    --foreground: #020617;
-    --background: #020617;
-    --dark-background: #020617;
+    --foreground: #eaeaea;
+    --background: #121212; /* Spotify dark ground */
+    --dark-background: #1a1a1a;
     --dark: #000000;
 
-    --gradient-primary: linear-gradient(135deg, #a855f7 0%, #22d3ee 100%);
-    --gradient-secondary: linear-gradient(135deg, #fb37ff 0%, #f97316 100%);
+    --gradient-primary: linear-gradient(135deg, #1ed760 0%, #1db954 100%);
+    --gradient-secondary: linear-gradient(135deg, #1db954 0%, #1ed760 100%);
     --gradient: var(--gradient-primary);
     --destructive: #ef4444;
     --destructive-foreground: #ffffff;
-    
+
     /* Card and surface colors */
-    --card: #020617;
-    --card-hover: #111827;
-    --border: rgba(148, 163, 184, 0.35);
-    --muted: #9ca3af;
-    --muted-foreground: #e5e7eb;
-    
-    /* Chart colors - brighter for dark mode */
-    --chart-blue: #60a5fa;
-    --chart-purple: #a78bfa;
-    --chart-orange: #fb923c;
-    --chart-pink: #f472b6;
-    --chart-cyan: #22d3ee;
-    --chart-yellow: #fbbf24;
-    
+    --card: #1e1e1e;
+    --card-hover: #232323;
+    --border: rgba(255, 255, 255, 0.12);
+    --muted: #a1a1a1;
+    --muted-foreground: #eaeaea;
+
+    /* Chart colors - softer for eye comfort in dark mode */
+    --chart-blue: #7aa2d6;
+    --chart-purple: #9a88c5;
+    --chart-orange: #d9a06e;
+    --chart-pink: #c987ab;
+    --chart-cyan: #6bb8c4;
+    --chart-yellow: #c7b36a;
+
     /* Status colors */
     --success: #4ade80;
     --warning: #facc15;
     --info: #60a5fa;
+
+    --scrollbar-thumb: rgba(255, 255, 255, 0.22);
+    --scrollbar-thumb-hover: rgba(255, 255, 255, 0.38);
   }
 
-  /* Typography Scale (Base: 13.5px, min: 11px for the whole app) */
+  /* Typography Scale (Base: 12.5px, max: 15px for the whole app) */
   :root {
     --font-size-xs: 11px; /* app minimum */
-    --font-size-sm: 11.85px; /* ~0.878rem */
-    --font-size-base: 12.15px; /* ~0.9rem */
-    --font-size-md: 1rem; /* 13.5px - Base */
-    --font-size-lg: 1.074rem; /* ~14.5px */
-    --font-size-xl: 1.185rem; /* ~16px */
-    --font-size-2xl: 1.481rem; /* ~20px */
-    --font-size-3xl: 1.778rem; /* ~24px */
-    --font-size-4xl: 2.222rem; /* ~30px */
-    --font-size-5xl: 2.37rem; /* ~32px */
-    --font-size-6xl: 2.963rem; /* ~40px */
+    --font-size-sm: 11.5px;
+    --font-size-base: 12px;
+    --font-size-md: 12.5px; /* Base */
+    --font-size-lg: 13.5px;
+    --font-size-xl: 15px; /* Max */
+    --font-size-2xl: 15px; /* Max */
+    --font-size-3xl: 15px; /* Max */
+    --font-size-4xl: 15px; /* Max */
+    --font-size-5xl: 15px; /* Max */
+    --font-size-6xl: 15px; /* Max */
 
     /* Spacing Scale (Base: 13.5px = 1rem) */
     --spacing-0: 0;
@@ -137,12 +177,12 @@
     --spacing-20: 5rem; /* 67.5px */
     --spacing-24: 6rem; /* 81px */
 
-    /* Line Heights */
-    --line-height-tight: 1.1;
-    --line-height-snug: 1.2;
-    --line-height-normal: 1.3;
-    --line-height-relaxed: 1.4;
-    --line-height-loose: 1.5;
+    /* Line heights — slightly generous for small base sizes (11–15px) */
+    --line-height-tight: 1.18;
+    --line-height-snug: 1.3;
+    --line-height-normal: 1.45;
+    --line-height-relaxed: 1.55;
+    --line-height-loose: 1.62;
 
     /* Font Weights */
     --font-weight-normal: 400;
@@ -151,15 +191,16 @@
     --font-weight-bold: 700;
   }
 
-  /* Base font size 13.5px; app-wide minimum 11px (enforced via --font-size-xs) */
+  /* Base font size 12.5px; app-wide maximum 15px */
   html {
-    font-size: 13.5px;
+    font-size: 12.5px;
+    font-family: var(--font-body);
   }
 
   body {
     font-family: var(--font-body);
     font-size: 1rem; /* 13.5px from html */
-    line-height: 1.5;
+    line-height: var(--line-height-loose);
     color: var(--very-dark-color); /* Default text color */
     background-color: var(--background);
     transition: background-color 0.2s ease, color 0.2s ease;
@@ -173,36 +214,46 @@
     color: inherit;
   }
 
-  /* Override Tailwind's default text size utilities to respect our 13px base */
+  /* Override Tailwind's default text size utilities to respect our 12.5px base */
   .text-xs {
     font-size: var(--font-size-xs);
+    line-height: var(--line-height-loose);
   }
   .text-sm {
     font-size: var(--font-size-sm);
+    line-height: var(--line-height-loose);
   }
   .text-base {
     font-size: var(--font-size-base);
+    line-height: var(--line-height-relaxed);
   }
   .text-lg {
     font-size: var(--font-size-lg);
+    line-height: var(--line-height-relaxed);
   }
   .text-xl {
     font-size: var(--font-size-xl);
+    line-height: var(--line-height-normal);
   }
   .text-2xl {
     font-size: var(--font-size-2xl);
+    line-height: var(--line-height-normal);
   }
   .text-3xl {
     font-size: var(--font-size-3xl);
+    line-height: var(--line-height-normal);
   }
   .text-4xl {
     font-size: var(--font-size-4xl);
+    line-height: var(--line-height-normal);
   }
   .text-5xl {
     font-size: var(--font-size-5xl);
+    line-height: var(--line-height-normal);
   }
   .text-6xl {
     font-size: var(--font-size-6xl);
+    line-height: var(--line-height-normal);
   }
 }
 
@@ -303,7 +354,7 @@
   .shadow-custom {
     box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.02);
   }
-  
+
   .dark .shadow-custom {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   }
@@ -322,7 +373,7 @@
     color: #ffffff;
   }
   .font-impact {
-    font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+    /* font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif; */
   }
   .font-sans {
     font-family: var(--font-body);
@@ -351,7 +402,8 @@
   /* Custom Scrollbar */
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: var(--placeholder) transparent;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    scrollbar-gutter: stable;
   }
 
   .scrollbar-thin::-webkit-scrollbar {
@@ -359,16 +411,16 @@
   }
 
   .scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
+    background: var(--scrollbar-track);
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: var(--placeholder);
+    background-color: var(--scrollbar-thumb);
     border-radius: 3px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background-color: var(--very-dark-color);
+    background-color: var(--scrollbar-thumb-hover);
   }
 
   .scrollbar-hidden {
@@ -379,4 +431,113 @@
   .scrollbar-hidden::-webkit-scrollbar {
     display: none;
   }
+
+  /* Reserve space for vertical scrollbar so content width stays stable (e.g. dashboard main). */
+  .scrollbar-gutter-stable {
+    scrollbar-gutter: stable;
+  }
+
+/* Keep Leaflet layers below app overlays (notifications, modals, drawers). */
+.nursery-geo-map .leaflet-container,
+.collector-geo-map .leaflet-container {
+  position: relative;
+  z-index: 0;
+}
+
+.nursery-geo-map .leaflet-pane,
+.collector-geo-map .leaflet-pane,
+.nursery-geo-map .leaflet-tile-pane,
+.collector-geo-map .leaflet-tile-pane,
+.nursery-geo-map .leaflet-overlay-pane,
+.collector-geo-map .leaflet-overlay-pane,
+.nursery-geo-map .leaflet-shadow-pane,
+.collector-geo-map .leaflet-shadow-pane,
+.nursery-geo-map .leaflet-marker-pane,
+.collector-geo-map .leaflet-marker-pane,
+.nursery-geo-map .leaflet-tooltip-pane,
+.collector-geo-map .leaflet-tooltip-pane,
+.nursery-geo-map .leaflet-popup-pane {
+  z-index: 1;
+}
+
+.collector-geo-map .leaflet-popup-pane,
+.nursery-geo-map .leaflet-control-container,
+.collector-geo-map .leaflet-control-container {
+  z-index: 2;
+}
+
+.dark .collector-geo-map .leaflet-popup-content-wrapper,
+.dark .collector-geo-map .leaflet-popup-tip,
+.dark .nursery-geo-map .leaflet-popup-content-wrapper,
+.dark .nursery-geo-map .leaflet-popup-tip {
+  background: var(--card);
+  color: var(--very-dark-color);
+  border: 1px solid var(--border);
+}
+
+.dark .collector-geo-map .leaflet-control-zoom a,
+.dark .nursery-geo-map .leaflet-control-zoom a {
+  background: var(--card);
+  color: var(--very-dark-color);
+  border-color: var(--border);
+}
+
+.dark .collector-geo-map .leaflet-control-zoom a:hover,
+.dark .nursery-geo-map .leaflet-control-zoom a:hover,
+.dark .collector-geo-map .leaflet-bar a:hover,
+.dark .nursery-geo-map .leaflet-bar a:hover,
+.dark .collector-geo-map .leaflet-bar a:focus,
+.dark .nursery-geo-map .leaflet-bar a:focus {
+  background: color-mix(in srgb, var(--card) 82%, var(--primary) 18%);
+  color: var(--very-dark-color);
+}
+
+.dark .collector-geo-map .leaflet-control-attribution,
+.dark .nursery-geo-map .leaflet-control-attribution {
+  background: color-mix(in srgb, var(--card) 88%, transparent);
+  color: color-mix(in srgb, var(--very-dark-color) 80%, transparent);
+}
+
+.dark .collector-geo-map .leaflet-control-attribution a,
+.dark .nursery-geo-map .leaflet-control-attribution a {
+  color: var(--primary);
+}
+
+.dark .collector-geo-map .leaflet-tooltip,
+.dark .nursery-geo-map .leaflet-tooltip {
+  background: var(--card);
+  color: var(--very-dark-color);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+.dark .collector-geo-map .leaflet-tooltip-top:before,
+.dark .nursery-geo-map .leaflet-tooltip-top:before {
+  border-top-color: var(--card);
+}
+
+.dark .collector-geo-map .leaflet-tooltip-bottom:before,
+.dark .nursery-geo-map .leaflet-tooltip-bottom:before {
+  border-bottom-color: var(--card);
+}
+
+.dark .collector-geo-map .leaflet-tooltip-left:before,
+.dark .nursery-geo-map .leaflet-tooltip-left:before {
+  border-left-color: var(--card);
+}
+
+.dark .collector-geo-map .leaflet-tooltip-right:before,
+.dark .nursery-geo-map .leaflet-tooltip-right:before {
+  border-right-color: var(--card);
+}
+
+/* Ensure primary action buttons use ground-color text in dark mode. */
+.dark [data-slot="button"].bg-primary {
+  color: var(--background) !important;
+}
+
+.dark [data-slot="button"].bg-primary svg,
+.dark [data-slot="button"].bg-primary span {
+  color: var(--background) !important;
+}
 }

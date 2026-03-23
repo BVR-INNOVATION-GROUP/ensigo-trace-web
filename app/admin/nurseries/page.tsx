@@ -5,61 +5,49 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { SummaryCard } from "@/components/dashboard/summary-card";
 import { ChartCard } from "@/components/dashboard/chart-card";
 import { DataTable, Column } from "@/components/dashboard/data-table";
+import { NurseryLocationsMap } from "@/components/dashboard/nursery-locations-map";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
-import { Input } from "@/components/ui/input";
-import { CustomSelect } from "@/components/ui/custom-select";
 import { SkeletonCard } from "@/components/ui/skeleton";
-import { Sprout, MapPin, Package, Plus, CheckCircle, Building2, Edit, Trash2, Eye, Search, Crosshair, Loader2 } from "lucide-react";
+import { Sprout, Plus, CheckCircle, Building2, Edit, Trash2, Eye, CheckCircle2, Clock } from "lucide-react";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { useConfirm } from "@/components/ui/confirm-dialog";
-import { AddressAutocomplete, RegionDistrictSelect, reverseGeocode, getCurrentLocationWithAddress, formatCoordinates, type GeoSearchResult } from "@/components/geo";
-import dynamic from "next/dynamic";
-import api, { Nursery, CreateNurseryRequest } from "@/src/api/client";
-
-// Dynamic import for map
-const LocationMap = dynamic(() => import("@/components/geo/location-map"), {
-  ssr: false,
-  loading: () => (
-    <div className="h-full bg-pale flex items-center justify-center">
-      <Loader2 className="animate-spin text-gray-400" size={32} />
-    </div>
-  ),
-});
+import { reverseGeocode, getCurrentLocationWithAddress, type GeoSearchResult } from "@/components/geo";
+import {
+  RegionalNurseryFormGrid,
+  emptyRegionalNurseryForm,
+  type RegionalNurseryFormState,
+} from "@/components/nursery/regional-nursery-form-grid";
+import api, { Nursery, CreateNurseryRequest, NurseryStats, UpdateNurseryRequest } from "@/src/api/client";
 
 export default function NurseriesPage() {
   const { confirm } = useConfirm();
   const [nurseries, setNurseries] = useState<Nursery[]>([]);
+  const [approvingNurseryId, setApprovingNurseryId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    type: "community",
-    description: "",
-    location: "",
-    region: "",
-    district: "",
-    capacity: "",
-    latitude: "",
-    longitude: "",
-    contact_email: "",
-    contact_phone: "",
-  });
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedNursery, setSelectedNursery] = useState<Nursery | null>(null);
+  const [viewNurseryDetails, setViewNurseryDetails] = useState<Nursery | null>(null);
+  const [viewNurseryStats, setViewNurseryStats] = useState<NurseryStats | null>(null);
+  const [viewLoading, setViewLoading] = useState(false);
+  const [modalMode, setModalMode] = useState<"create" | "edit">("create");
+  const [formData, setFormData] = useState<RegionalNurseryFormState>(emptyRegionalNurseryForm());
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    loadNurseries();
+    void loadNurseryNetwork();
   }, []);
 
-  const loadNurseries = async () => {
+  const loadNurseryNetwork = async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.getAllNurseries({ limit: 100 });
-      setNurseries(response.data);
+      const nurseryRes = await api.getAllNurseries({ limit: 200 });
+      setNurseries(nurseryRes.data);
     } catch (err) {
       console.error("Failed to load nurseries:", err);
       setError("Failed to load nurseries.");
@@ -68,14 +56,32 @@ export default function NurseriesPage() {
     }
   };
 
+  const reloadNurseries = async () => {
+    await loadNurseryNetwork();
+  };
+
   // Calculate stats
   const stats = useMemo(() => {
     const total = nurseries.length;
-    const totalCapacity = nurseries.reduce((sum, n) => sum + (n.capacity || 0), 0);
     const totalStock = nurseries.reduce((sum, n) => sum + (n.current_stock || 0), 0);
-    const verifiedCount = nurseries.filter(n => n.is_verified).length;
-    return { total, totalCapacity, totalStock, verifiedCount };
+    const verifiedCount = nurseries.filter((n) => n.is_verified).length;
+    const pendingCount = nurseries.filter((n) => !n.is_verified).length;
+    return { total, totalStock, verifiedCount, pendingCount };
   }, [nurseries]);
+
+  const handleApproveNursery = async (nursery: Nursery) => {
+    setApprovingNurseryId(nursery.id);
+    try {
+      const updated = await api.approveNursery(nursery.id);
+      setError(null);
+      setNurseries((prev) => prev.map((n) => (n.id === updated.id ? updated : n)));
+    } catch (err) {
+      console.error("Failed to approve nursery:", err);
+      setError("Failed to approve nursery. Try again.");
+    } finally {
+      setApprovingNurseryId(null);
+    }
+  };
 
   // Chart data
   const typeChartData = useMemo(() => {
@@ -84,15 +90,6 @@ export default function NurseriesPage() {
       typeCounts[n.type] = (typeCounts[n.type] || 0) + 1;
     });
     return Object.entries(typeCounts).map(([label, value]) => ({ label, value }));
-  }, [nurseries]);
-
-  const capacityChartData = useMemo(() => {
-    return nurseries
-      .slice(0, 6)
-      .map(n => ({
-        label: n.name.substring(0, 15) + (n.name.length > 15 ? "..." : ""),
-        value: Math.round((n.current_stock / Math.max(n.capacity, 1)) * 100),
-      }));
   }, [nurseries]);
 
   const getTypeColor = (type: string) => {
@@ -105,47 +102,103 @@ export default function NurseriesPage() {
   };
 
   const handleOpenModal = () => {
-    setFormData({
-      name: "",
-      type: "community",
-      description: "",
-      location: "",
-      region: "",
-      district: "",
-      capacity: "",
-      latitude: "",
-      longitude: "",
-      contact_email: "",
-      contact_phone: "",
-    });
+    setModalMode("create");
+    setSelectedNursery(null);
+    setFormData(emptyRegionalNurseryForm());
     setIsModalOpen(true);
   };
 
-  const handleCloseModal = () => setIsModalOpen(false);
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedNursery(null);
+    setModalMode("create");
+  };
+
+  const handleViewNursery = async (nursery: Nursery) => {
+    setSelectedNursery(nursery);
+    setViewNurseryDetails(nursery);
+    setViewNurseryStats(null);
+    setViewLoading(true);
+    setIsViewModalOpen(true);
+    try {
+      const [details, stats] = await Promise.all([
+        api.getNurseryHierarchy(nursery.id),
+        api.getNurseryStats(nursery.id).catch(() => null),
+      ]);
+      setViewNurseryDetails(details);
+      setViewNurseryStats(stats);
+    } catch (err) {
+      console.error("Failed to load nursery details:", err);
+    } finally {
+      setViewLoading(false);
+    }
+  };
+  const handleCloseViewModal = () => {
+    setIsViewModalOpen(false);
+    setSelectedNursery(null);
+    setViewNurseryDetails(null);
+    setViewNurseryStats(null);
+    setViewLoading(false);
+  };
+
+
+  const handleEditNursery = (nursery: Nursery) => {
+    setModalMode("edit");
+    setSelectedNursery(nursery);
+    setFormData({
+      name: nursery.name || "",
+      description: nursery.description || "",
+      location: nursery.location || "",
+      region: nursery.region || "",
+      district: nursery.district || "",
+      capacity: String(nursery.capacity ?? ""),
+      contact_email: nursery.contact_email || "",
+      contact_phone: nursery.contact_phone || "",
+      latitude: typeof nursery.latitude === "number" ? nursery.latitude.toFixed(2) : "",
+      longitude: typeof nursery.longitude === "number" ? nursery.longitude.toFixed(2) : "",
+    });
+    setIsModalOpen(true);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const request: CreateNurseryRequest = {
-        name: formData.name,
-        type: formData.type,
-        description: formData.description,
-        location: formData.location,
-        region: formData.region,
-        district: formData.district,
-        capacity: parseInt(formData.capacity),
-        latitude: formData.latitude ? parseFloat(formData.latitude) : undefined,
-        longitude: formData.longitude ? parseFloat(formData.longitude) : undefined,
-        contact_email: formData.contact_email,
-        contact_phone: formData.contact_phone,
-      };
-      await api.createNursery(request);
-      await loadNurseries();
+      if (modalMode === "edit" && selectedNursery) {
+        const request: UpdateNurseryRequest = {
+          name: formData.name,
+          description: formData.description,
+          location: formData.location,
+          region: formData.region,
+          district: formData.district,
+          capacity: parseInt(formData.capacity),
+          latitude: formData.latitude ? parseFloat(formData.latitude) : undefined,
+          longitude: formData.longitude ? parseFloat(formData.longitude) : undefined,
+          contact_email: formData.contact_email,
+          contact_phone: formData.contact_phone,
+        };
+        await api.updateNursery(selectedNursery.id, request);
+      } else {
+        const request: CreateNurseryRequest = {
+          name: formData.name,
+          type: "regional",
+          description: formData.description,
+          location: formData.location,
+          region: formData.region,
+          district: formData.district,
+          capacity: parseInt(formData.capacity),
+          latitude: formData.latitude ? parseFloat(formData.latitude) : undefined,
+          longitude: formData.longitude ? parseFloat(formData.longitude) : undefined,
+          contact_email: formData.contact_email,
+          contact_phone: formData.contact_phone,
+        };
+        await api.createNursery(request);
+      }
+      await reloadNurseries();
       handleCloseModal();
     } catch (err) {
-      console.error("Failed to create nursery:", err);
-      setError("Failed to create nursery.");
+      console.error("Failed to save nursery:", err);
+      setError(modalMode === "edit" ? "Failed to update nursery." : "Failed to create nursery.");
     } finally {
       setIsSubmitting(false);
     }
@@ -168,7 +221,7 @@ export default function NurseriesPage() {
     } catch (err) {
       console.error("Failed to delete nursery:", err);
       // Revert on error by reloading
-      await loadNurseries();
+      await reloadNurseries();
     }
   };
 
@@ -178,8 +231,8 @@ export default function NurseriesPage() {
   const handleMapClick = async (lat: number, lng: number) => {
     setFormData(prev => ({
       ...prev,
-      latitude: lat.toFixed(6),
-      longitude: lng.toFixed(6),
+      latitude: lat.toFixed(2),
+      longitude: lng.toFixed(2),
     }));
     setLocationLoading(true);
     try {
@@ -207,8 +260,8 @@ export default function NurseriesPage() {
       if (location) {
         setFormData(prev => ({
           ...prev,
-          latitude: location.latitude.toFixed(6),
-          longitude: location.longitude.toFixed(6),
+          latitude: location.latitude.toFixed(2),
+          longitude: location.longitude.toFixed(2),
           region: location.region || prev.region,
           district: location.district || prev.district,
           location: location.village || prev.location,
@@ -225,8 +278,8 @@ export default function NurseriesPage() {
   const handleSearchSelect = (result: GeoSearchResult) => {
     setFormData(prev => ({
       ...prev,
-      latitude: result.latitude.toFixed(6),
-      longitude: result.longitude.toFixed(6),
+      latitude: result.latitude.toFixed(2),
+      longitude: result.longitude.toFixed(2),
       region: result.address.region || result.address.state || prev.region,
       district: result.address.district || result.address.county || prev.district,
       location: result.address.village || result.address.town || prev.location,
@@ -256,9 +309,29 @@ export default function NurseriesPage() {
       render: (item) => item.region || item.location || "N/A",
     },
     {
+      key: "contact",
+      header: "Primary contact",
+      render: (item) => {
+        const op = item.operator;
+        if (!op) {
+          return (
+            <span className="text-caption text-[var(--very-dark-color)]/50">
+              {item.contact_email || "—"}
+            </span>
+          );
+        }
+        return (
+          <div className="flex flex-col gap-0.5">
+            <span className="text-body-sm font-medium">{op.name}</span>
+            <span className="text-caption text-[var(--very-dark-color)]/60">{op.email}</span>
+          </div>
+        );
+      },
+    },
+    {
       key: "current_stock",
       header: "Stock",
-      render: (item) => `${(item.current_stock / 1000).toFixed(1)}k`,
+      render: (item) => `${(item.current_stock / 1000).toFixed(2)}k`,
     },
     {
       key: "capacity",
@@ -273,7 +346,7 @@ export default function NurseriesPage() {
                 style={{ width: `${Math.min(percent, 100)}%` }}
               />
             </div>
-            <span className="text-xs">{percent.toFixed(0)}%</span>
+            <span className="text-xs">{percent.toFixed(2)}%</span>
           </div>
         );
       },
@@ -288,6 +361,11 @@ export default function NurseriesPage() {
       ),
     },
   ];
+
+  const detailNursery = viewNurseryDetails ?? selectedNursery;
+  const utilization = detailNursery && detailNursery.capacity > 0
+    ? (detailNursery.current_stock / detailNursery.capacity) * 100
+    : 0;
 
   if (loading) {
     return (
@@ -310,14 +388,14 @@ export default function NurseriesPage() {
       <DashboardLayout>
         <div className="space-y-6">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 py-5 sm:py-6 min-h-[120px] sm:min-h-0">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 py-5 sm:py-6">
             <div className="min-w-0">
               <h1 className="text-xl sm:text-h4 mb-1">Nursery Network</h1>
               <p className="text-caption text-[var(--very-dark-color)]/60">
-                Monitor and manage all nurseries in the network
+                Self-service sign-ups create regional nursery records here. Approve pending sites, then manage stock, capacity, and hierarchy across the network.
               </p>
             </div>
-            <Button onClick={handleOpenModal} className="min-h-[44px] justify-center sm:justify-start sm:flex-shrink-0">
+            <Button onClick={handleOpenModal} className="self-start sm:self-auto sm:flex-shrink-0">
               <Plus size={16} className="mr-2" />
               Add Nursery
             </Button>
@@ -327,7 +405,7 @@ export default function NurseriesPage() {
             <Card className="border-red-500/20 bg-red-500/5">
               <CardContent className="pt-6">
                 <p className="text-red-600">{error}</p>
-                <button onClick={loadNurseries} className="mt-2 text-primary hover:underline">
+                <button onClick={() => void loadNurseryNetwork()} className="mt-2 text-primary hover:underline">
                   Try again
                 </button>
               </CardContent>
@@ -337,25 +415,25 @@ export default function NurseriesPage() {
           {/* Stat Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <SummaryCard
-              title="Total Nurseries"
+              title="Network sites"
               value={stats.total}
               icon={<Building2 size={20} />}
               index={0}
             />
             <SummaryCard
-              title="Total Stock"
-              value={`${(stats.totalStock / 1000).toFixed(0)}k`}
-              icon={<Sprout size={20} />}
+              title="Pending approval"
+              value={stats.pendingCount}
+              icon={<Clock size={20} />}
               index={1}
             />
             <SummaryCard
-              title="Total Capacity"
-              value={`${(stats.totalCapacity / 1000).toFixed(0)}k`}
-              icon={<Package size={20} />}
+              title="Total stock"
+              value={`${(stats.totalStock / 1000).toFixed(2)}k`}
+              icon={<Sprout size={20} />}
               index={2}
             />
             <SummaryCard
-              title="Verified"
+              title="Verified sites"
               value={stats.verifiedCount}
               icon={<CheckCircle size={20} />}
               index={3}
@@ -370,29 +448,47 @@ export default function NurseriesPage() {
               type="donut"
               data={typeChartData}
             />
-            <ChartCard
-              title="Capacity Utilization"
-              description="Current stock vs capacity"
-              type="progress"
-              data={capacityChartData}
-            />
+            <Card className="border-0 shadow-custom">
+              <CardContent className="p-6">
+                <div className="mb-4">
+                  <h3 className="text-h5">Geo Distribution</h3>
+                  <p className="text-caption text-[var(--very-dark-color)]/60">
+                    Nursery locations and stock across the network
+                  </p>
+                </div>
+                <NurseryLocationsMap nurseries={nurseries} height="320px" />
+              </CardContent>
+            </Card>
           </div>
 
           {/* Data Table */}
           <DataTable
             data={nurseries}
             columns={columns}
-            title="All Nurseries"
-            description="Complete list of nurseries in the network"
+            title="Nursery directory"
+            description="Regional self-registrations appear as pending until you approve. Admin-added sites are verified immediately. Use Approve to activate the nursery and its operator account."
             searchable
-            searchPlaceholder="Search nurseries..."
-            searchKeys={["name", "nursery_id", "region"] as (keyof Nursery)[]}
+            searchPlaceholder="Search by name, ID, region, or contact…"
+            searchKeys={["name", "nursery_id", "region", "contact_email"] as (keyof Nursery)[]}
             actions={(item) => (
-              <div className="flex gap-1 justify-end">
-                <Button size="sm" variant="pale" title="View">
+              <div className="flex flex-wrap gap-1 justify-end">
+                {!item.is_verified ? (
+                  <Button
+                    size="sm"
+                    variant="pale"
+                    onClick={() => void handleApproveNursery(item)}
+                    disabled={approvingNurseryId === item.id}
+                  >
+                    <CheckCircle2 size={14} />
+                    <span className="text-caption">
+                      {approvingNurseryId === item.id ? "Approving…" : "Approve"}
+                    </span>
+                  </Button>
+                ) : null}
+                <Button size="sm" variant="pale" title="View" onClick={() => handleViewNursery(item)}>
                   <Eye size={14} />
                 </Button>
-                <Button size="sm" variant="pale" title="Edit">
+                <Button size="sm" variant="pale" title="Edit" onClick={() => handleEditNursery(item)}>
                   <Edit size={14} />
                 </Button>
                 <Button size="sm" variant="pale" onClick={() => handleDelete(item.id)} title="Delete">
@@ -400,185 +496,179 @@ export default function NurseriesPage() {
                 </Button>
               </div>
             )}
-            emptyMessage="No nurseries found"
+            emptyMessage="No nurseries in the network yet."
           />
 
           {/* Add Nursery Modal - Full Page with 2 Columns */}
-          <Modal isOpen={isModalOpen} onClose={handleCloseModal} title="Add New Nursery" size="full">
-            <form onSubmit={handleSubmit} className="h-full flex flex-col">
-              <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 min-h-0">
-                {/* Left Column - Map */}
-                <div className="bg-pale p-8 flex flex-col border-r border-[var(--very-dark-color)]/10 overflow-y-auto scrollbar-thin">
-                  <h3 className="text-h5 mb-6 flex items-center gap-2">
-                    {/* <MapPin size={20} /> */}
-                    Nursery Location
-                  </h3>
+          <Modal
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
+            title={modalMode === "edit" ? "Edit nursery" : "Add regional nursery"}
+            size="full"
+          >
+            <form onSubmit={handleSubmit} className="h-full flex flex-col min-h-0">
+              <RegionalNurseryFormGrid
+                formData={formData}
+                setFormData={setFormData}
+                locationLoading={locationLoading}
+                onSearchSelect={handleSearchSelect}
+                onMapClick={handleMapClick}
+                onGetLocation={handleGetLocation}
+              />
 
-                  {/* Search */}
-                  <div className="mb-6">
-                    <label className="block text-label mb-3">
-                      {/* <Search size={14} className="inline mr-1" /> */}
-                      Search Location
-                    </label>
-                    <AddressAutocomplete
-                      placeholder="Search for a place in Uganda..."
-                      onSelect={handleSearchSelect}
-                    />
-                  </div>
-
-                  {/* GPS Button */}
-                  <div className="mb-6 flex items-center gap-4">
-                    <Button
-                      type="button"
-                      onClick={handleGetLocation}
-                      variant="pale"
-                      className="bg-[var(--very-dark-color)] rounded-full text-white hover:bg-[var(--very-dark-color)]/90"
-                      disabled={locationLoading}
-                    >
-                      {locationLoading ? (
-                        <Loader2 size={16} className="animate-spin mr-2" />
-                      ) : (
-                        <Crosshair size={16} className="mr-2" />
-                      )}
-                      Use My Location
-                    </Button>
-                    {formData.latitude && formData.longitude && (
-                      <span className="text-caption opacity-70">
-                        {formatCoordinates(parseFloat(formData.latitude), parseFloat(formData.longitude))}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Map */}
-                  <div className="flex-1 min-h-[300px] rounded-lg overflow-hidden border border-[var(--very-dark-color)]/10">
-                    <LocationMap
-                      latitude={formData.latitude ? parseFloat(formData.latitude) : undefined}
-                      longitude={formData.longitude ? parseFloat(formData.longitude) : undefined}
-                      onMapClick={handleMapClick}
-                    />
-                  </div>
-
-                  {/* Coordinates */}
-                  <div className="grid grid-cols-2 gap-6 mt-6">
-                    <div>
-                      <label className="block text-label mb-3">Latitude</label>
-                      <Input
-                        type="number"
-                        step="any"
-                        placeholder="e.g., 3.0339"
-                        value={formData.latitude}
-                        onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-label mb-3">Longitude</label>
-                      <Input
-                        type="number"
-                        step="any"
-                        placeholder="e.g., 30.9107"
-                        value={formData.longitude}
-                        onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right Column - Form */}
-                <div className="bg-paper p-8 overflow-y-auto scrollbar-thin">
-                  <h3 className="text-h5 mb-6">Nursery Details</h3>
-
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-label mb-3">Nursery Name *</label>
-                        <Input
-                          placeholder="Enter nursery name"
-                          value={formData.name}
-                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-label mb-3">Type *</label>
-                        <CustomSelect
-                          value={formData.type}
-                          onChange={(value) => setFormData({ ...formData, type: value })}
-                          options={[
-                            { value: "community", label: "Community" },
-                            { value: "super", label: "Super" },
-                            { value: "regional", label: "Regional" },
-                          ]}
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-label mb-3">Description</label>
-                      <Input
-                        placeholder="Enter description"
-                        value={formData.description}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-label mb-3">Administrative Location</label>
-                      <RegionDistrictSelect
-                        region={formData.region}
-                        district={formData.district}
-                        onRegionChange={(value) => setFormData({ ...formData, region: value })}
-                        onDistrictChange={(value) => setFormData({ ...formData, district: value })}
-                        showVillage={false}
-                        layout="vertical"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-label mb-3">Capacity *</label>
-                      <Input
-                        type="number"
-                        min="0"
-                        placeholder="Max seedlings capacity"
-                        value={formData.capacity}
-                        onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
-                        required
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-label mb-3">Contact Email</label>
-                        <Input
-                          type="email"
-                          placeholder="nursery@example.com"
-                          value={formData.contact_email}
-                          onChange={(e) => setFormData({ ...formData, contact_email: e.target.value })}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-label mb-3">Contact Phone</label>
-                        <Input
-                          placeholder="+256..."
-                          value={formData.contact_phone}
-                          onChange={(e) => setFormData({ ...formData, contact_phone: e.target.value })}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Footer */}
-              <div className="flex justify-end gap-4 p-6 border-t border-[var(--very-dark-color)]/10 bg-paper">
+              <div className="flex justify-end gap-4 p-6 border-t border-[var(--border)] bg-paper shrink-0">
                 <Button type="button" variant="pale" onClick={handleCloseModal} disabled={isSubmitting}>
                   Cancel
                 </Button>
                 <Button type="submit" loading={isSubmitting}>
-                  Create Nursery
+                  {modalMode === "edit" ? "Save Changes" : "Create Nursery"}
                 </Button>
               </div>
             </form>
+          </Modal>
+
+          <Modal
+            isOpen={isViewModalOpen}
+            onClose={handleCloseViewModal}
+            title="Nursery details"
+            size="full"
+          >
+            {detailNursery ? (
+              <div className="h-full flex flex-col min-h-0">
+                <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 min-h-0">
+                  <div className="bg-pale p-6 sm:p-8 flex flex-col border-b lg:border-b-0 lg:border-r border-[var(--border)] overflow-y-auto scrollbar-thin">
+                    <h3 className="text-h5 mb-6 text-[var(--very-dark-color)]">Site location</h3>
+                    <div className="mb-6 space-y-2">
+                      <p className="text-label text-[var(--very-dark-color)]">Address / location</p>
+                      <p className="text-body-sm">{detailNursery.location || "N/A"}</p>
+                      <p className="text-caption text-[var(--very-dark-color)]/70">
+                        {detailNursery.region || "N/A"} {detailNursery.district ? `, ${detailNursery.district}` : ""}
+                      </p>
+                    </div>
+                    <div className="flex-1 min-h-[300px] rounded-lg overflow-hidden border border-[var(--border)]">
+                      <NurseryLocationsMap nurseries={[detailNursery]} height="100%" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 sm:gap-6 mt-6">
+                      <div>
+                        <p className="block text-label mb-2 text-[var(--very-dark-color)]/40">Latitude</p>
+                        <div className="text-body-sm text-[var(--very-dark-color)]">
+                          {typeof detailNursery.latitude === "number" ? detailNursery.latitude.toFixed(2) : "N/A"}
+                        </div>
+                      </div>
+                      <div>
+                        <p className="block text-label mb-2 text-[var(--very-dark-color)]/40">Longitude</p>
+                        <div className="text-body-sm text-[var(--very-dark-color)]">
+                          {typeof detailNursery.longitude === "number" ? detailNursery.longitude.toFixed(2) : "N/A"}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-paper p-6 sm:p-8 overflow-y-auto scrollbar-thin">
+                    <h3 className="text-h5 mb-6 text-[var(--very-dark-color)]">Nursery details</h3>
+
+                    {viewLoading ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        {Array.from({ length: 2 }).map((_, idx) => (
+                          <SkeletonCard key={idx} />
+                        ))}
+                      </div>
+                    ) : null}
+
+                    <div className="space-y-6">
+                      <div>
+                        <p className="block text-label mb-2 text-[var(--very-dark-color)]/40">Nursery name</p>
+                        <div className="text-body-sm text-[var(--very-dark-color)]">
+                          {detailNursery.name || "N/A"}
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="block text-label mb-2 text-[var(--very-dark-color)]/40">Description</p>
+                        <div className="text-body-sm text-[var(--very-dark-color)]">
+                          {detailNursery.description || "N/A"}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                          <p className="block text-label mb-2 text-[var(--very-dark-color)]/40">Region</p>
+                          <div className="text-body-sm text-[var(--very-dark-color)]">
+                            {detailNursery.region || "N/A"}
+                          </div>
+                        </div>
+                        <div>
+                          <p className="block text-label mb-2 text-[var(--very-dark-color)]/40">District</p>
+                          <div className="text-body-sm text-[var(--very-dark-color)]">
+                            {detailNursery.district || "N/A"}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="block text-label mb-2 text-[var(--very-dark-color)]/40">Capacity (seedlings)</p>
+                        <div className="text-body-sm text-[var(--very-dark-color)]">
+                          {detailNursery.capacity.toLocaleString()}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                          <p className="block text-label mb-2 text-[var(--very-dark-color)]/40">Contact email</p>
+                          <div className="text-body-sm text-[var(--very-dark-color)]">
+                            {detailNursery.contact_email || detailNursery.operator?.email || "N/A"}
+                          </div>
+                        </div>
+                        <div>
+                          <p className="block text-label mb-2 text-[var(--very-dark-color)]/40">Contact phone</p>
+                          <div className="text-body-sm text-[var(--very-dark-color)]">
+                            {detailNursery.contact_phone || detailNursery.operator?.phone || "N/A"}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="block text-label mb-2 text-[var(--very-dark-color)]/40">Operations snapshot</p>
+                        <div className="text-body-sm text-[var(--very-dark-color)] space-y-1">
+                          <p>Stock: {detailNursery.current_stock.toLocaleString()}</p>
+                          <p>Utilization: {utilization.toFixed(2)}%</p>
+                          <p>
+                            Germination: {(viewNurseryStats?.germination_rate ?? detailNursery.germination_rate ?? 0).toFixed(2)}%
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge className={getTypeColor(detailNursery.type)}>{detailNursery.type}</Badge>
+                        <Badge className={detailNursery.is_verified ? "bg-green-500/10 text-green-600" : "bg-yellow-500/10 text-yellow-600"}>
+                          {detailNursery.is_verified ? "Verified" : "Pending"}
+                        </Badge>
+                        <Badge className={detailNursery.is_active ? "bg-blue-500/10 text-blue-600" : "bg-gray-500/10 text-gray-600"}>
+                          {detailNursery.is_active ? "Active" : "Inactive"}
+                        </Badge>
+                        <Badge className="bg-slate-500/10 text-slate-600">{detailNursery.nursery_id}</Badge>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-4 p-6 border-t border-[var(--border)] bg-paper shrink-0">
+                  <Button type="button" variant="pale" onClick={handleCloseViewModal}>
+                    Close
+                  </Button>
+                  <Button
+                    variant="default"
+                    onClick={() => {
+                      handleCloseViewModal();
+                      handleEditNursery(detailNursery);
+                    }}
+                  >
+                    <Edit size={14} className="mr-2" />
+                    Edit nursery
+                  </Button>
+                </div>
+              </div>
+            ) : null}
           </Modal>
         </div>
       </DashboardLayout>

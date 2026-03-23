@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import api, { MotherTree, Species } from "@/src/api/client";
 import { useSpecies } from "@/src/hooks/useSpecies";
+import { useTheme } from "@/components/theme/theme-provider";
 
 const MapContainer = dynamic(
     () => import("react-leaflet").then((mod) => mod.MapContainer),
@@ -39,6 +40,7 @@ const Popup = dynamic(
 );
 
 export default function MotherTreesPage() {
+    const { resolvedTheme } = useTheme();
     const [trees, setTrees] = useState<MotherTree[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
@@ -105,13 +107,13 @@ export default function MotherTreesPage() {
     const getHealthColor = (status?: string) => {
         switch (status) {
             case "excellent":
-                return "bg-green-100 text-green-700";
+                return "bg-green-500/10 text-green-600 dark:text-green-400";
             case "good":
-                return "bg-blue-100 text-blue-700";
+                return "bg-blue-500/10 text-blue-600 dark:text-blue-400";
             case "fair":
-                return "bg-yellow-100 text-yellow-700";
+                return "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400";
             case "poor":
-                return "bg-red-100 text-red-700";
+                return "bg-red-500/10 text-red-600 dark:text-red-400";
             default:
                 return "bg-pale text-[var(--very-dark-color)]";
         }
@@ -137,7 +139,7 @@ export default function MotherTreesPage() {
                     </div>
                     <Button
                         onClick={() => setShowAddModal(true)}
-                        className="bg-primary hover:bg-primary-dark text-white"
+                        className="bg-primary hover:bg-primary-dark"
                     >
                         <Plus size={16} className="mr-2" />
                         Register Tree
@@ -145,7 +147,7 @@ export default function MotherTreesPage() {
                 </div>
 
                 {/* Filters */}
-                <div className="bg-white rounded-lg p-4 mb-6 shadow-sm border border-[var(--very-dark-color)]/10">
+                <div className="bg-paper rounded-lg p-4 mb-6 shadow-sm border border-[var(--very-dark-color)]/10">
                     <div className="flex flex-col sm:flex-row gap-4">
                         <div className="flex-1">
                             <div className="relative">
@@ -207,7 +209,11 @@ export default function MotherTreesPage() {
                         >
                             <TileLayer
                                 attribution='&copy; OpenStreetMap'
-                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                url={
+                                    resolvedTheme === "dark"
+                                        ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                                        : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                }
                             />
                             {filteredTrees.map((tree) => (
                                 <Marker
@@ -237,7 +243,7 @@ export default function MotherTreesPage() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.05 }}
-                                className="bg-white rounded-lg p-4 shadow-sm border border-[var(--very-dark-color)]/10 hover:shadow-md transition-shadow"
+                                className="bg-paper rounded-lg p-4 shadow-sm border border-[var(--very-dark-color)]/10 hover:shadow-md transition-shadow"
                             >
                                 <div className="flex items-start justify-between mb-3">
                                     <div>

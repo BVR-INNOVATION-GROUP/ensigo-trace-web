@@ -379,7 +379,7 @@ export default function SeedBatchesPage() {
             />
             <SummaryCard
               title="Total Quantity"
-              value={`${stats.totalQuantity.toFixed(1)} kg`}
+              value={`${stats.totalQuantity.toFixed(2)} kg`}
               icon={<Package size={20} />}
               index={3}
             />

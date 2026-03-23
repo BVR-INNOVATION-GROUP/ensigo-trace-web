@@ -1,22 +1,15 @@
 import type { Metadata } from "next";
 import {
-  Plus_Jakarta_Sans,
-  Inter,
+  Poppins,
   JetBrains_Mono,
 } from "next/font/google";
 import { Providers } from "@/components/providers";
 import "./globals.css";
 
-const jakarta = Plus_Jakarta_Sans({
-  weight: ["400", "500", "600", "700", "800"],
+const poppins = Poppins({
+  weight: ["300", "400", "500", "600", "700", "800"],
   subsets: ["latin"],
-  variable: "--font-heading",
-});
-
-const inter = Inter({
-  weight: ["300", "400", "500", "600", "700"],
-  subsets: ["latin"],
-  variable: "--font-body",
+  variable: "--font-poppins",
 });
 
 const mono = JetBrains_Mono({
@@ -42,6 +35,7 @@ const themeScript = `
     const theme = localStorage.getItem('ensigo-theme') || 'system';
     const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const isDark = theme === 'dark' || (theme === 'system' && systemDark);
+    document.documentElement.classList.remove('dark', 'light');
     document.documentElement.classList.add(isDark ? 'dark' : 'light');
   })();
 `;
@@ -57,7 +51,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body
-        className={`${jakarta.variable} ${inter.variable} ${mono.variable} antialiased`}
+        className={`${poppins.variable} ${mono.variable} antialiased`}
       >
         <Providers>{children}</Providers>
       </body>

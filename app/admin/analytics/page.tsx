@@ -201,8 +201,8 @@ export default function AnalyticsPage() {
           {/* Stat Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
             <SummaryCard title="Total Seeds" value={stats?.totalSeeds.toLocaleString() || "0"} icon={<Database size={20} />} index={0} />
-            <SummaryCard title="Germination" value={`${stats?.germinationRate.toFixed(1) || 0}%`} icon={<Sprout size={20} />} index={1} />
-            <SummaryCard title="Survival" value={`${stats?.survivalRate.toFixed(1) || 0}%`} icon={<Leaf size={20} />} index={2} />
+            <SummaryCard title="Germination" value={`${stats?.germinationRate.toFixed(2) || 0}%`} icon={<Sprout size={20} />} index={1} />
+            <SummaryCard title="Survival" value={`${stats?.survivalRate.toFixed(2) || 0}%`} icon={<Leaf size={20} />} index={2} />
             <SummaryCard title="Planted" value={stats?.totalPlanted.toLocaleString() || "0"} icon={<Activity size={20} />} index={3} />
             <SummaryCard title="Nurseries" value={stats?.activeNurseries || 0} icon={<Building2 size={20} />} index={4} />
             <SummaryCard title="Species" value={stats?.speciesDiversity || 0} icon={<TrendingUp size={20} />} index={5} />

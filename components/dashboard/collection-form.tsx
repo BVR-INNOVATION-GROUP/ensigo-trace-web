@@ -194,8 +194,8 @@ export function CollectionForm({
     const handleMapClick = async (lat: number, lng: number) => {
         setFormData(prev => ({
             ...prev,
-            latitude: lat.toFixed(6),
-            longitude: lng.toFixed(6),
+            latitude: lat.toFixed(2),
+            longitude: lng.toFixed(2),
         }));
         setLocationLoading(true);
         try {
@@ -223,8 +223,8 @@ export function CollectionForm({
             if (location) {
                 setFormData(prev => ({
                     ...prev,
-                    latitude: location.latitude.toFixed(6),
-                    longitude: location.longitude.toFixed(6),
+                    latitude: location.latitude.toFixed(2),
+                    longitude: location.longitude.toFixed(2),
                     region: location.region || prev.region,
                     district: location.district || prev.district,
                     village: location.village || prev.village,
@@ -241,8 +241,8 @@ export function CollectionForm({
     const handleSearchSelect = (result: GeoSearchResult) => {
         setFormData(prev => ({
             ...prev,
-            latitude: result.latitude.toFixed(6),
-            longitude: result.longitude.toFixed(6),
+            latitude: result.latitude.toFixed(2),
+            longitude: result.longitude.toFixed(2),
             region: result.address.region || result.address.state || prev.region,
             district: result.address.district || result.address.county || prev.district,
             village: result.address.village || result.address.town || prev.village,
@@ -319,8 +319,8 @@ export function CollectionForm({
                         <Button
                             type="button"
                             onClick={handleGetLocation}
-                            variant="pale"
-                            className="bg-[var(--very-dark-color)] rounded-full text-white hover:bg-[var(--very-dark-color)]/90"
+                            variant="default"
+                            className="rounded-full"
                             disabled={locationLoading}
                         >
                             {locationLoading ? (
@@ -338,7 +338,7 @@ export function CollectionForm({
                     </div>
 
                     {/* Map */}
-                    <div className="flex-1 min-h-[280px] rounded-lg overflow-hidden border border-[var(--very-dark-color)]/10">
+                    <div className="collector-geo-map flex-1 min-h-[280px] rounded-lg overflow-hidden border border-[var(--very-dark-color)]/10">
                         <LocationMap
                             latitude={formData.latitude ? parseFloat(formData.latitude) : undefined}
                             longitude={formData.longitude ? parseFloat(formData.longitude) : undefined}

@@ -220,7 +220,7 @@ export async function getCurrentLocationWithAddress(): Promise<GeoLocation | nul
     return {
       latitude,
       longitude,
-      displayName: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+      displayName: `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`,
     };
   } catch (error) {
     console.error("Get current location error:", error);

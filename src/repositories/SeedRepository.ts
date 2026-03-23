@@ -9,47 +9,28 @@ import type { SeedCollectionI } from "../models/SeedCollection";
 
 export class SeedCollectionRepository {
   private storageKey = "seed_collections";
-  private useAPI = true;
-
-  constructor() {
-    // Check if API is available
-    this.checkAPIAvailability();
-  }
-
-  private async checkAPIAvailability() {
-    try {
-      await fetch(
-        `${
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:4545"
-        }/api/v1/health`
-      );
-      this.useAPI = true;
-    } catch {
-      this.useAPI = false;
-      console.log("API unavailable, using localStorage fallback");
-    }
-  }
+  private allowOfflineFallback = process.env.NEXT_PUBLIC_ENABLE_OFFLINE_FALLBACK === "true";
 
   async getAll(): Promise<SeedCollectionI[]> {
-    if (this.useAPI) {
-      try {
-        const response = await api.getMyCollections({ limit: 100 });
-        const collections = response.data.map(this.mapToLegacyFormat);
-        // Cache for offline use
-        localStorage.setItem(this.storageKey, JSON.stringify(collections));
-        return collections;
-      } catch (err) {
-        console.error("API error, falling back to localStorage:", err);
+    try {
+      const response = await api.getMyCollections({ limit: 100 });
+      const collections = response.data.map(this.mapToLegacyFormat);
+      // Cache successful API responses for optional offline troubleshooting.
+      localStorage.setItem(this.storageKey, JSON.stringify(collections));
+      return collections;
+    } catch (err) {
+      if (!this.allowOfflineFallback) {
+        throw err;
       }
+      console.error("API error, using offline fallback:", err);
     }
 
-    // Fallback to localStorage
     const cached = localStorage.getItem(this.storageKey);
     if (cached) {
       return JSON.parse(cached);
     }
 
-    // Use mock data as last resort
+    // Last-resort mock data only when explicit offline fallback is enabled.
     localStorage.setItem(
       this.storageKey,
       JSON.stringify(seedCollectionsMockData)
@@ -60,29 +41,30 @@ export class SeedCollectionRepository {
   async create(
     collection: Omit<SeedCollectionI, "id">
   ): Promise<SeedCollectionI> {
-    if (this.useAPI) {
-      try {
-        const request: CreateCollectionRequest = {
-          species_id: collection.species_id,
-          species_name: collection.species,
-          mother_tree_id: collection.mother_tree_id,
-          quantity: collection.quantity,
-          unit: collection.unit,
-          latitude: collection.latitude,
-          longitude: collection.longitude,
-          region: collection.region,
-          district: collection.district,
-          village: collection.village,
-          target_nursery_id: collection.target_nursery_id,
-          collection_date: collection.collection_date,
-          additional_info: collection.additionalInfo,
-          photos: collection.photos,
-        };
-        const created = await api.createCollection(request);
-        return this.mapToLegacyFormat(created);
-      } catch (err) {
-        console.error("API error, falling back to localStorage:", err);
+    try {
+      const request: CreateCollectionRequest = {
+        species_id: collection.species_id,
+        species_name: collection.species,
+        mother_tree_id: collection.mother_tree_id,
+        quantity: collection.quantity,
+        unit: collection.unit,
+        latitude: collection.latitude,
+        longitude: collection.longitude,
+        region: collection.region,
+        district: collection.district,
+        village: collection.village,
+        target_nursery_id: collection.target_nursery_id,
+        collection_date: collection.collection_date,
+        additional_info: collection.additionalInfo,
+        photos: collection.photos,
+      };
+      const created = await api.createCollection(request);
+      return this.mapToLegacyFormat(created);
+    } catch (err) {
+      if (!this.allowOfflineFallback) {
+        throw err;
       }
+      console.error("API error, using offline fallback:", err);
     }
 
     // Fallback to localStorage
@@ -102,17 +84,18 @@ export class SeedCollectionRepository {
     id: string,
     updates: Partial<Omit<SeedCollectionI, "id">>
   ): Promise<SeedCollectionI | null> {
-    if (this.useAPI) {
-      try {
-        const updated = await api.updateCollection(id, {
-          status: updates.status,
-          review_notes: updates.review_notes,
-          quality_rating: updates.quality_rating,
-        });
-        return this.mapToLegacyFormat(updated);
-      } catch (err) {
-        console.error("API error, falling back to localStorage:", err);
+    try {
+      const updated = await api.updateCollection(id, {
+        status: updates.status,
+        review_notes: updates.review_notes,
+        quality_rating: updates.quality_rating,
+      });
+      return this.mapToLegacyFormat(updated);
+    } catch (err) {
+      if (!this.allowOfflineFallback) {
+        throw err;
       }
+      console.error("API error, using offline fallback:", err);
     }
 
     // Fallback to localStorage
@@ -134,12 +117,13 @@ export class SeedCollectionRepository {
   }
 
   async getStats(): Promise<CollectorStats> {
-    if (this.useAPI) {
-      try {
-        return await api.getMyStats();
-      } catch (err) {
-        console.error("API error:", err);
+    try {
+      return await api.getMyStats();
+    } catch (err) {
+      if (!this.allowOfflineFallback) {
+        throw err;
       }
+      console.error("API error, using offline fallback:", err);
     }
 
     // Calculate from localStorage
@@ -156,12 +140,13 @@ export class SeedCollectionRepository {
   }
 
   async getLocations(): Promise<LocationPoint[]> {
-    if (this.useAPI) {
-      try {
-        return await api.getMyLocations();
-      } catch (err) {
-        console.error("API error:", err);
+    try {
+      return await api.getMyLocations();
+    } catch (err) {
+      if (!this.allowOfflineFallback) {
+        throw err;
       }
+      console.error("API error, using offline fallback:", err);
     }
 
     // Calculate from localStorage
@@ -189,6 +174,31 @@ export class SeedCollectionRepository {
   }
 
   private mapToLegacyFormat(collection: SeedCollection): SeedCollectionI {
+    const parsePhotos = (raw?: string): string[] | undefined => {
+      if (!raw) return undefined;
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((item) => typeof item === "string");
+        }
+        if (typeof parsed === "string" && parsed.trim()) {
+          return [parsed.trim()];
+        }
+      } catch {
+        const normalized = raw.trim();
+        if (!normalized) return undefined;
+        if (normalized.startsWith("http://") || normalized.startsWith("https://")) {
+          return [normalized];
+        }
+        const split = normalized
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean);
+        if (split.length > 0) return split;
+      }
+      return undefined;
+    };
+
     return {
       id: collection.id,
       collection_number: collection.collection_number,
@@ -215,7 +225,7 @@ export class SeedCollectionRepository {
       reviewed_at: collection.reviewed_at,
       review_notes: collection.review_notes,
       quality_rating: collection.quality_rating,
-      photos: collection.photos ? JSON.parse(collection.photos) : undefined,
+      photos: parsePhotos(collection.photos),
       additionalInfo: collection.additional_info,
     };
   }

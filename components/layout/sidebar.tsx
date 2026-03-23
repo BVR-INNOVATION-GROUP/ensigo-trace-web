@@ -1,17 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
 import {
     LayoutGrid,
     User,
     Settings,
-    Database,
     Sprout,
-    BarChart3,
     Building2,
-    FolderTree,
-    MapPin,
+    TreePine,
     Package,
     ShoppingCart,
     Target,
@@ -35,18 +33,15 @@ const allMenuItems: MenuItem[] = [
     { href: "/dashboard", label: "My Collections", icon: LayoutGrid, roles: ["collector"] },
     
     // Admin
-    { href: "/admin", label: "Dashboard", icon: LayoutGrid, roles: ["admin"] },
-    { href: "/admin/batches", label: "Seed Batches", icon: Database, roles: ["admin"] },
     { href: "/admin/nurseries", label: "Nurseries", icon: Building2, roles: ["admin"] },
-    { href: "/admin/projects", label: "Projects", icon: FolderTree, roles: ["admin"] },
-    { href: "/admin/provenance", label: "Provenance", icon: MapPin, roles: ["admin"] },
-    { href: "/admin/analytics", label: "Analytics", icon: BarChart3, roles: ["admin"] },
+    { href: "/admin/mother-trees-species", label: "Mother Trees & Species", icon: TreePine, roles: ["admin"] },
     
-    // Nursery (DB roles: super_nursery, community_nursery, regional_nursery)
-    { href: "/nursery", label: "Dashboard", icon: LayoutGrid, roles: NURSERY_ROLES },
-    { href: "/nursery/inventory", label: "Inventory", icon: Package, roles: NURSERY_ROLES },
-    { href: "/nursery/germination", label: "Germination", icon: Sprout, roles: NURSERY_ROLES },
-    { href: "/nursery/sales", label: "Sales", icon: ShoppingCart, roles: NURSERY_ROLES },
+    // Nursery role-specific flow
+    { href: "/nursery/collectors", label: "Collectors", icon: User, roles: ["regional_nursery"] },
+    { href: "/nursery/super-nurseries", label: "Super Nurseries", icon: Building2, roles: ["regional_nursery"] },
+    { href: "/nursery/requests", label: "Inventory Requests", icon: Package, roles: NURSERY_ROLES },
+    { href: "/nursery/inventory", label: "Inventory", icon: Sprout, roles: ["super_nursery", "community_nursery"] },
+    { href: "/nursery/sales", label: "POS Sales", icon: ShoppingCart, roles: ["community_nursery"] },
     
     // Partner
     { href: "/partner", label: "Dashboard", icon: LayoutGrid, roles: ["partner"] },
@@ -105,7 +100,7 @@ function SidebarContent({ onNavigate, onClose }: { onNavigate?: () => void; onCl
                         menuItems.map((item) => {
                             const Icon = item.icon;
                             let isActive = false;
-                            if (item.href === "/dashboard" || item.href === "/admin" || item.href === "/nursery" || item.href === "/partner") {
+                            if (item.href === "/dashboard" || item.href === "/admin" || item.href === "/partner") {
                                 isActive = pathname === item.href;
                             } else {
                                 isActive = pathname.startsWith(item.href);
@@ -139,16 +134,21 @@ export function Sidebar() {
 
     return (
         <>
-            {/* Backdrop: mobile only */}
-            <button
-                type="button"
-                aria-label="Close menu"
-                onClick={close}
-                className={cn(
-                    "fixed inset-0 z-40 bg-black/50 transition-opacity md:hidden",
-                    isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.button
+                        key="sidebar-backdrop"
+                        type="button"
+                        aria-label="Close menu"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
+                        onClick={close}
+                        className="fixed inset-0 z-40 bg-black/50 dark:bg-black/60 backdrop-blur-[2px] md:hidden"
+                    />
                 )}
-            />
+            </AnimatePresence>
 
             {/* Sidebar: desktop always visible, mobile as drawer */}
             <aside

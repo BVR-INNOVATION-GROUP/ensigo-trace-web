@@ -141,7 +141,7 @@ export function RegionMapModal({ isOpen, onClose, collections = [] }: RegionMapM
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Collection Heat Map" className="opacity-0" size="xl">
+    <Modal isOpen={isOpen} onClose={onClose} title="Collection Heat Map" size="xl">
       <div className="p-4">
         <div className="h-[500px] rounded-lg overflow-hidden relative">
           {/* name = main.a */}
@@ -185,7 +185,7 @@ export function RegionMapModal({ isOpen, onClose, collections = [] }: RegionMapM
                         <>
                           <span className="text-lg font-bold text-primary block">{stats.count}</span>
                           <span className="text-xs opacity-70">collections</span>
-                          <span className="text-xs block mt-1">{stats.quantity.toFixed(1)} kg</span>
+                          <span className="text-xs block mt-1">{stats.quantity.toFixed(2)} kg</span>
                         </>
                       ) : (
                         <span className="text-xs opacity-50 block">No collections</span>
@@ -253,7 +253,7 @@ export function RegionMapModal({ isOpen, onClose, collections = [] }: RegionMapM
           <div className="absolute top-4 right-4 bg-white/95 dark:bg-[var(--card)]/95 backdrop-blur-sm rounded-lg p-3 shadow-lg z-[1000]">
             <p className="text-xs text-[var(--very-dark-color)]/60">Total</p>
             <p className="text-lg font-bold text-[var(--very-dark-color)]">{totalStats.count} <span className="text-xs font-normal">collections</span></p>
-            <p className="text-sm text-primary font-medium">{totalStats.quantity.toFixed(1)} kg</p>
+            <p className="text-sm text-primary font-medium">{totalStats.quantity.toFixed(2)} kg</p>
           </div>
         </div>
       </div>

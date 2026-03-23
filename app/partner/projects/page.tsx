@@ -159,7 +159,7 @@ export default function PartnerProjectsPage() {
                             />
                           </div>
                           <p className="text-caption opacity-75 mt-1">
-                            {progressPercent.toFixed(1)}% complete
+                            {progressPercent.toFixed(2)}% complete
                           </p>
                         </div>
 
@@ -213,13 +213,13 @@ export default function PartnerProjectsPage() {
                           </div>
                           <div className="text-center">
                             <p className="text-h5 text-primary">
-                              {((project.plantedTrees * 0.035) / 1000).toFixed(1)}t
+                              {((project.plantedTrees * 0.035) / 1000).toFixed(2)}t
                             </p>
                             <p className="text-caption opacity-75">CO₂ Captured</p>
                           </div>
                           <div className="text-center">
                             <p className="text-h5 text-primary">
-                              {progressPercent.toFixed(0)}%
+                              {progressPercent.toFixed(2)}%
                             </p>
                             <p className="text-caption opacity-75">Completion</p>
                           </div>

@@ -98,6 +98,7 @@ export interface AuthResponse {
   token: string;
 }
 
+/** Self-registration payload (login modal) — backend only accepts regional_nursery for public signup. */
 export interface RegisterData {
   email: string;
   password: string;
@@ -105,6 +106,11 @@ export interface RegisterData {
   phone?: string;
   role: UserRole;
   region?: string;
+  district?: string;
+  location?: string;
+  latitude?: number;
+  longitude?: number;
+  capacity?: number;
   business_name?: string;
   business_description?: string;
 }

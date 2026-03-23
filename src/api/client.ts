@@ -8,6 +8,7 @@ interface RequestOptions {
 
 class APIClient {
   private baseUrl: string;
+  private static redirectingToLogin = false;
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
@@ -16,6 +17,22 @@ class APIClient {
   private getToken(): string | null {
     if (typeof window === "undefined") return null;
     return localStorage.getItem("token");
+  }
+
+  private handleUnauthorized() {
+    if (typeof window === "undefined") return;
+
+    // Clear local auth state on session expiration / invalid credentials.
+    try {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+    } catch {
+      // Ignore storage access errors (e.g. privacy mode).
+    }
+
+    if (APIClient.redirectingToLogin) return;
+    APIClient.redirectingToLogin = true;
+    window.location.href = "/login";
   }
 
   private async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
@@ -43,11 +60,20 @@ class APIClient {
     const response = await fetch(`${this.baseUrl}${endpoint}`, config);
 
     if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        this.handleUnauthorized();
+      }
       const error = await response.json().catch(() => ({ error: "Request failed" }));
       throw new Error(error.error || "Request failed");
     }
-
-    return response.json();
+    if (response.status === 204) {
+      return undefined as T;
+    }
+    const text = await response.text();
+    if (!text) {
+      return undefined as T;
+    }
+    return JSON.parse(text) as T;
   }
 
   // Auth
@@ -108,6 +134,13 @@ class APIClient {
     return this.request<PaginatedResponse<SeedCollection>>(`/collections/me?${query}`);
   }
 
+  async getCollectorCollections(collectorId: string, params?: { limit?: number; offset?: number }) {
+    const query = new URLSearchParams();
+    if (params?.limit) query.set("limit", params.limit.toString());
+    if (params?.offset) query.set("offset", params.offset.toString());
+    return this.request<PaginatedResponse<SeedCollection>>(`/collections/collector/${collectorId}?${query}`);
+  }
+
   async getMyStats() {
     return this.request<CollectorStats>("/collections/me/stats");
   }
@@ -161,6 +194,13 @@ class APIClient {
     return this.request<NurseryStats>(`/nurseries/${id}/stats`);
   }
 
+  async getNurseryBatches(nurseryId: string, params?: { limit?: number; offset?: number }) {
+    const query = new URLSearchParams();
+    if (params?.limit) query.set("limit", params.limit.toString());
+    if (params?.offset) query.set("offset", params.offset.toString());
+    return this.request<PaginatedResponse<SeedBatch>>(`/collections/nursery/${nurseryId}/batches?${query}`);
+  }
+
   async createNursery(data: CreateNurseryRequest) {
     return this.request<Nursery>("/nurseries", {
       method: "POST",
@@ -174,10 +214,117 @@ class APIClient {
     });
   }
 
+  async updateNursery(id: string, data: UpdateNurseryRequest) {
+    return this.request<Nursery>(`/nurseries/${id}`, {
+      method: "PUT",
+      body: data,
+    });
+  }
+
+  async approveNursery(id: string) {
+    return this.request<Nursery>(`/nurseries/${id}/verify`, {
+      method: "PATCH",
+    });
+  }
+
   async addCollectorToNursery(nurseryId: string, collectorId: string) {
     return this.request(`/nurseries/${nurseryId}/collectors`, {
       method: "POST",
       body: { collector_id: collectorId },
+    });
+  }
+
+  async getNurseryCollectors(nurseryId: string) {
+    return this.request<NurseryCollector[]>(`/nurseries/${nurseryId}/collectors`);
+  }
+
+  async removeCollectorFromNursery(nurseryId: string, collectorId: string) {
+    return this.request(`/nurseries/${nurseryId}/collectors/${collectorId}`, {
+      method: "DELETE",
+    });
+  }
+
+  async createCollectorForNursery(
+    nurseryId: string,
+    data: CreateCollectorForNurseryRequest
+  ) {
+    return this.request<{ success: boolean; collector?: User }>(`/nurseries/${nurseryId}/collectors`, {
+      method: "POST",
+      body: data,
+    });
+  }
+
+  // Inventory requests
+  async createInventoryRequest(data: CreateInventoryRequest) {
+    return this.request<InventoryRequest>("/inventory-requests", {
+      method: "POST",
+      body: data,
+    });
+  }
+
+  async getInventoryRequests(params: { nursery_id: string; limit?: number; offset?: number }) {
+    const query = new URLSearchParams();
+    query.set("nursery_id", params.nursery_id);
+    if (params.limit) query.set("limit", params.limit.toString());
+    if (params.offset) query.set("offset", params.offset.toString());
+    return this.request<PaginatedResponse<InventoryRequest>>(`/inventory-requests?${query}`);
+  }
+
+  async getInventoryRequest(id: string) {
+    return this.request<InventoryRequest>(`/inventory-requests/${id}`);
+  }
+
+  async approveInventoryRequest(id: string, notes?: string) {
+    return this.request<InventoryRequest>(`/inventory-requests/${id}/approve`, {
+      method: "POST",
+      body: { notes },
+    });
+  }
+
+  async rejectInventoryRequest(id: string, notes?: string) {
+    return this.request<InventoryRequest>(`/inventory-requests/${id}/reject`, {
+      method: "POST",
+      body: { notes },
+    });
+  }
+
+  async fulfillInventoryRequest(id: string, notes?: string) {
+    return this.request<InventoryRequest>(`/inventory-requests/${id}/fulfill`, {
+      method: "POST",
+      body: { notes },
+    });
+  }
+
+  // Sales (POS)
+  async createSale(data: CreateSaleRequest) {
+    return this.request<Sale>("/sales", {
+      method: "POST",
+      body: data,
+    });
+  }
+
+  async getSales(params?: { nursery_id?: string; limit?: number; offset?: number }) {
+    const query = new URLSearchParams();
+    if (params?.nursery_id) query.set("nursery_id", params.nursery_id);
+    if (params?.limit) query.set("limit", params.limit.toString());
+    if (params?.offset) query.set("offset", params.offset.toString());
+    return this.request<PaginatedResponse<Sale>>(`/sales?${query}`);
+  }
+
+  async getSale(id: string) {
+    return this.request<Sale>(`/sales/${id}`);
+  }
+
+  async getSalesStats(params?: { nursery_id?: string }) {
+    const query = new URLSearchParams();
+    if (params?.nursery_id) query.set("nursery_id", params.nursery_id);
+    return this.request<SalesStats>(`/sales/stats?${query}`);
+  }
+
+  async updateSalePaymentStatus(id: string, data: UpdateSalePaymentStatusRequest) {
+    return this.request<Sale>(`/sales/${id}/payment-status`, {
+      method: "PATCH",
+      body: data,
     });
   }
 
@@ -189,8 +336,32 @@ class APIClient {
     return this.request<PaginatedResponse<Species>>(`/species?${query}`);
   }
 
+  async getSpeciesById(id: string) {
+    return this.request<Species>(`/species/${id}`);
+  }
+
   async searchSpecies(query: string, limit = 20) {
     return this.request<Species[]>(`/species/search?q=${encodeURIComponent(query)}&limit=${limit}`);
+  }
+
+  async createSpecies(data: CreateSpeciesRequest) {
+    return this.request<Species>("/species", {
+      method: "POST",
+      body: data,
+    });
+  }
+
+  async updateSpecies(id: string, data: UpdateSpeciesRequest) {
+    return this.request<Species>(`/species/${id}`, {
+      method: "PUT",
+      body: data,
+    });
+  }
+
+  async deleteSpecies(id: string) {
+    return this.request(`/species/${id}`, {
+      method: "DELETE",
+    });
   }
 
   // Mother Trees
@@ -208,8 +379,25 @@ class APIClient {
     });
   }
 
+  async updateMotherTree(id: string, data: UpdateMotherTreeRequest) {
+    return this.request<MotherTree>(`/mother-trees/${id}`, {
+      method: "PUT",
+      body: data,
+    });
+  }
+
+  async deleteMotherTree(id: string) {
+    return this.request(`/mother-trees/${id}`, {
+      method: "DELETE",
+    });
+  }
+
   async getNearbyMotherTrees(lat: number, lng: number, radius = 10) {
     return this.request<MotherTree[]>(`/mother-trees/nearby?lat=${lat}&lng=${lng}&radius=${radius}`);
+  }
+
+  async getMotherTreesBySpecies(speciesId: string) {
+    return this.request<MotherTree[]>(`/mother-trees/species/${speciesId}`);
   }
 
   // Chat
@@ -425,6 +613,8 @@ export interface CollectorSpecies {
 
 export interface Species {
   id: string;
+  created_at?: string;
+  updated_at?: string;
   scientific_name: string;
   common_name?: string;
   local_name?: string;
@@ -434,9 +624,14 @@ export interface Species {
   native_region?: string;
   growth_rate?: string;
   max_height?: number;
+  life_span?: number;
+  seeds_per_kg?: number;
+  germination_days?: number;
+  germination_rate?: number;
   uses?: string;
   conservation_status?: string;
   photo_url?: string;
+  is_active?: boolean;
 }
 
 export interface MotherTree {
@@ -458,6 +653,8 @@ export interface MotherTree {
 
 export interface Nursery {
   id: string;
+  created_at?: string;
+  updated_at?: string;
   nursery_id: string;
   name: string;
   type: "regional" | "super" | "community";
@@ -470,6 +667,8 @@ export interface Nursery {
   longitude?: number;
   capacity: number;
   current_stock: number;
+  active_batches?: number;
+  germination_rate?: number;
   operator_id: string;
   operator?: User;
   parent_nursery_id?: string;
@@ -542,6 +741,55 @@ export interface SeedBatch {
   received_date: string;
 }
 
+export interface InventoryRequest {
+  id: string;
+  from_nursery_id: string;
+  from_nursery?: Nursery;
+  to_nursery_id: string;
+  to_nursery?: Nursery;
+  requested_by_id: string;
+  requested_by?: User;
+  reviewed_by_id?: string;
+  reviewed_by?: User;
+  source_batch_id?: string;
+  target_batch_id?: string;
+  species_id: string;
+  species?: Species;
+  quantity: number;
+  unit: "count" | "kg" | "g";
+  status: "pending" | "approved" | "rejected" | "fulfilled";
+  notes?: string;
+  review_notes?: string;
+  reviewed_at?: string;
+  fulfilled_at?: string;
+  created_at?: string;
+}
+
+export interface Sale {
+  id: string;
+  sale_number: string;
+  batch_id: string;
+  batch?: SeedBatch;
+  species_id: string;
+  species?: Species;
+  quantity: number;
+  unit: "count" | "kg" | "g";
+  price_per_unit: number;
+  total_amount: number;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  nursery_id: string;
+  payment_status: "pending" | "paid" | "failed" | "refunded";
+  payment_method?: "flutterwave" | "cash" | "bank_transfer" | "mobile_money";
+  transaction_reference?: string;
+  paid_at?: string;
+  sale_date: string;
+  notes?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface ChatRoom {
   id: string;
   name?: string;
@@ -587,6 +835,13 @@ export interface CollectorStats {
   unique_species: number;
 }
 
+export interface SalesStats {
+  total_sales: number;
+  total_revenue: number;
+  pending_count: number;
+  paid_count: number;
+}
+
 export interface NurseryStats {
   total_batches: number;
   active_batches: number;
@@ -618,6 +873,11 @@ export interface RegisterRequest {
   phone?: string;
   role: string;
   region?: string;
+  district?: string;
+  location?: string;
+  latitude?: number;
+  longitude?: number;
+  capacity?: number;
   business_name?: string;
   business_description?: string;
 }
@@ -633,6 +893,14 @@ export interface UpdateProfileRequest {
   latitude?: number;
   longitude?: number;
   profile_photo?: string;
+}
+
+export interface CreateCollectorForNurseryRequest {
+  name: string;
+  email: string;
+  password: string;
+  phone?: string;
+  address?: string;
 }
 
 export interface CreateCollectionRequest {
@@ -676,6 +944,56 @@ export interface CreateNurseryRequest {
   offers_seedlings?: boolean;
   offers_training?: boolean;
   offers_contracts?: boolean;
+
+  // Provision a dedicated user account that can log in as `super_nursery`
+  // and manage the created super nursery.
+  super_operator_name?: string;
+  super_operator_email?: string;
+  super_operator_password?: string;
+  super_operator_phone?: string;
+  super_operator_address?: string;
+}
+
+export interface UpdateNurseryRequest {
+  name?: string;
+  description?: string;
+  location?: string;
+  region?: string;
+  district?: string;
+  latitude?: number;
+  longitude?: number;
+  capacity?: number;
+  contact_email?: string;
+  contact_phone?: string;
+  offers_seedlings?: boolean;
+  offers_training?: boolean;
+  offers_contracts?: boolean;
+}
+
+export interface CreateInventoryRequest {
+  from_nursery_id: string;
+  to_nursery_id: string;
+  species_id: string;
+  quantity: number;
+  unit: "count" | "kg" | "g";
+  notes?: string;
+}
+
+export interface CreateSaleRequest {
+  batch_id: string;
+  quantity: number;
+  price_per_unit: number;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  payment_method?: "flutterwave" | "cash" | "bank_transfer" | "mobile_money";
+  transaction_reference?: string;
+  notes?: string;
+}
+
+export interface UpdateSalePaymentStatusRequest {
+  payment_status: "pending" | "paid" | "failed" | "refunded";
+  transaction_reference?: string;
 }
 
 export interface CreateMotherTreeRequest {
@@ -693,6 +1011,66 @@ export interface CreateMotherTreeRequest {
   health_status?: string;
   photo_url?: string;
   notes?: string;
+}
+
+export interface UpdateMotherTreeRequest {
+  species_id?: string;
+  latitude?: number;
+  longitude?: number;
+  region?: string;
+  district?: string;
+  village?: string;
+  ecological_zone?: string;
+  age?: number;
+  height?: number;
+  dbh?: number;
+  crown_diameter?: number;
+  health_status?: string;
+  photo_url?: string;
+  notes?: string;
+}
+
+export interface CreateSpeciesRequest {
+  scientific_name: string;
+  common_name?: string;
+  local_name?: string;
+  family?: string;
+  description?: string;
+  ecological_zone?: string;
+  native_region?: string;
+  growth_rate?: string;
+  max_height?: number;
+  life_span?: number;
+  seeding_season_start?: number;
+  seeding_season_end?: number;
+  seeds_per_kg?: number;
+  germination_days?: number;
+  germination_rate?: number;
+  uses?: string;
+  conservation_status?: string;
+  photo_url?: string;
+}
+
+export interface UpdateSpeciesRequest {
+  scientific_name?: string;
+  common_name?: string;
+  local_name?: string;
+  family?: string;
+  description?: string;
+  ecological_zone?: string;
+  native_region?: string;
+  growth_rate?: string;
+  max_height?: number;
+  life_span?: number;
+  seeding_season_start?: number;
+  seeding_season_end?: number;
+  seeds_per_kg?: number;
+  germination_days?: number;
+  germination_rate?: number;
+  uses?: string;
+  conservation_status?: string;
+  photo_url?: string;
+  is_active?: boolean;
 }
 
 export interface SendMessageRequest {

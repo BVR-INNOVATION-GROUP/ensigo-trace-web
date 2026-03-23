@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { SalesService } from "@/src/services/SalesService";
 import type { Sale } from "@/src/models/Sale";
 
@@ -11,9 +11,9 @@ export function useSales(nurseryId: string) {
     paidSales: 0,
   });
   const [loading, setLoading] = useState(false);
-  const salesService = new SalesService();
+  const salesService = useMemo(() => new SalesService(), []);
 
-  const loadSales = async () => {
+  const loadSales = useCallback(async () => {
     setLoading(true);
     try {
       const allSales = await salesService.getAllSales(nurseryId);
@@ -25,11 +25,11 @@ export function useSales(nurseryId: string) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [nurseryId, salesService]);
 
   useEffect(() => {
     loadSales();
-  }, [nurseryId]);
+  }, [loadSales]);
 
   return { sales, stats, loading, loadSales };
 }

@@ -12,6 +12,21 @@ interface SummaryCardProps {
   subtitle?: string;
 }
 
+function formatNumericValue(value: number): string {
+  if (!Number.isFinite(value)) {
+    return "0.00";
+  }
+
+  if (Number.isInteger(value)) {
+    return value.toLocaleString();
+  }
+
+  return value.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
 export function SummaryCard({ title, value, icon, cardImage, index = 0, subtitle }: SummaryCardProps) {
   return (
     <motion.div
@@ -40,7 +55,7 @@ export function SummaryCard({ title, value, icon, cardImage, index = 0, subtitle
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: index * 0.1 + 0.2, duration: 0.3 }}
           >
-            {typeof value === "number" ? value.toLocaleString() : value}
+            {typeof value === "number" ? formatNumericValue(value) : value}
           </motion.p>
           {subtitle && (
             <p className="text-caption text-[var(--very-dark-color)]/50">{subtitle}</p>

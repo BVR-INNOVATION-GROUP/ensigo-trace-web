@@ -131,8 +131,8 @@ export function LocationPicker({
         }
 
         setCoords({ lat: location.latitude, lng: location.longitude });
-        setManualLat(location.latitude.toFixed(6));
-        setManualLng(location.longitude.toFixed(6));
+        setManualLat(location.latitude.toFixed(2));
+        setManualLng(location.longitude.toFixed(2));
 
         const newData = {
           region: location.region || locationData.region,
@@ -170,8 +170,8 @@ export function LocationPicker({
     if (disabled) return;
 
     setCoords({ lat, lng });
-    setManualLat(lat.toFixed(6));
-    setManualLng(lng.toFixed(6));
+    setManualLat(lat.toFixed(2));
+    setManualLng(lng.toFixed(2));
     setIsLoading(true);
     setError(null);
 
@@ -213,8 +213,8 @@ export function LocationPicker({
     const lng = result.longitude;
 
     setCoords({ lat, lng });
-    setManualLat(lat.toFixed(6));
-    setManualLng(lng.toFixed(6));
+    setManualLat(lat.toFixed(2));
+    setManualLng(lng.toFixed(2));
 
     const newData = {
       region: result.address.region || result.address.state || locationData.region,
@@ -311,8 +311,8 @@ export function LocationPicker({
           <Button
             type="button"
             onClick={handleGetCurrentLocation}
-            variant="pale"
-            className="bg-[var(--very-dark-color)] rounded-full text-white hover:bg-[var(--very-dark-color)]/90"
+            variant="default"
+            className="rounded-full"
             disabled={disabled || isLoading}
           >
             {isLoading ? (

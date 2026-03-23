@@ -1,15 +1,10 @@
-import { SalesRepository } from "../repositories/SalesRepository";
+import api, { type CreateSaleRequest, type Sale as ApiSale } from "../api/client";
 import type { Sale } from "../models/Sale";
 
 export class SalesService {
-  private repo: SalesRepository;
-
-  constructor() {
-    this.repo = new SalesRepository();
-  }
-
   async getAllSales(nurseryId?: string): Promise<Sale[]> {
-    return this.repo.getAll(nurseryId);
+    const res = await api.getSales({ nursery_id: nurseryId, limit: 500, offset: 0 });
+    return (res.data || []).map(this.toUiSale);
   }
 
   async createSale(
@@ -28,14 +23,22 @@ export class SalesService {
       return { success: false, error: "Customer information is required" };
     }
 
-    const totalAmount = saleData.quantity * saleData.pricePerUnit;
-    const sale = await this.repo.create({
-      ...saleData,
-      totalAmount,
-      paymentStatus: "pending",
-    });
-
-    return { success: true, data: sale };
+    try {
+      const payload: CreateSaleRequest = {
+        batch_id: saleData.batchId,
+        quantity: saleData.quantity,
+        price_per_unit: saleData.pricePerUnit,
+        customer_name: saleData.customerName,
+        customer_email: saleData.customerEmail,
+        customer_phone: saleData.customerPhone,
+        payment_method: saleData.paymentMethod || "cash",
+        notes: saleData.notes,
+      };
+      const sale = await api.createSale(payload);
+      return { success: true, data: this.toUiSale(sale) };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : "Failed to create sale" };
+    }
   }
 
   async updatePaymentStatus(
@@ -43,22 +46,18 @@ export class SalesService {
     status: Sale["paymentStatus"],
     transactionReference?: string
   ): Promise<{ success: boolean; data?: Sale; error?: string }> {
-    const sale = await this.repo.getById(saleId);
-    if (!sale) {
-      return { success: false, error: "Sale not found" };
+    try {
+      const updated = await api.updateSalePaymentStatus(saleId, {
+        payment_status: status,
+        transaction_reference: transactionReference,
+      });
+      return { success: true, data: this.toUiSale(updated) };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to update sale",
+      };
     }
-
-    const updates: Partial<Sale> = { paymentStatus: status };
-    if (transactionReference) {
-      updates.transactionReference = transactionReference;
-    }
-
-    const updated = await this.repo.update(saleId, updates);
-    if (!updated) {
-      return { success: false, error: "Failed to update sale" };
-    }
-
-    return { success: true, data: updated };
   }
 
   async getSalesStats(nurseryId?: string): Promise<{
@@ -67,19 +66,35 @@ export class SalesService {
     pendingPayments: number;
     paidSales: number;
   }> {
-    const sales = await this.repo.getAll(nurseryId);
-    const totalSales = sales.length;
-    const totalRevenue = sales
-      .filter((s) => s.paymentStatus === "paid")
-      .reduce((sum, s) => sum + s.totalAmount, 0);
-    const pendingPayments = sales.filter((s) => s.paymentStatus === "pending").length;
-    const paidSales = sales.filter((s) => s.paymentStatus === "paid").length;
+    const stats = await api.getSalesStats({ nursery_id: nurseryId });
 
     return {
-      totalSales,
-      totalRevenue,
-      pendingPayments,
-      paidSales,
+      totalSales: stats.total_sales || 0,
+      totalRevenue: stats.total_revenue || 0,
+      pendingPayments: stats.pending_count || 0,
+      paidSales: stats.paid_count || 0,
+    };
+  }
+
+  private toUiSale(sale: ApiSale): Sale {
+    return {
+      id: sale.id,
+      saleNumber: sale.sale_number,
+      batchId: sale.batch_id,
+      species: sale.species?.scientific_name || sale.batch?.species?.scientific_name || "Unknown species",
+      quantity: sale.quantity,
+      unit: sale.unit === "count" ? "seeds" : sale.unit,
+      pricePerUnit: sale.price_per_unit,
+      totalAmount: sale.total_amount,
+      customerName: sale.customer_name || "",
+      customerEmail: sale.customer_email || "",
+      customerPhone: sale.customer_phone || "",
+      paymentStatus: sale.payment_status,
+      paymentMethod: sale.payment_method === "mobile_money" ? "flutterwave" : sale.payment_method,
+      transactionReference: sale.transaction_reference,
+      saleDate: sale.sale_date,
+      notes: sale.notes,
+      nurseryId: sale.nursery_id,
     };
   }
 }

@@ -44,17 +44,22 @@ export default function ProfilePage() {
                 setUser(JSON.parse(userData));
             }
             
-            // Try to fetch stats
-            try {
-                                const statsData = await api.getMyStats();
-                                setStats({
-                                    total_collections: statsData.total_collections,
-                                    approved_collections: statsData.approved,
-                                    pending_collections: statsData.pending_reviews,
-                                    total_quantity: statsData.total_quantity,
-                                });
-            } catch {
-                // Stats not available for this user type
+            const parsedUser: User | null = userData ? JSON.parse(userData) : null;
+            // Admin profile should not show collection activity.
+            if (parsedUser?.role !== "admin") {
+                try {
+                    const statsData = await api.getMyStats();
+                    setStats({
+                        total_collections: statsData.total_collections,
+                        approved_collections: statsData.approved,
+                        pending_collections: statsData.pending_reviews,
+                        total_quantity: statsData.total_quantity,
+                    });
+                } catch {
+                    // Stats not available for this user type
+                }
+            } else {
+                setStats(null);
             }
         } catch (error) {
             console.error("Error loading profile:", error);
@@ -199,7 +204,7 @@ export default function ProfilePage() {
                         />
 
                         {/* Activity Stats */}
-                        {stats && (
+                        {stats && user.role !== "admin" && (
                             <div className="bg-[var(--card)] rounded-xl p-6">
                                 <h3 className="font-semibold text-[var(--very-dark-color)] mb-5 flex items-center gap-2">
                                     <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -235,7 +240,7 @@ export default function ProfilePage() {
                                             <Leaf size={16} className="text-primary" />
                                         </div>
                                         <p className="text-xl font-semibold">
-                                            {stats.total_quantity.toFixed(1)}
+                                            {stats.total_quantity.toFixed(2)}
                                             <span className="text-sm font-normal ml-0.5">kg</span>
                                         </p>
                                     </div>

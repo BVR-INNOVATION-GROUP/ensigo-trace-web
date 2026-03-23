@@ -31,6 +31,15 @@ export class AuthService {
     if (!data.business_name?.trim()) {
       throw new Error("Nursery or organisation name is required");
     }
+    if (!data.region?.trim()) {
+      throw new Error("Region is required");
+    }
+    if (!data.district?.trim()) {
+      throw new Error("District is required");
+    }
+    if (data.capacity == null || Number.isNaN(data.capacity) || data.capacity < 1) {
+      throw new Error("Valid capacity (seedlings) is required");
+    }
 
     return this.repo.register({
       ...data,

@@ -26,6 +26,21 @@ interface DataTableProps<T> {
   maxHeight?: string;
 }
 
+function formatCellNumber(value: number): string {
+  if (!Number.isFinite(value)) {
+    return "0.00";
+  }
+
+  if (Number.isInteger(value)) {
+    return value.toLocaleString();
+  }
+
+  return value.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
 export function DataTable<T extends { id?: string | number }>({
   data,
   columns,
@@ -75,14 +90,14 @@ export function DataTable<T extends { id?: string | number }>({
               </div>
             )}
             {searchable && (
-              <div className="relative">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--very-dark-color)]/40" />
+              <div className="relative w-full sm:w-auto">
+                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--very-dark-color)]/40" />
                 <input
                   type="text"
                   placeholder={searchPlaceholder}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 pr-4 py-2 bg-pale rounded-lg text-sm w-full sm:w-64 border-0 focus:outline-none"
+                  className="h-11 pl-10 pr-4 bg-pale rounded-lg text-body w-full sm:w-80 md:w-96 border border-transparent focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30"
                 />
               </div>
             )}
@@ -91,14 +106,14 @@ export function DataTable<T extends { id?: string | number }>({
       )}
 
       <div className="overflow-auto" style={{ maxHeight }}>
-        <table className="w-full min-w-[600px]">
+        <table className="w-full min-w-[520px] md:min-w-[680px]">
           <thead className="sticky top-0 bg-paper z-10">
             <tr className="border-b border-[var(--very-dark-color)]/10">
               {columns.map((column) => (
                 <th
                   key={String(column.key)}
                   className={cn(
-                    "px-4 py-3 text-left text-label font-medium text-[var(--very-dark-color)]/70",
+                    "px-4 py-3 text-left text-label font-medium text-[var(--very-dark-color)]/70 whitespace-nowrap",
                     column.className
                   )}
                 >
@@ -137,10 +152,16 @@ export function DataTable<T extends { id?: string | number }>({
                   onClick={() => onRowClick?.(item)}
                 >
                   {columns.map((column) => (
-                    <td key={String(column.key)} className={cn("px-4 py-3", column.className)}>
+                    <td key={String(column.key)} className={cn("px-4 py-3 align-top", column.className)}>
                       {column.render
                         ? column.render(item, index)
-                        : String((item as Record<string, unknown>)[String(column.key)] ?? "")}
+                        : (() => {
+                            const value = (item as Record<string, unknown>)[String(column.key)];
+                            if (typeof value === "number") {
+                              return formatCellNumber(value);
+                            }
+                            return String(value ?? "");
+                          })()}
                     </td>
                   ))}
                   {actions && (

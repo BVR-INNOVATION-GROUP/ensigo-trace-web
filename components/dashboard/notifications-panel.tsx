@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Bell,
   MessageCircle,
@@ -101,14 +102,35 @@ export function NotificationsPanel({ isOpen, onClose }: NotificationsPanelProps)
     }
   };
 
-  if (!isOpen) return null;
+  const panelTransition = { duration: 0.28, ease: [0.32, 0.72, 0, 1] as const };
+  const overlayTransition = { duration: 0.22, ease: [0.32, 0.72, 0, 1] as const };
 
   return (
-    <div className="fixed inset-0 bg-black/20 z-50" onClick={onClose}>
-      <div
-        className="absolute right-0 top-0 h-full w-full max-w-md bg-paper shadow-custom flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          <motion.div
+            key="notifications-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={overlayTransition}
+            className="fixed inset-0 z-50 bg-black/40 dark:bg-black/55 backdrop-blur-sm"
+            onClick={onClose}
+            aria-hidden
+          />
+          <motion.div
+            key="notifications-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Notifications"
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={panelTransition}
+            className="fixed right-0 top-0 z-[51] h-full w-full max-w-md bg-paper shadow-custom flex flex-col border-l border-[var(--border)]"
+            onClick={(e) => e.stopPropagation()}
+          >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-[var(--very-dark-color)]/10">
           <div className="flex items-center gap-2">
@@ -270,8 +292,10 @@ export function NotificationsPanel({ isOpen, onClose }: NotificationsPanelProps)
             </div>
           )}
         </div>
-      </div>
-    </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   );
 }
 

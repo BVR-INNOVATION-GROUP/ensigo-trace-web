@@ -23,6 +23,9 @@ interface ConfirmContextType {
 
 const ConfirmContext = createContext<ConfirmContextType | null>(null);
 
+const overlayTransition = { duration: 0.22, ease: [0.32, 0.72, 0, 1] as const };
+const dialogTransition = { duration: 0.24, ease: [0.32, 0.72, 0, 1] as const };
+
 export function useConfirm() {
   const context = useContext(ConfirmContext);
   if (!context) {
@@ -97,22 +100,32 @@ export function ConfirmProvider({ children }: ConfirmProviderProps) {
       <AnimatePresence>
         {isOpen && options && (
           <>
-            {/* Backdrop */}
             <motion.div
+              key="confirm-backdrop"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 z-50"
+              transition={overlayTransition}
+              className="fixed inset-0 bg-black/50 dark:bg-black/60 backdrop-blur-[2px] z-50"
               onClick={handleCancel}
             />
-            {/* Dialog */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ duration: 0.2 }}
-              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md"
+              key="confirm-dialog"
+              role="presentation"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={overlayTransition}
+              className="fixed inset-0 z-[51] flex items-center justify-center p-4 pointer-events-none"
             >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96, y: 16 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: 12 }}
+                transition={dialogTransition}
+                className="pointer-events-auto w-full max-w-md"
+                onClick={(e) => e.stopPropagation()}
+              >
               <div className="bg-paper rounded-lg shadow-custom overflow-hidden">
                 <div className="p-6">
                   <div className="flex items-start gap-4">
@@ -144,6 +157,7 @@ export function ConfirmProvider({ children }: ConfirmProviderProps) {
                   </Button>
                 </div>
               </div>
+              </motion.div>
             </motion.div>
           </>
         )}

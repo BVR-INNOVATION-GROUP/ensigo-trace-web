@@ -7,6 +7,9 @@ import { cn } from "@/lib/utils";
 import type { SeedCollectionI } from "@/src/models/SeedCollection";
 import Image from "next/image";
 
+const DEFAULT_SEED_IMAGE =
+    "https://images.pexels.com/photos/2286895/pexels-photo-2286895.jpeg?auto=compress&cs=tinysrgb&w=800";
+
 interface SeedBatchTableProps {
     collections: SeedCollectionI[];
     onView: (collection: SeedCollectionI) => void;
@@ -14,20 +17,34 @@ interface SeedBatchTableProps {
 }
 
 export function SeedBatchTable({ collections, onView, onEdit }: SeedBatchTableProps) {
+    const formatQuantity = (value: number) => {
+        if (!Number.isFinite(value)) {
+            return "0.00";
+        }
+        return value.toFixed(2);
+    };
+
+    const resolvePhoto = (collection: SeedCollectionI) => {
+        const candidate = collection.photos?.find(
+            (photo) => typeof photo === "string" && (photo.startsWith("http://") || photo.startsWith("https://"))
+        );
+        return candidate || DEFAULT_SEED_IMAGE;
+    };
+
     return (
         <div className="mt-8">
             <div className="mb-4">
                 <h2 className="text-h5 mb-1">
-                    MY SEED BATCH
+                    MY COLLECTIONS
                 </h2>
                 <p className="text-caption">
-                    Your recent seed collection submissions
+                    Recent submissions with status, date, and destination context
                 </p>
             </div>
 
             <div className="bg-paper rounded-lg shadow-custom overflow-hidden">
                 <div className="overflow-auto" style={{ maxHeight: "600px" }}>
-                    <table className="w-full min-w-[500px]">
+                    <table className="w-full min-w-[680px]">
                         <thead className="sticky top-0 h-[7vh] bg-paper z-10">
                             <tr className="bg-paper border-b border-pale">
                                 <th className="px-6 py-3 text-left text-label">
@@ -38,6 +55,12 @@ export function SeedBatchTable({ collections, onView, onEdit }: SeedBatchTablePr
                                 </th>
                                 <th className="px-6 py-3 text-left text-label">
                                     Quantity
+                                </th>
+                                <th className="px-6 py-3 text-left text-label">
+                                    Status
+                                </th>
+                                <th className="px-6 py-3 text-left text-label">
+                                    Collected
                                 </th>
                                 <th className="px-6 py-3 text-right text-label">
                                     {/* Actions */}
@@ -60,7 +83,7 @@ export function SeedBatchTable({ collections, onView, onEdit }: SeedBatchTablePr
                                         <div className="flex items-center gap-3">
                                             <div className="w-12 h-12 rounded bg-pale flex items-center justify-center overflow-hidden flex-shrink-0">
                                                 <Image
-                                                    src={collection.photos?.[0] || "https://images.unsplash.com/photo-1462143338528-eca9936a4d09?w=100"}
+                                                    src={resolvePhoto(collection)}
                                                     alt={collection.species || "Tree"}
                                                     width={48}
                                                     height={48}
@@ -79,7 +102,21 @@ export function SeedBatchTable({ collections, onView, onEdit }: SeedBatchTablePr
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className="text-body">
-                                            {collection.quantity} {collection.unit.toUpperCase()}
+                                            {formatQuantity(collection.quantity)} {collection.unit.toUpperCase()}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-xs capitalize text-primary">
+                                            {collection.status || "pending"}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <span className="text-body">
+                                            {collection.collection_date
+                                                ? new Date(collection.collection_date).toLocaleDateString()
+                                                : collection.submitted_at
+                                                    ? new Date(collection.submitted_at).toLocaleDateString()
+                                                    : "-"}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">

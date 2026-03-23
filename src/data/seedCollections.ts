@@ -1,25 +1,20 @@
 import type { SeedCollectionI } from "../models/SeedCollection";
 
-const treeImages = [
-  "https://images.unsplash.com/photo-1462143338528-eca9936a4d09?w=100",
-  "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=100",
-  "https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?w=100",
-  "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=100",
-  "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=100",
-  "https://images.unsplash.com/photo-1511497584788-876760111969?w=100",
-  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=100",
-  "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=100",
-  "https://images.unsplash.com/photo-1511497584788-876760111969?w=100",
-  "https://images.unsplash.com/photo-1448375240586-882707db888b?w=100",
-  "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=100",
-  "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=100",
-  "https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?w=100",
-  "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=100",
-  "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=100",
+const seedImages = [
+  "https://images.pexels.com/photos/4110251/pexels-photo-4110251.jpeg?auto=compress&cs=tinysrgb&w=900",
+  "https://images.pexels.com/photos/7422241/pexels-photo-7422241.jpeg?auto=compress&cs=tinysrgb&w=900",
+  "https://images.pexels.com/photos/6843340/pexels-photo-6843340.jpeg?auto=compress&cs=tinysrgb&w=900",
+  "https://images.pexels.com/photos/4207909/pexels-photo-4207909.jpeg?auto=compress&cs=tinysrgb&w=900",
+  "https://images.pexels.com/photos/5609479/pexels-photo-5609479.jpeg?auto=compress&cs=tinysrgb&w=900",
+  "https://images.pexels.com/photos/547263/pexels-photo-547263.jpeg?auto=compress&cs=tinysrgb&w=900",
+  "https://images.pexels.com/photos/1092730/pexels-photo-1092730.jpeg?auto=compress&cs=tinysrgb&w=900",
+  "https://images.pexels.com/photos/5945708/pexels-photo-5945708.jpeg?auto=compress&cs=tinysrgb&w=900",
+  "https://images.pexels.com/photos/4099234/pexels-photo-4099234.jpeg?auto=compress&cs=tinysrgb&w=900",
+  "https://images.pexels.com/photos/265216/pexels-photo-265216.jpeg?auto=compress&cs=tinysrgb&w=900",
 ];
 
 const getRandomImage = () => {
-  return treeImages[Math.floor(Math.random() * treeImages.length)];
+  return seedImages[Math.floor(Math.random() * seedImages.length)];
 };
 
 export const seedCollectionsMockData: SeedCollectionI[] = [

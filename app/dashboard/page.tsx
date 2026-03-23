@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
@@ -9,11 +9,9 @@ import { SeedBatchTable } from "@/components/dashboard/seed-batch-table";
 import { SeedCollectionService } from "@/src/services/SeedCollection";
 import { CollectionDetailsModal } from "@/components/dashboard/collection-details-modal";
 import { CollectionFormModal } from "@/components/dashboard/collection-form-modal";
-import { NotificationsPanel } from "@/components/dashboard/notifications-panel";
-import { FileText, RefreshCw, List, Plus, MapPin, Bell, Loader2 } from "lucide-react";
+import { FileText, RefreshCw, List, Plus, MapPin, Loader2 } from "lucide-react";
 import type { SeedCollectionI, CollectorStats, LocationPoint } from "@/src/models/SeedCollection";
 import { SeedCollectionRepository } from "@/src/repositories/SeedRepository";
-import api from "@/src/api/client";
 
 // Dynamically import the map to avoid SSR issues
 const CollectionLocationsMap = dynamic(
@@ -35,19 +33,19 @@ export default function DashboardPage() {
     const [selectedCollection, setSelectedCollection] = useState<SeedCollectionI | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-    const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [editingCollection, setEditingCollection] = useState<SeedCollectionI | null>(null);
     const [loading, setLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
     const [userName, setUserName] = useState("Collector");
     const [showMap, setShowMap] = useState(true);
-    const [unreadCount, setUnreadCount] = useState(0);
+    const [loadError, setLoadError] = useState<string | null>(null);
 
-    const seedService = new SeedCollectionService();
-    const seedRepo = new SeedCollectionRepository();
+    const seedService = useMemo(() => new SeedCollectionService(), []);
+    const seedRepo = useMemo(() => new SeedCollectionRepository(), []);
 
     const loadCollections = useCallback(async (showSpinner = true) => {
         if (showSpinner) setRefreshing(true);
+        setLoadError(null);
         try {
             const [data, statsData, locationsData] = await Promise.all([
                 seedService.getAllCollections(),
@@ -59,19 +57,11 @@ export default function DashboardPage() {
             setLocations(locationsData ?? []);
         } catch (error) {
             console.error("Error loading collections:", error);
+            setLoadError(error instanceof Error ? error.message : "Failed to load collector data from backend.");
         } finally {
             setRefreshing(false);
         }
-    }, []);
-
-    const fetchUnreadCount = useCallback(async () => {
-        try {
-            const result = await api.getUnreadNotificationCount();
-            setUnreadCount(result.count);
-        } catch (err) {
-            console.error("Failed to fetch unread count:", err);
-        }
-    }, []);
+    }, [seedRepo, seedService]);
 
     useEffect(() => {
         const user = localStorage.getItem("user");
@@ -80,16 +70,14 @@ export default function DashboardPage() {
             setUserName(userData.name || "Collector");
         }
         loadCollections();
-        fetchUnreadCount();
 
         // Set up polling for real-time updates (every 30 seconds)
         const interval = setInterval(() => {
             loadCollections(false);
-            fetchUnreadCount();
         }, 30000);
 
         return () => clearInterval(interval);
-    }, [loadCollections, fetchUnreadCount]);
+    }, [loadCollections]);
 
     const handleView = (collection: SeedCollectionI) => {
         setSelectedCollection(collection);
@@ -165,19 +153,6 @@ export default function DashboardPage() {
                     </motion.h1>
                     <div className="flex items-center gap-2">
                         <motion.button
-                            onClick={() => setIsNotificationsOpen(true)}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="inline-flex items-center justify-center p-2 rounded-full bg-pale hover:bg-pale-dark transition-all relative"
-                        >
-                            <Bell size={20} />
-                            {unreadCount > 0 && (
-                                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 rounded-full flex items-center justify-center text-white text-[10px] font-medium">
-                                    {unreadCount > 99 ? "99+" : unreadCount}
-                                </span>
-                            )}
-                        </motion.button>
-                        <motion.button
                             onClick={handleRefresh}
                             disabled={refreshing}
                             whileHover={{ scale: 1.05 }}
@@ -190,7 +165,7 @@ export default function DashboardPage() {
                             onClick={handleAdd}
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-primary hover:bg-primary-dark text-white text-body font-medium transition-all"
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-primary hover:bg-primary-dark text-white dark:text-[var(--background)] text-body font-medium transition-all"
                         >
                             <Plus size={16} />
                             <span className="hidden sm:inline">Add Collection</span>
@@ -205,6 +180,11 @@ export default function DashboardPage() {
                 >
                     Track your seed collection batches and submissions.
                 </motion.p>
+                {loadError && (
+                    <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-300">
+                        {loadError}
+                    </div>
+                )}
 
                 {/* Summary Cards - Mobile Responsive Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
@@ -299,14 +279,6 @@ export default function DashboardPage() {
                 collection={editingCollection || undefined}
                 onSubmit={handleFormSubmit}
                 loading={loading}
-            />
-
-            <NotificationsPanel
-                isOpen={isNotificationsOpen}
-                onClose={() => {
-                    setIsNotificationsOpen(false);
-                    fetchUnreadCount();
-                }}
             />
         </DashboardLayout>
     );

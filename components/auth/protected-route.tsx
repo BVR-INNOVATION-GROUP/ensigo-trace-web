@@ -15,9 +15,11 @@ function getDashboardForRole(role: UserRole): string {
     case "collector":
       return "/dashboard";
     case "super_nursery":
+      return "/nursery/requests";
     case "community_nursery":
+      return "/nursery/requests";
     case "regional_nursery":
-      return "/nursery";
+      return "/nursery/collectors";
     case "partner":
       return "/partner";
     default:

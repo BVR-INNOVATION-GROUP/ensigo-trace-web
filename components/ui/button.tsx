@@ -10,7 +10,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        default: "bg-primary text-white dark:text-[var(--background)] hover:bg-primary/90",
         destructive:
           "bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500/20",
         outline:
@@ -24,12 +24,12 @@ const buttonVariants = cva(
         paper: "bg-paper text-[var(--very-dark-color)] hover:bg-pale",
       },
       size: {
-        default: "h-11 px-5 py-3 has-[>svg]:px-4",
-        sm: "h-10 rounded-md gap-1.5 px-4 has-[>svg]:px-3",
-        lg: "h-14 rounded-md px-8 has-[>svg]:px-6",
-        icon: "size-11",
-        "icon-sm": "size-10",
-        "icon-lg": "size-14",
+        default: "h-10 px-5 py-2.5 has-[>svg]:px-4",
+        sm: "h-9 rounded-md gap-1.5 px-3.5 has-[>svg]:px-3",
+        lg: "h-12 rounded-md px-7 has-[>svg]:px-6",
+        icon: "size-10",
+        "icon-sm": "size-9",
+        "icon-lg": "size-12",
       },
     },
     defaultVariants: {

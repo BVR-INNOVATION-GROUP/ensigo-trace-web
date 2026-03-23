@@ -23,9 +23,19 @@ export function CollectionDetailsModal({
     isOpen,
     onClose,
 }: CollectionDetailsModalProps) {
-    const photos = collection.photos || [
-        "https://images.unsplash.com/photo-1462143338528-eca9936a4d09?w=600",
-    ];
+    const formatQuantity = (value: number) => {
+        if (!Number.isFinite(value)) {
+            return "0.00";
+        }
+        return value.toFixed(2);
+    };
+
+    const photos =
+        collection.photos?.filter((photo) => typeof photo === "string" && (photo.startsWith("http://") || photo.startsWith("https://"))) ||
+        [];
+    const displayPhotos = photos.length
+        ? photos
+        : ["https://images.pexels.com/photos/2286895/pexels-photo-2286895.jpeg?auto=compress&cs=tinysrgb&w=1200"];
 
     return (
         <Modal
@@ -47,7 +57,7 @@ export function CollectionDetailsModal({
                             </p>
                         </div>
                         <span className="inline-block bg-primary/10 px-3 py-1.5 rounded-full text-label whitespace-nowrap">
-                            {collection.quantity} {collection.unit.toUpperCase()}
+                            {formatQuantity(collection.quantity)} {collection.unit.toUpperCase()}
                         </span>
                     </div>
                 </div>
@@ -59,7 +69,7 @@ export function CollectionDetailsModal({
                         <h3 className="text-h6">Photos</h3>
                         <Carousel className="w-full">
                             <CarouselContent>
-                                {photos.map((photo, index) => (
+                                {displayPhotos.map((photo, index) => (
                                     <CarouselItem key={index}>
                                         <div className="relative w-full h-80 rounded-lg overflow-hidden bg-pale">
                                             <Image
@@ -73,7 +83,7 @@ export function CollectionDetailsModal({
                                     </CarouselItem>
                                 ))}
                             </CarouselContent>
-                            {photos.length > 1 && (
+                            {displayPhotos.length > 1 && (
                                 <>
                                     <CarouselPrevious className="left-2 bg-black/50 hover:bg-black/70 text-white border-0" />
                                     <CarouselNext className="right-2 bg-black/50 hover:bg-black/70 text-white border-0" />
@@ -117,14 +127,14 @@ export function CollectionDetailsModal({
                     <div>
                         <p className="text-caption opacity-75 mb-1">Quantity</p>
                         <p className="text-label">
-                            {collection.quantity} {collection.unit.toUpperCase()}
+                            {formatQuantity(collection.quantity)} {collection.unit.toUpperCase()}
                         </p>
                     </div>
                     {collection.latitude && collection.longitude && (
                         <div>
                             <p className="text-caption opacity-75 mb-1">Coordinates</p>
                             <p className="text-label">
-                                {collection.latitude.toFixed(6)}, {collection.longitude.toFixed(6)}
+                                {collection.latitude.toFixed(2)}, {collection.longitude.toFixed(2)}
                             </p>
                         </div>
                     )}

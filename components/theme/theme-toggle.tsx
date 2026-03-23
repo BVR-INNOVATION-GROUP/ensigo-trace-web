@@ -1,6 +1,7 @@
 "use client";
 
 import { Moon, Sun, Monitor } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "./theme-provider";
 import { Button } from "@/components/ui/button";
 import { useState, useRef, useEffect } from "react";
@@ -43,8 +44,16 @@ export function ThemeToggle() {
         <CurrentIcon size={18} />
       </Button>
 
-      {isOpen && (
-        <div className="absolute right-0 mt-2 w-36 rounded-md bg-[var(--card)] shadow-custom border border-[var(--border)] z-50">
+      <AnimatePresence>
+        {isOpen && (
+        <motion.div
+          key="theme-menu"
+          initial={{ opacity: 0, y: -8, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -6, scale: 0.98 }}
+          transition={{ duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
+          className="absolute right-0 mt-2 w-36 rounded-md bg-[var(--card)] shadow-custom border border-[var(--border)] z-50 origin-top-right"
+        >
           {options.map((option) => {
             const Icon = option.icon;
             return (
@@ -64,8 +73,9 @@ export function ThemeToggle() {
               </button>
             );
           })}
-        </div>
-      )}
+        </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

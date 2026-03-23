@@ -5,6 +5,9 @@ import { X } from "lucide-react";
 import { IconButton } from "./icon-button";
 import { cn } from "@/lib/utils";
 
+const overlayTransition = { duration: 0.22, ease: [0.32, 0.72, 0, 1] as const };
+const panelEase = [0.32, 0.72, 0, 1] as const;
+
 interface ModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -35,25 +38,39 @@ export function Modal({
     closeOnOverlayClick = true,
     className,
 }: ModalProps) {
+    const isFull = size === "full";
+    const panelTransition = { duration: 0.24, ease: panelEase };
+
     return (
         <AnimatePresence>
             {isOpen && (
                 <motion.div
+                    key="modal-root"
+                    role="presentation"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
+                    transition={overlayTransition}
                     className="fixed inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
                     onClick={closeOnOverlayClick ? onClose : undefined}
                 >
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        key="modal-panel"
+                        initial={
+                            isFull
+                                ? { opacity: 0, y: 28 }
+                                : { opacity: 0, scale: 0.96, y: 16 }
+                        }
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        transition={{ duration: 0.2 }}
+                        exit={
+                            isFull
+                                ? { opacity: 0, y: 20 }
+                                : { opacity: 0, scale: 0.96, y: 12 }
+                        }
+                        transition={panelTransition}
                         className={cn(
                             "bg-paper rounded-lg w-full flex flex-col shadow-custom",
-                            size === "full" ? "max-h-[95vh]" : "max-h-[85vh]",
+                            isFull ? "max-h-[95vh]" : "max-h-[85vh]",
                             sizeClasses[size],
                             className
                         )}

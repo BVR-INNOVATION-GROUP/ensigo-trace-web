@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { SummaryCard } from "@/components/dashboard/summary-card";
 import { ChartCard } from "@/components/dashboard/chart-card";
@@ -20,6 +21,7 @@ import {
 import api, { Nursery, NurseryStats, SeedCollection } from "@/src/api/client";
 
 export default function NurseryDashboardPage() {
+  const router = useRouter();
   const { confirm } = useConfirm();
   const [nursery, setNursery] = useState<Nursery | null>(null);
   const [stats, setStats] = useState<NurseryStats | null>(null);
@@ -50,8 +52,16 @@ export default function NurseryDashboardPage() {
   }, []);
 
   useEffect(() => {
+    const raw = localStorage.getItem("user");
+    if (raw) {
+      const current = JSON.parse(raw) as { role?: string };
+      if (current.role === "regional_nursery") {
+        router.replace("/nursery/collectors");
+        return;
+      }
+    }
     fetchData();
-  }, [fetchData]);
+  }, [fetchData, router]);
 
   // Chart data
   const capacityChartData = useMemo(() => {
@@ -208,7 +218,7 @@ export default function NurseryDashboardPage() {
           />
           <SummaryCard
             title="Germination Rate"
-            value={`${(stats?.germination_rate || 0).toFixed(1)}%`}
+            value={`${(stats?.germination_rate || 0).toFixed(2)}%`}
             icon={<TrendingUp size={20} />}
             index={3}
           />

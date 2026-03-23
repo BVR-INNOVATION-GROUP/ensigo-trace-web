@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Bell, User, LogOut, Menu } from "lucide-react";
 import Image from "next/image";
@@ -127,8 +128,16 @@ export function Header() {
                         )}
                     </button>
 
-                    {showDropdown && (
-                        <div className="absolute right-0 top-12 w-56 bg-[var(--card)] rounded-lg shadow-custom border border-[var(--border)] z-50 py-2">
+                    <AnimatePresence>
+                        {showDropdown && (
+                        <motion.div
+                            key="header-user-menu"
+                            initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                            transition={{ duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
+                            className="absolute right-0 top-12 w-56 bg-[var(--card)] rounded-lg shadow-custom border border-[var(--border)] z-50 py-2 origin-top-right"
+                        >
                             <div className="px-4 py-3 border-b border-[var(--very-dark-color)]/10">
                                 <p className="text-label font-medium mb-1 truncate">{userName || "User"}</p>
                                 <p className="text-caption truncate">{userEmail || "user@example.com"}</p>
@@ -150,8 +159,9 @@ export function Header() {
                                 <LogOut size={16} />
                                 <span>Logout</span>
                             </button>
-                        </div>
-                    )}
+                        </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
                 </div>
             </header>
