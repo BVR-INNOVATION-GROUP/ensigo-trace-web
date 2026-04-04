@@ -16,7 +16,7 @@ import { SeedCollectionRepository } from "@/src/repositories/SeedRepository";
 // Dynamically import the map to avoid SSR issues
 const CollectionLocationsMap = dynamic(
     () => import("@/components/dashboard/collection-locations-map"),
-    { 
+    {
         ssr: false,
         loading: () => (
             <div className="h-[300px] bg-pale rounded-lg flex items-center justify-center">

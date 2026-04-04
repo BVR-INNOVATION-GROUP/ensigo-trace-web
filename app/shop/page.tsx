@@ -1,5 +1,6 @@
 import React from 'react'
-import ShoppingFeed from "@/app/shop/ShoppingFeed"
+import ShoppingFeed from './ShoppingFeed'
+
 const page = () => {
   return (
     <ShoppingFeed />

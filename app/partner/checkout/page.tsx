@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { motion } from "framer-motion";
 import { CreditCard, Package, MapPin, User, Mail, Phone } from "lucide-react";
+import { formatCurrency } from "@/src/utils/currency";
 import { useUser } from "@/src/hooks/useUser";
 
 declare global {
@@ -63,7 +64,7 @@ function CheckoutPageContent() {
     script.src = "https://checkout.flutterwave.com/v3.js";
     script.async = true;
     script.id = "flutterwave-script";
-    
+
     // Check if script already exists
     if (!document.getElementById("flutterwave-script")) {
       document.body.appendChild(script);
@@ -338,13 +339,13 @@ function CheckoutPageContent() {
                     <div className="flex justify-between text-body-sm">
                       <span className="text-caption opacity-75">Subtotal</span>
                       <span className="text-label">
-                        {subtotal.toLocaleString()} UGX
+                        {formatCurrency(subtotal, 'UGX')}
                       </span>
                     </div>
                     <div className="flex justify-between text-body-sm">
                       <span className="text-caption opacity-75">Shipping</span>
                       <span className="text-label">
-                        {shipping.toLocaleString()} UGX
+                        {formatCurrency(shipping, 'UGX')}
                       </span>
                     </div>
                   </div>
@@ -352,7 +353,7 @@ function CheckoutPageContent() {
                   <div className="flex justify-between items-center pt-2">
                     <span className="text-label font-medium">Total</span>
                     <span className="text-h5 text-primary">
-                      {total.toLocaleString()} UGX
+                      {formatCurrency(total, 'UGX')}
                     </span>
                   </div>
 

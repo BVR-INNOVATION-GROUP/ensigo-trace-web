@@ -6,6 +6,7 @@ import { CustomSelect } from "@/components/ui/custom-select";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
+import { formatCurrency } from "@/src/utils/currency";
 import type { SeedBatch } from "@/src/data/mockData";
 
 interface CreateSaleModalProps {
@@ -112,7 +113,7 @@ export function CreateSaleModal({
                   <div className="flex justify-between items-center">
                     <span className="text-label font-medium">Total Amount:</span>
                     <span className="text-h5 text-primary">
-                      {calculatedTotal.toLocaleString()} UGX
+                      {formatCurrency(calculatedTotal, 'UGX')}
                     </span>
                   </div>
                 </div>

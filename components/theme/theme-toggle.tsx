@@ -35,45 +35,50 @@ export function ThemeToggle() {
 
   return (
     <div className="relative" ref={menuRef}>
-      <Button
+      {/* <Button
         variant="pale"
         size="icon-sm"
+        > */}
+      <button
         onClick={() => setIsOpen(!isOpen)}
         title="Toggle theme"
+
       >
-        <CurrentIcon size={18} />
-      </Button>
+
+        <CurrentIcon size={20} />
+      </button>
+      {/* </Button> */}
 
       <AnimatePresence>
         {isOpen && (
-        <motion.div
-          key="theme-menu"
-          initial={{ opacity: 0, y: -8, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -6, scale: 0.98 }}
-          transition={{ duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
-          className="absolute right-0 mt-2 w-36 rounded-md bg-[var(--card)] shadow-custom border border-[var(--border)] z-50 origin-top-right"
-        >
-          {options.map((option) => {
-            const Icon = option.icon;
-            return (
-              <button
-                key={option.value}
-                onClick={() => {
-                  setTheme(option.value);
-                  setIsOpen(false);
-                }}
-                className={cn(
-                  "w-full flex items-center gap-2 px-3 py-2.5 text-body hover:bg-[var(--card-hover)] transition-colors",
-                  theme === option.value && "text-primary"
-                )}
-              >
-                <Icon size={16} />
-                {option.label}
-              </button>
-            );
-          })}
-        </motion.div>
+          <motion.div
+            key="theme-menu"
+            initial={{ opacity: 0, y: -8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.98 }}
+            transition={{ duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
+            className="absolute right-0 mt-2 w-36 rounded-md bg-[var(--card)] shadow-custom border border-[var(--border)] z-50 origin-top-right"
+          >
+            {options.map((option) => {
+              const Icon = option.icon;
+              return (
+                <button
+                  key={option.value}
+                  onClick={() => {
+                    setTheme(option.value);
+                    setIsOpen(false);
+                  }}
+                  className={cn(
+                    "w-full flex items-center gap-2 px-3 py-2.5 text-body hover:bg-[var(--card-hover)] transition-colors",
+                    theme === option.value && "text-primary"
+                  )}
+                >
+                  <Icon size={16} />
+                  {option.label}
+                </button>
+              );
+            })}
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

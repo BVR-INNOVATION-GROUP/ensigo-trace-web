@@ -16,6 +16,7 @@ import { useConfirm } from "@/components/ui/confirm-dialog";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { type UserRole } from "@/src/models/User";
 import { ShoppingCart, DollarSign, Clock, Package, CheckCircle, XCircle, Eye, PlusCircle } from "lucide-react";
+import { formatCurrency } from "@/src/utils/currency";
 import { SalesService } from "@/src/services/SalesService";
 import { useSales } from "@/src/hooks/useSales";
 import api, { type SeedBatch, type Nursery, type User } from "@/src/api/client";
@@ -242,7 +243,7 @@ export default function SalesPage() {
     {
       key: "totalAmount",
       header: "Amount",
-      render: (item) => `${item.totalAmount.toLocaleString()} UGX`,
+      render: (item) => formatCurrency(item.totalAmount, 'UGX'),
     },
     {
       key: "paymentStatus",
@@ -291,7 +292,7 @@ export default function SalesPage() {
           {/* Stat Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <SummaryCard title="Total Orders" value={stats.totalSales} icon={<ShoppingCart size={20} />} index={0} />
-            <SummaryCard title="Total Revenue" value={`${(stats.totalRevenue / 1000).toFixed(2)}K UGX`} icon={<DollarSign size={20} />} index={1} />
+            <SummaryCard title="Total Revenue" value={formatCurrency(stats.totalRevenue, 'UGX')} icon={<DollarSign size={20} />} index={1} />
             <SummaryCard title="Pending Orders" value={stats.pendingPayments} icon={<Clock size={20} />} index={2} />
             <SummaryCard title="Fulfilled Orders" value={stats.paidSales} icon={<Package size={20} />} index={3} />
           </div>

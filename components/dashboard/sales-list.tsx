@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, CheckCircle } from "lucide-react";
+import { formatCurrency } from "@/src/utils/currency";
 import type { Sale } from "@/src/models/Sale";
 
 interface SalesListProps {
@@ -62,7 +63,7 @@ export function SalesList({ sales, loading, onUpdateStatus }: SalesListProps) {
             </div>
             <div className="text-right ml-4">
               <p className="text-h5 text-primary">
-                {sale.totalAmount.toLocaleString()} UGX
+                {formatCurrency(sale.totalAmount, 'UGX')}
               </p>
               <p className="text-caption opacity-75">
                 {sale.quantity} {sale.unit}
@@ -77,7 +78,7 @@ export function SalesList({ sales, loading, onUpdateStatus }: SalesListProps) {
             <div>
               <p className="text-caption opacity-75 mb-1">Price/Unit</p>
               <p className="text-label">
-                {sale.pricePerUnit.toLocaleString()} UGX
+                {formatCurrency(sale.pricePerUnit, 'UGX')}
               </p>
             </div>
             <div>

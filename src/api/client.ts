@@ -1,4 +1,5 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4545/api/v1";
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:4545/api/v1";
 
 interface RequestOptions {
   method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
@@ -35,7 +36,10 @@ class APIClient {
     window.location.href = "/login";
   }
 
-  private async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
+  private async request<T>(
+    endpoint: string,
+    options: RequestOptions = {}
+  ): Promise<T> {
     const { method = "GET", body, headers = {} } = options;
 
     const token = this.getToken();
@@ -63,7 +67,9 @@ class APIClient {
       if (response.status === 401 || response.status === 403) {
         this.handleUnauthorized();
       }
-      const error = await response.json().catch(() => ({ error: "Request failed" }));
+      const error = await response
+        .json()
+        .catch(() => ({ error: "Request failed" }));
       throw new Error(error.error || "Request failed");
     }
     if (response.status === 204) {
@@ -119,26 +125,39 @@ class APIClient {
     });
   }
 
-  async getCollections(params?: { status?: string; limit?: number; offset?: number }) {
+  async getCollections(params?: {
+    status?: string;
+    limit?: number;
+    offset?: number;
+  }) {
     const query = new URLSearchParams();
     if (params?.status) query.set("status", params.status);
     if (params?.limit) query.set("limit", params.limit.toString());
     if (params?.offset) query.set("offset", params.offset.toString());
-    return this.request<PaginatedResponse<SeedCollection>>(`/collections?${query}`);
+    return this.request<PaginatedResponse<SeedCollection>>(
+      `/collections?${query}`
+    );
   }
 
   async getMyCollections(params?: { limit?: number; offset?: number }) {
     const query = new URLSearchParams();
     if (params?.limit) query.set("limit", params.limit.toString());
     if (params?.offset) query.set("offset", params.offset.toString());
-    return this.request<PaginatedResponse<SeedCollection>>(`/collections/me?${query}`);
+    return this.request<PaginatedResponse<SeedCollection>>(
+      `/collections/me?${query}`
+    );
   }
 
-  async getCollectorCollections(collectorId: string, params?: { limit?: number; offset?: number }) {
+  async getCollectorCollections(
+    collectorId: string,
+    params?: { limit?: number; offset?: number }
+  ) {
     const query = new URLSearchParams();
     if (params?.limit) query.set("limit", params.limit.toString());
     if (params?.offset) query.set("offset", params.offset.toString());
-    return this.request<PaginatedResponse<SeedCollection>>(`/collections/collector/${collectorId}?${query}`);
+    return this.request<PaginatedResponse<SeedCollection>>(
+      `/collections/collector/${collectorId}?${query}`
+    );
   }
 
   async getMyStats() {
@@ -170,7 +189,11 @@ class APIClient {
   }
 
   // Nurseries
-  async getNurseries(params?: { type?: string; limit?: number; offset?: number }) {
+  async getNurseries(params?: {
+    type?: string;
+    limit?: number;
+    offset?: number;
+  }) {
     const query = new URLSearchParams();
     if (params?.type) query.set("type", params.type);
     if (params?.limit) query.set("limit", params.limit.toString());
@@ -194,11 +217,47 @@ class APIClient {
     return this.request<NurseryStats>(`/nurseries/${id}/stats`);
   }
 
-  async getNurseryBatches(nurseryId: string, params?: { limit?: number; offset?: number }) {
+  async getNurseryBatches(
+    nurseryId: string,
+    params?: { limit?: number; offset?: number }
+  ) {
     const query = new URLSearchParams();
     if (params?.limit) query.set("limit", params.limit.toString());
     if (params?.offset) query.set("offset", params.offset.toString());
-    return this.request<PaginatedResponse<SeedBatch>>(`/collections/nursery/${nurseryId}/batches?${query}`);
+    return this.request<PaginatedResponse<SeedBatch>>(
+      `/collections/nursery/${nurseryId}/batches?${query}`
+    );
+  }
+
+  // Public shop - get all available batches across all nurseries
+  async getPublicBatches(params?: {
+    limit?: number;
+    offset?: number;
+    search?: string;
+    regions?: string;
+    min_price?: number;
+    max_price?: number;
+    status?: string;
+    units?: string;
+    min_germination?: number;
+    max_germination?: number;
+  }) {
+    const query = new URLSearchParams();
+    if (params?.limit) query.set("limit", params.limit.toString());
+    if (params?.offset) query.set("offset", params.offset.toString());
+    if (params?.search) query.set("search", params.search);
+    if (params?.regions) query.set("regions", params.regions);
+    if (params?.min_price) query.set("min_price", params.min_price.toString());
+    if (params?.max_price) query.set("max_price", params.max_price.toString());
+    if (params?.status) query.set("status", params.status);
+    if (params?.units) query.set("units", params.units);
+    if (params?.min_germination)
+      query.set("min_germination", params.min_germination.toString());
+    if (params?.max_germination)
+      query.set("max_germination", params.max_germination.toString());
+    return this.request<PaginatedResponse<SeedBatch>>(
+      `/public/batches?${query}`
+    );
   }
 
   async createNursery(data: CreateNurseryRequest) {
@@ -235,7 +294,9 @@ class APIClient {
   }
 
   async getNurseryCollectors(nurseryId: string) {
-    return this.request<NurseryCollector[]>(`/nurseries/${nurseryId}/collectors`);
+    return this.request<NurseryCollector[]>(
+      `/nurseries/${nurseryId}/collectors`
+    );
   }
 
   async removeCollectorFromNursery(nurseryId: string, collectorId: string) {
@@ -248,10 +309,13 @@ class APIClient {
     nurseryId: string,
     data: CreateCollectorForNurseryRequest
   ) {
-    return this.request<{ success: boolean; collector?: User }>(`/nurseries/${nurseryId}/collectors`, {
-      method: "POST",
-      body: data,
-    });
+    return this.request<{ success: boolean; collector?: User }>(
+      `/nurseries/${nurseryId}/collectors`,
+      {
+        method: "POST",
+        body: data,
+      }
+    );
   }
 
   // Inventory requests
@@ -262,12 +326,18 @@ class APIClient {
     });
   }
 
-  async getInventoryRequests(params: { nursery_id: string; limit?: number; offset?: number }) {
+  async getInventoryRequests(params: {
+    nursery_id: string;
+    limit?: number;
+    offset?: number;
+  }) {
     const query = new URLSearchParams();
     query.set("nursery_id", params.nursery_id);
     if (params.limit) query.set("limit", params.limit.toString());
     if (params.offset) query.set("offset", params.offset.toString());
-    return this.request<PaginatedResponse<InventoryRequest>>(`/inventory-requests?${query}`);
+    return this.request<PaginatedResponse<InventoryRequest>>(
+      `/inventory-requests?${query}`
+    );
   }
 
   async getInventoryRequest(id: string) {
@@ -303,7 +373,11 @@ class APIClient {
     });
   }
 
-  async getSales(params?: { nursery_id?: string; limit?: number; offset?: number }) {
+  async getSales(params?: {
+    nursery_id?: string;
+    limit?: number;
+    offset?: number;
+  }) {
     const query = new URLSearchParams();
     if (params?.nursery_id) query.set("nursery_id", params.nursery_id);
     if (params?.limit) query.set("limit", params.limit.toString());
@@ -321,7 +395,10 @@ class APIClient {
     return this.request<SalesStats>(`/sales/stats?${query}`);
   }
 
-  async updateSalePaymentStatus(id: string, data: UpdateSalePaymentStatusRequest) {
+  async updateSalePaymentStatus(
+    id: string,
+    data: UpdateSalePaymentStatusRequest
+  ) {
     return this.request<Sale>(`/sales/${id}/payment-status`, {
       method: "PATCH",
       body: data,
@@ -341,7 +418,9 @@ class APIClient {
   }
 
   async searchSpecies(query: string, limit = 20) {
-    return this.request<Species[]>(`/species/search?q=${encodeURIComponent(query)}&limit=${limit}`);
+    return this.request<Species[]>(
+      `/species/search?q=${encodeURIComponent(query)}&limit=${limit}`
+    );
   }
 
   async createSpecies(data: CreateSpeciesRequest) {
@@ -369,7 +448,9 @@ class APIClient {
     const query = new URLSearchParams();
     if (params?.limit) query.set("limit", params.limit.toString());
     if (params?.offset) query.set("offset", params.offset.toString());
-    return this.request<PaginatedResponse<MotherTree>>(`/mother-trees?${query}`);
+    return this.request<PaginatedResponse<MotherTree>>(
+      `/mother-trees?${query}`
+    );
   }
 
   async createMotherTree(data: CreateMotherTreeRequest) {
@@ -393,7 +474,9 @@ class APIClient {
   }
 
   async getNearbyMotherTrees(lat: number, lng: number, radius = 10) {
-    return this.request<MotherTree[]>(`/mother-trees/nearby?lat=${lat}&lng=${lng}&radius=${radius}`);
+    return this.request<MotherTree[]>(
+      `/mother-trees/nearby?lat=${lat}&lng=${lng}&radius=${radius}`
+    );
   }
 
   async getMotherTreesBySpecies(speciesId: string) {
@@ -412,11 +495,16 @@ class APIClient {
     return this.request<ChatRoom[]>("/chat/rooms");
   }
 
-  async getMessages(roomId: string, params?: { limit?: number; offset?: number }) {
+  async getMessages(
+    roomId: string,
+    params?: { limit?: number; offset?: number }
+  ) {
     const query = new URLSearchParams();
     if (params?.limit) query.set("limit", params.limit.toString());
     if (params?.offset) query.set("offset", params.offset.toString());
-    return this.request<ChatMessage[]>(`/chat/rooms/${roomId}/messages?${query}`);
+    return this.request<ChatMessage[]>(
+      `/chat/rooms/${roomId}/messages?${query}`
+    );
   }
 
   async markAsRead(roomId: string) {
@@ -444,15 +532,25 @@ class APIClient {
   }
 
   // Admin endpoints
-  async getAllCollections(params?: { status?: string; limit?: number; offset?: number }) {
+  async getAllCollections(params?: {
+    status?: string;
+    limit?: number;
+    offset?: number;
+  }) {
     const query = new URLSearchParams();
     if (params?.status) query.set("status", params.status);
     if (params?.limit) query.set("limit", params.limit.toString());
     if (params?.offset) query.set("offset", params.offset.toString());
-    return this.request<PaginatedResponse<SeedCollection>>(`/collections?${query}`);
+    return this.request<PaginatedResponse<SeedCollection>>(
+      `/collections?${query}`
+    );
   }
 
-  async getAllNurseries(params?: { type?: string; limit?: number; offset?: number }) {
+  async getAllNurseries(params?: {
+    type?: string;
+    limit?: number;
+    offset?: number;
+  }) {
     const query = new URLSearchParams();
     if (params?.type) query.set("type", params.type);
     if (params?.limit) query.set("limit", params.limit.toString());
@@ -464,10 +562,16 @@ class APIClient {
     const query = new URLSearchParams();
     if (params?.limit) query.set("limit", params.limit.toString());
     if (params?.offset) query.set("offset", params.offset.toString());
-    return this.request<PaginatedResponse<MotherTree>>(`/mother-trees?${query}`);
+    return this.request<PaginatedResponse<MotherTree>>(
+      `/mother-trees?${query}`
+    );
   }
 
-  async getAllUsers(params?: { role?: string; limit?: number; offset?: number }) {
+  async getAllUsers(params?: {
+    role?: string;
+    limit?: number;
+    offset?: number;
+  }) {
     const query = new URLSearchParams();
     if (params?.role) query.set("role", params.role);
     if (params?.limit) query.set("limit", params.limit.toString());
@@ -484,36 +588,52 @@ class APIClient {
   async getAdminStats() {
     // Aggregate stats from multiple endpoints
     const [collections, nurseries, motherTrees, species] = await Promise.all([
-      this.request<PaginatedResponse<SeedCollection>>("/collections?limit=1000"),
+      this.request<PaginatedResponse<SeedCollection>>(
+        "/collections?limit=1000"
+      ),
       this.request<PaginatedResponse<Nursery>>("/nurseries?limit=100"),
       this.request<PaginatedResponse<MotherTree>>("/mother-trees?limit=100"),
       this.request<PaginatedResponse<Species>>("/species?limit=100"),
     ]);
 
-    const totalQuantity = collections.data.reduce((sum, c) => sum + (c.quantity || 0), 0);
-    const totalPlanted = collections.data
-      .filter(c => c.status === "planted")
-      .reduce((sum, c) => sum + (c.quantity || 0), 0);
-    
-    // Fetch stats from all nurseries to get germination rates
-    const nurseryStatsPromises = nurseries.data.slice(0, 10).map(n => 
-      this.getNurseryStats(n.id).catch(() => null)
+    const totalQuantity = collections.data.reduce(
+      (sum, c) => sum + (c.quantity || 0),
+      0
     );
+    const totalPlanted = collections.data
+      .filter((c) => c.status === "planted")
+      .reduce((sum, c) => sum + (c.quantity || 0), 0);
+
+    // Fetch stats from all nurseries to get germination rates
+    const nurseryStatsPromises = nurseries.data
+      .slice(0, 10)
+      .map((n) => this.getNurseryStats(n.id).catch(() => null));
     const nurseryStats = await Promise.all(nurseryStatsPromises);
-    const validStats = nurseryStats.filter((s): s is NurseryStats => s !== null);
-    
+    const validStats = nurseryStats.filter(
+      (s): s is NurseryStats => s !== null
+    );
+
     // Calculate aggregate germination rate from nursery stats
-    const germinationRates = validStats.filter(s => s.germination_rate > 0);
-    const avgGerminationRate = germinationRates.length > 0
-      ? germinationRates.reduce((sum, s) => sum + s.germination_rate, 0) / germinationRates.length
-      : 0;
-    
+    const germinationRates = validStats.filter((s) => s.germination_rate > 0);
+    const avgGerminationRate =
+      germinationRates.length > 0
+        ? germinationRates.reduce((sum, s) => sum + s.germination_rate, 0) /
+          germinationRates.length
+        : 0;
+
     // Calculate survival rate based on distributed vs current stock
-    const totalDistributed = validStats.reduce((sum, s) => sum + (s.distributed_count || 0), 0);
-    const totalSeedlings = validStats.reduce((sum, s) => sum + (s.total_seedlings || 0), 0);
-    const survivalRate = totalSeedlings > 0 && totalDistributed > 0
-      ? Math.min(100, (totalDistributed / totalSeedlings) * 100)
-      : 0;
+    const totalDistributed = validStats.reduce(
+      (sum, s) => sum + (s.distributed_count || 0),
+      0
+    );
+    const totalSeedlings = validStats.reduce(
+      (sum, s) => sum + (s.total_seedlings || 0),
+      0
+    );
+    const survivalRate =
+      totalSeedlings > 0 && totalDistributed > 0
+        ? Math.min(100, (totalDistributed / totalSeedlings) * 100)
+        : 0;
 
     return {
       totalSeeds: totalQuantity,
@@ -521,7 +641,9 @@ class APIClient {
       germinationRate: avgGerminationRate,
       survivalRate: survivalRate,
       activeNurseries: nurseries.total,
-      activeRegions: new Set(collections.data.map(c => c.region).filter(Boolean)).size || 1,
+      activeRegions:
+        new Set(collections.data.map((c) => c.region).filter(Boolean)).size ||
+        1,
       totalPlanted: totalPlanted,
       // Carbon sequestration: ~35kg CO2 per planted tree per year (young tree estimate)
       // Based on research: young trees sequester 10-25kg CO2/year, mature trees 20-50kg/year
@@ -586,7 +708,13 @@ export interface User {
   email: string;
   name: string;
   phone?: string;
-  role: "collector" | "super_nursery" | "community_nursery" | "regional_nursery" | "partner" | "admin";
+  role:
+    | "collector"
+    | "super_nursery"
+    | "community_nursery"
+    | "regional_nursery"
+    | "partner"
+    | "admin";
   region?: string;
   business_id: string;
   business_name?: string;
@@ -699,7 +827,13 @@ export interface SeedCollection {
   id: string;
   collection_number: string;
   batch_number?: string;
-  status: "pending" | "approved" | "rejected" | "in_nursery" | "distributed" | "planted";
+  status:
+    | "pending"
+    | "approved"
+    | "rejected"
+    | "in_nursery"
+    | "distributed"
+    | "planted";
   species_id?: string;
   species?: Species;
   species_name?: string;
@@ -739,6 +873,13 @@ export interface SeedBatch {
   unit: string;
   germination_rate?: number;
   received_date: string;
+  // Additional fields for public shop
+  species_name?: string;
+  region?: string;
+  latitude?: number;
+  longitude?: number;
+  photo_url?: string;
+  collection_date?: string;
 }
 
 export interface InventoryRequest {

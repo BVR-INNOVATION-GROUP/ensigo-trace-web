@@ -51,7 +51,16 @@ export function ProtectedRoute({
         const role: UserRole = user.role;
 
         // If user is not verified, always send them to pending onboarding
-        if (user.is_verified === false && pathname !== "/onboarding/pending") {
+        // Exception: regional nurseries can access species/mother trees pages even when not verified
+        const allowedUnverifiedPaths = [
+          "/onboarding/pending",
+          "/dashboard/mother-trees",
+          "/dashboard/new",
+        ];
+        const isRegionalNursery = role === "regional_nursery";
+        const isAllowedPath = allowedUnverifiedPaths.some((p) => pathname.startsWith(p));
+
+        if (user.is_verified === false && !isAllowedPath && !(isRegionalNursery && isAllowedPath)) {
           router.push("/onboarding/pending");
           return;
         }
