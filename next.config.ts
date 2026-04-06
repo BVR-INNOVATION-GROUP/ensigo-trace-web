@@ -6,7 +6,6 @@ const nextConfig: NextConfig = {
     // Dangerously allow production builds to successfully complete even if
     // your project has type errors.
     ignoreBuildErrors: true,
-    
   },
   images: {
     remotePatterns: [
@@ -17,6 +16,10 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "images.pexels.com",
+      },
+      {
+        protocol: "https",
+        hostname: "ensigo.s3.eu-north-1.amazonaws.com",
       },
     ],
   },

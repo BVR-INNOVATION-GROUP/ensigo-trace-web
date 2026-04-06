@@ -29,6 +29,16 @@ interface ShopProduct {
     photoUrl?: string;
 }
 
+const getCollectionPhoto = (collection?: { photos?: string }) => {
+    if (!collection?.photos) return null;
+    try {
+        const photos = JSON.parse(collection.photos);
+        return Array.isArray(photos) && photos.length > 0 ? photos[0] : null;
+    } catch {
+        return null;
+    }
+};
+
 export default function PublicShopPage() {
     const router = useRouter();
     const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
@@ -180,7 +190,7 @@ export default function PublicShopPage() {
                 nurseryLocation: batch.nursery?.location || batch.region || "Uganda",
                 region: batch.region || "West Nile",
                 status: batch.status || "available",
-                photoUrl: batch.species?.photo_url,
+                photoUrl: batch.species?.photo_url || batch.photo_url || getCollectionPhoto(batch.collection),
             }));
 
             setProducts(shopProducts);
@@ -273,7 +283,7 @@ export default function PublicShopPage() {
                 nurseryLocation: batch.nursery?.location || batch.region || "Uganda",
                 region: batch.region || "West Nile",
                 status: batch.status || "available",
-                photoUrl: batch.species?.photo_url,
+                photoUrl: batch.species?.photo_url || batch.photo_url || getCollectionPhoto(batch.collection),
             }));
 
             setProducts(shopProducts);

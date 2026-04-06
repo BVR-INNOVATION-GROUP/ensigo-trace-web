@@ -12,7 +12,7 @@ import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { CustomSelect } from "@/components/ui/custom-select";
-import { Target, Plus, CheckCircle, FolderOpen, TreePine, Edit, Trash2, MapPin, Search, Crosshair, Loader2 } from "lucide-react";
+import { MapPin, Plus, Loader2, FolderOpen, Target, TreePine, CheckCircle, Edit, Trash2, Crosshair } from "lucide-react";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { AddressAutocomplete, RegionDistrictSelect, reverseGeocode, getCurrentLocationWithAddress, formatCoordinates, type GeoSearchResult } from "@/components/geo";
@@ -283,7 +283,7 @@ export default function ProjectsPage() {
             <ChartCard
               title="Project Progress"
               description="Completion percentage by project"
-              type="progress"
+              type="bar"
               data={progressChartData}
             />
           </div>
@@ -335,7 +335,7 @@ export default function ProjectsPage() {
             <form onSubmit={handleSubmit} className="h-full flex flex-col">
               <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 min-h-0">
                 {/* Left Column - Map */}
-                <div className="bg-pale p-8 flex flex-col border-r border-[var(--very-dark-color)]/10 overflow-y-auto scrollbar-thin">
+                <div className="bg-pale p-8 flex flex-col border-r border-(--very-dark-color)/10 overflow-y-auto scrollbar-thin">
                   <h3 className="text-h5 mb-6 flex items-center gap-2">
                     <MapPin size={20} />
                     Project Location
@@ -377,7 +377,7 @@ export default function ProjectsPage() {
                   </div>
 
                   {/* Map */}
-                  <div className="flex-1 min-h-[300px] rounded-lg overflow-hidden border border-[var(--very-dark-color)]/10">
+                  <div className="flex-1 min-h-[300px] rounded-lg overflow-hidden border border-(--very-dark-color)/10">
                     <LocationMap
                       latitude={formData.latitude ? parseFloat(formData.latitude) : undefined}
                       longitude={formData.longitude ? parseFloat(formData.longitude) : undefined}
@@ -499,7 +499,7 @@ export default function ProjectsPage() {
               </div>
 
               {/* Footer */}
-              <div className="flex justify-end gap-4 p-6 border-t border-[var(--very-dark-color)]/10 bg-paper">
+              <div className="flex justify-end gap-4 p-6 border-t border-(--very-dark-color)/10 bg-paper">
                 <Button type="button" variant="pale" onClick={handleCloseModal} disabled={isSubmitting}>
                   Cancel
                 </Button>

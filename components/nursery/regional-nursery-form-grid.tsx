@@ -170,6 +170,7 @@ export function RegionalNurseryFormGrid({
               value={formData.capacity}
               onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
               required
+              readOnly
             />
           </div>
 
@@ -207,7 +208,7 @@ export function emptyRegionalNurseryForm(): RegionalNurseryFormState {
     location: "",
     region: "",
     district: "",
-    capacity: "",
+    capacity: "5000000",
     latitude: "",
     longitude: "",
     contact_email: "",

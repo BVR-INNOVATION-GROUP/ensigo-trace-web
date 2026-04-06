@@ -1,16 +1,16 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { motion } from "framer-motion";
 import { CheckCircle, Package, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { SalesService } from "@/src/services/SalesService";
-import { mockSeedBatches, mockNurseries } from "@/src/data/mockData";
+import { mockSeedBatches } from "@/src/data/mockData";
 
 export default function CheckoutSuccessPage() {
   return (
@@ -21,7 +21,6 @@ export default function CheckoutSuccessPage() {
 }
 
 function CheckoutSuccessContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [txRef, setTxRef] = useState("");
   const [transactionId, setTransactionId] = useState("");
@@ -31,8 +30,8 @@ function CheckoutSuccessContent() {
     const txRefParam = searchParams.get("tx_ref");
     const transactionIdParam = searchParams.get("transaction_id");
 
-    if (txRefParam) setTxRef(txRefParam);
-    if (transactionIdParam) setTransactionId(transactionIdParam);
+    if (txRefParam) setTimeout(() => setTxRef(txRefParam), 0);
+    if (transactionIdParam) setTimeout(() => setTransactionId(transactionIdParam), 0);
 
     // Create order record after successful payment
     const createOrder = async () => {
@@ -44,7 +43,7 @@ function CheckoutSuccessContent() {
 
       try {
         const order = JSON.parse(orderData);
-        
+
         // Find the batch to get nurseryId
         const batch = mockSeedBatches.find((b) => b.id === order.batchId);
         if (!batch || !batch.nurseryId) {
@@ -75,7 +74,7 @@ function CheckoutSuccessContent() {
             storedTxId || storedTxRef || transactionIdParam || ""
           );
           setOrderCreated(true);
-          
+
           // Clean up session storage
           sessionStorage.removeItem("pendingOrder");
           sessionStorage.removeItem("transactionRef");

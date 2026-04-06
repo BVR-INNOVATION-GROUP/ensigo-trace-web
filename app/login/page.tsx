@@ -60,12 +60,12 @@ function LoginForm() {
   return (
     <>
       <RegionalSignupModal isOpen={signupOpen} onClose={closeSignup} />
-      <div className="fixed top-4 right-4 z-[60]">
+      <div className="fixed top-4 right-4 z-60">
         <ThemeToggle />
       </div>
       <div className="min-h-screen flex">
         <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-          <div className="absolute inset-0 bg-[url('https://images.pexels.com/photos/1179229/pexels-photo-1179229.jpeg')] bg-cover bg-center" />
+          <div className="absolute inset-0 bg-[url('https://images.pexels.com/photos/28556567/pexels-photo-28556567.jpeg')] bg-cover bg-center" />
           <div className="absolute inset-0 bg-black/50" />
           <div className="relative z-10 flex flex-col justify-between p-12 text-white w-full">
             <motion.div
@@ -76,7 +76,7 @@ function LoginForm() {
               <div className="flex items-center gap-3 mb-8">
                 <div>
                   <p
-                    style={{ fontFamily: "iMPACT", fontSize: "2.2rem", lineHeight: "1.1" }}
+                    style={{ fontSize: "2rem", lineHeight: "1.1", fontWeight: 900 }}
                     className="leading-tight"
                   >
                     ENSIGO <span className="text-white">TRACE</span>
@@ -93,10 +93,10 @@ function LoginForm() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <h1 className="mb-4 text-white leading-tight" style={{ fontSize: "2rem" }}>
+              <h1 className="mb-4 text-white leading-tight max-w-[75%]" style={{ fontSize: "2rem" }}>
                 Restoring Biodiversity through Africa&apos;s Native Tree Seed System
               </h1>
-              <p className="opacity-90 leading-relaxed">
+              <p className="opacity-90 leading-relaxed max-w-[60%]">
                 Millions of trees are planted every year across Africa – yet too few survive. Ensigo Africa is fixing
                 that by building a tech-driven native seed network that ensures every tree planted is traceable, viable,
                 and ecologically appropriate.
@@ -110,22 +110,25 @@ function LoginForm() {
               className="max-w-md"
             >
               <p className="opacity-90 leading-relaxed" style={{ fontSize: "1.05rem" }}>
-                powered by bvr.africa &copy; 2025
+                powered by bvr.africa &copy; <span>{new Date().getFullYear()}</span>
               </p>
             </motion.div>
           </div>
         </div>
 
-        <div className="w-full lg:w-1/2 flex items-center justify-center bg-pale p-6 lg:p-12">
+        <div className="w-full flex-1 flex items-center justify-center bg-pale p-6 lg:p-12">
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
-            className="w-full max-w-md"
+            className=" min-w-[64%] h-full flex flex-col justify-between"
           >
+
+            <div />
+
             <div className="lg:hidden flex items-center gap-3 mb-8">
               <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-xl">🌳</span>
+                {/* <span className="text-xl">🌳</span> */}
               </div>
               <div>
                 <p style={{ fontFamily: "iMPACT" }} className="text-h4">
@@ -135,14 +138,14 @@ function LoginForm() {
               </div>
             </div>
 
-            <div className="bg-paper rounded-2xl shadow-custom p-8 lg:p-10 border border-[var(--border)]">
+            <div className="bg-paper rounded shadow-custom p-8 lg:p-[4rem]">
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.2 }}
               >
-                <h2 className="text-h4 mb-2 text-[var(--very-dark-color)]">Welcome back</h2>
-                <p className="text-body-sm mb-8 text-[var(--very-dark-color)]/75">
+                <h2 className="text-2xl mb-2 text-(--very-dark-color)">Welcome back</h2>
+                <p className="text-body-sm mb-8 text-(--very-dark-color)/75">
                   Sign in to continue to your dashboard
                 </p>
 

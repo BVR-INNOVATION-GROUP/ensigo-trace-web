@@ -31,23 +31,24 @@ interface MenuItem {
 const allMenuItems: MenuItem[] = [
     // Collector
     { href: "/dashboard", label: "My Collections", icon: LayoutGrid, roles: ["collector"] },
-    
+
     // Admin
     { href: "/admin/nurseries", label: "Nurseries", icon: Building2, roles: ["admin"] },
     { href: "/admin/mother-trees-species", label: "Mother Trees & Species", icon: TreePine, roles: ["admin"] },
-    
+
     // Nursery role-specific flow
     { href: "/nursery/collectors", label: "Collectors", icon: User, roles: ["regional_nursery"] },
+    { href: "/nursery/regional-inventory", label: "Regional Inventory", icon: Package, roles: ["regional_nursery"] },
     { href: "/nursery/super-nurseries", label: "Super Nurseries", icon: Building2, roles: ["regional_nursery"] },
     { href: "/nursery/requests", label: "Inventory Requests", icon: Package, roles: NURSERY_ROLES },
     { href: "/nursery/inventory", label: "Inventory", icon: Sprout, roles: ["super_nursery", "community_nursery"] },
     { href: "/nursery/sales", label: "POS Sales", icon: ShoppingCart, roles: ["community_nursery"] },
-    
+
     // Partner
     { href: "/partner", label: "Dashboard", icon: LayoutGrid, roles: ["partner"] },
     { href: "/partner/browse", label: "Browse Seeds", icon: ShoppingCart, roles: ["partner"] },
     { href: "/partner/projects", label: "My Projects", icon: Target, roles: ["partner"] },
-    
+
     // Common (all DB roles)
     { href: "/dashboard/profile", label: "Profile", icon: User, roles: USER_ROLES },
     { href: "/dashboard/settings", label: "Settings", icon: Settings, roles: USER_ROLES },

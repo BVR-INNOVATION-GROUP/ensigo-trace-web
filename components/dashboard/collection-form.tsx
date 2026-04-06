@@ -96,12 +96,22 @@ export function CollectionForm({
     };
 
     const handleSelectChange = (name: string, value: string) => {
+        console.log(`handleSelectChange called with name: ${name}, value: ${value}`);
         if (name === "species") {
             const selectedSpecies = species.find(s => s.id === value);
+            console.log("Species selected:", selectedSpecies);
             setFormData({
                 ...formData,
                 speciesId: value,
                 species: selectedSpecies?.scientific_name || "",
+            });
+        } else if (name === "motherTree") {
+            const selectedSpecies = species.find(s => s.id === value);
+            console.log("Mother tree selected:", selectedSpecies);
+            setFormData({
+                ...formData,
+                motherTreeId: value,
+                motherTree: selectedSpecies?.scientific_name || "",
             });
         } else if (name === "targetNurseryId") {
             setFormData({ ...formData, targetNurseryId: value });
@@ -188,6 +198,16 @@ export function CollectionForm({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // Debug form data changes
+    useEffect(() => {
+        console.log("Form data changed:", {
+            speciesId: formData.speciesId,
+            species: formData.species,
+            motherTreeId: formData.motherTreeId,
+            motherTree: formData.motherTree,
+        });
+    }, [formData.speciesId, formData.species, formData.motherTreeId, formData.motherTree]);
+
     const [locationLoading, setLocationLoading] = useState(false);
 
     // Handle map click
@@ -251,6 +271,7 @@ export function CollectionForm({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        console.log("Form submission started");
 
         let photoUrls: string[] = [];
 
@@ -268,9 +289,9 @@ export function CollectionForm({
         }
 
         // Combine date and time
-        const collectionDateTime = `${formData.collectionDate}T${formData.collectionTime}:00`;
+        const collectionDateTime = formData.collectionDate; // Send only date, backend will handle time
 
-        await onSubmit({
+        const submitData = {
             species: formData.species,
             species_id: formData.speciesId || undefined,
             motherTree: formData.motherTree,
@@ -286,7 +307,11 @@ export function CollectionForm({
             collection_date: collectionDateTime,
             target_nursery_id: formData.targetNurseryId || undefined,
             photos: photoUrls.length > 0 ? photoUrls : undefined,
-        });
+        };
+
+        console.log("Submitting data:", submitData);
+        await onSubmit(submitData);
+        console.log("Form submission completed");
     };
 
     // Find selected nursery for display
@@ -435,7 +460,7 @@ export function CollectionForm({
                             <label className="block text-label mb-3">Mother Tree *</label>
                             <CustomSelect
                                 name="motherTree"
-                                value={formData.speciesId}
+                                value={formData.motherTreeId}
                                 onChange={(value) => handleSelectChange("motherTree", value)}
                                 options={speciesOptions}
                                 placeholder="Select species of mother tree"

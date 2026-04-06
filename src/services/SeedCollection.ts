@@ -14,7 +14,7 @@ export class SeedCollectionService {
   }
 
   async addCollection(data: Omit<SeedCollectionI, "id">) {
-    if (!data.motherTree.trim()) {
+    if (!data.motherTree?.trim()) {
       return { success: false, error: "Mother tree name is required" };
     }
     if (data.quantity <= 0) {
@@ -26,7 +26,7 @@ export class SeedCollectionService {
 
   async updateCollection(
     id: string,
-    updates: Partial<Omit<SeedCollectionI, "id">>
+    updates: Partial<Omit<SeedCollectionI, "id">>,
   ) {
     if (updates.quantity !== undefined && updates.quantity <= 0) {
       return { success: false, error: "Quantity must be greater than 0" };

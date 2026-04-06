@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { SkeletonCard } from "@/components/ui/skeleton";
+import { SkeletonAdminLayout } from "@/components/ui/skeleton";
 import { Plus, Leaf, TreePine, FlaskConical, Eye, Edit, Trash2 } from "lucide-react";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import api, { Species, CreateSpeciesRequest, UpdateSpeciesRequest } from "@/src/api/client";
@@ -215,13 +215,7 @@ export default function MotherTreesSpeciesPage() {
     return (
       <ProtectedRoute allowedRoles={["admin"]}>
         <DashboardLayout>
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <SkeletonCard key={i} />
-              ))}
-            </div>
-          </div>
+          <SkeletonAdminLayout />
         </DashboardLayout>
       </ProtectedRoute>
     );
@@ -234,7 +228,7 @@ export default function MotherTreesSpeciesPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-h4 mb-1">Mother Trees & Species</h1>
-              <p className="text-caption text-[var(--very-dark-color)]/60">
+              <p className="text-caption text-(--very-dark-color)/60">
                 Start from species, then manage mother trees per species record.
               </p>
             </div>
@@ -422,15 +416,15 @@ export default function MotherTreesSpeciesPage() {
           <Modal isOpen={isViewOpen} onClose={() => setIsViewOpen(false)} title="Species details" size="md">
             {selectedSpecies ? (
               <div className="p-6 space-y-2 text-body-sm">
-                <p><span className="text-[var(--very-dark-color)]/40">Scientific name:</span> {selectedSpecies.scientific_name}</p>
-                <p><span className="text-[var(--very-dark-color)]/40">Common name:</span> {selectedSpecies.common_name || "N/A"}</p>
-                <p><span className="text-[var(--very-dark-color)]/40">Local name:</span> {selectedSpecies.local_name || "N/A"}</p>
-                <p><span className="text-[var(--very-dark-color)]/40">Family:</span> {selectedSpecies.family || "N/A"}</p>
-                <p><span className="text-[var(--very-dark-color)]/40">Ecological zone:</span> {selectedSpecies.ecological_zone || "N/A"}</p>
-                <p><span className="text-[var(--very-dark-color)]/40">Native region:</span> {selectedSpecies.native_region || "N/A"}</p>
-                <p><span className="text-[var(--very-dark-color)]/40">Conservation:</span> {selectedSpecies.conservation_status || "N/A"}</p>
-                <p><span className="text-[var(--very-dark-color)]/40">Uses:</span> {selectedSpecies.uses || "N/A"}</p>
-                <p><span className="text-[var(--very-dark-color)]/40">Description:</span> {selectedSpecies.description || "N/A"}</p>
+                <p><span className="text-(--very-dark-color)/40">Scientific name:</span> {selectedSpecies.scientific_name}</p>
+                <p><span className="text-(--very-dark-color)/40">Common name:</span> {selectedSpecies.common_name || "N/A"}</p>
+                <p><span className="text-(--very-dark-color)/40">Local name:</span> {selectedSpecies.local_name || "N/A"}</p>
+                <p><span className="text-(--very-dark-color)/40">Family:</span> {selectedSpecies.family || "N/A"}</p>
+                <p><span className="text-(--very-dark-color)/40">Ecological zone:</span> {selectedSpecies.ecological_zone || "N/A"}</p>
+                <p><span className="text-(--very-dark-color)/40">Native region:</span> {selectedSpecies.native_region || "N/A"}</p>
+                <p><span className="text-(--very-dark-color)/40">Conservation:</span> {selectedSpecies.conservation_status || "N/A"}</p>
+                <p><span className="text-(--very-dark-color)/40">Uses:</span> {selectedSpecies.uses || "N/A"}</p>
+                <p><span className="text-(--very-dark-color)/40">Description:</span> {selectedSpecies.description || "N/A"}</p>
               </div>
             ) : null}
           </Modal>

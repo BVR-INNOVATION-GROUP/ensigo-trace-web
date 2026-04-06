@@ -22,13 +22,16 @@ export default function SettingsPage() {
       const nameParts = user.name.split(" ");
       const firstName = nameParts[0] || "";
       const lastName = nameParts.slice(1).join(" ") || "";
-      
-      setProfileData({
-        firstName,
-        lastName,
-        phone: "", // Not stored in user object
-        location: user.region || "",
-      });
+
+      // Use setTimeout to avoid synchronous setState in effect
+      setTimeout(() => {
+        setProfileData({
+          firstName,
+          lastName,
+          phone: "", // Not stored in user object
+          location: user.region || "",
+        });
+      }, 0);
     }
   }, [user]);
   const [passwordData, setPasswordData] = useState({
@@ -73,7 +76,7 @@ export default function SettingsPage() {
         </p>
 
         <div className="bg-paper rounded-lg overflow-hidden shadow-custom">
-          <div className="flex border-b border-[var(--border)]">
+          <div className="flex border-b border-(--border)">
             <button
               type="button"
               onClick={() => setActiveTab("profile")}
@@ -141,7 +144,7 @@ export default function SettingsPage() {
                   </p>
                 </div>
 
-                <div className="flex justify-end gap-4 pt-4 border-t border-[var(--border)]">
+                <div className="flex justify-end gap-4 pt-4 border-t border-(--border)">
                   <Button
                     type="submit"
                     className="bg-primary hover:bg-primary-dark text-white"
@@ -194,7 +197,7 @@ export default function SettingsPage() {
                   </p>
                 </div>
 
-                <div className="flex justify-end gap-4 pt-4 border-t border-[var(--border)]">
+                <div className="flex justify-end gap-4 pt-4 border-t border-(--border)">
                   <Button
                     type="submit"
                     className="bg-primary hover:bg-primary-dark text-white"

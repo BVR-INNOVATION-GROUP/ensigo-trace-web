@@ -10,7 +10,7 @@ import { ChartCard } from "@/components/dashboard/chart-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
-import { Building2, Package, Sprout, Warehouse } from "lucide-react";
+import { Building2, Package, Sprout, Warehouse, Eye, EyeOff, RefreshCw } from "lucide-react";
 import { NURSERY_ROLES } from "@/src/models/User";
 import api, { CreateNurseryRequest, Nursery, User } from "@/src/api/client";
 
@@ -32,6 +32,8 @@ export default function SuperNurseriesPage() {
   const [operatorEmail, setOperatorEmail] = useState("");
   const [operatorPassword, setOperatorPassword] = useState("");
   const [operatorPhone, setOperatorPhone] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [generatingPassword, setGeneratingPassword] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -78,6 +80,17 @@ export default function SuperNurseriesPage() {
     load();
   }, [load]);
 
+  const generatePassword = useCallback(() => {
+    setGeneratingPassword(true);
+    // Generate a secure random password
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+    let password = "";
+    for (let i = 0; i < 12; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setOperatorPassword(password);
+    setTimeout(() => setGeneratingPassword(false), 500);
+  }, []);
   const createSuperNursery = useCallback(async () => {
     if (!regionalNursery || !name.trim()) return;
     if (!operatorName.trim() || !operatorEmail.trim() || !operatorPassword.trim()) return;
@@ -212,62 +225,96 @@ export default function SuperNurseriesPage() {
             emptyMessage={loading ? "Loading super nurseries..." : "No super nurseries linked yet"}
           />
 
-          <Modal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} title="Add Super Nursery" size="lg">
-            <div className="p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="space-y-2 md:col-span-2">
+          <Modal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} title="Add Super Nursery" size="xl">
+            <div className="p-6 space-y-6 max-w-4xl mx-auto">
+              <div className="space-y-4">
+                <div className="space-y-2">
                   <label className="text-sm font-medium">Name</label>
                   <Input placeholder="Super nursery name" value={name} onChange={(e) => setName(e.target.value)} />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Capacity</label>
-                  <Input type="number" min={1} placeholder="Capacity" value={capacity} onChange={(e) => setCapacity(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Region</label>
-                  <Input placeholder="Region" value={formRegion} onChange={(e) => setFormRegion(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">District</label>
-                  <Input placeholder="District" value={formDistrict} onChange={(e) => setFormDistrict(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Location</label>
-                  <Input placeholder="Location" value={formLocation} onChange={(e) => setFormLocation(e.target.value)} />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Capacity</label>
+                    <Input type="number" min={1} placeholder="Capacity" value={capacity} onChange={(e) => setCapacity(e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Region</label>
+                    <Input placeholder="Region" value={formRegion} onChange={(e) => setFormRegion(e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">District</label>
+                    <Input placeholder="District" value={formDistrict} onChange={(e) => setFormDistrict(e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Location</label>
+                    <Input placeholder="Location" value={formLocation} onChange={(e) => setFormLocation(e.target.value)} />
+                  </div>
                 </div>
 
-                <div className="space-y-2 md:col-span-2 pt-2">
-                  <p className="text-sm font-medium">Super Nursery Operator Login</p>
-                  <p className="text-caption opacity-70">
-                    Create the user account that can log in and manage this super nursery.
-                  </p>
-                </div>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <h3 className="text-base font-medium">Super Nursery Operator Login</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Create the user account that can log in and manage this super nursery.
+                    </p>
+                  </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Operator Name</label>
-                  <Input placeholder="Operator full name" value={operatorName} onChange={(e) => setOperatorName(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Operator Email</label>
-                  <Input
-                    type="email"
-                    placeholder="operator@email.com"
-                    value={operatorEmail}
-                    onChange={(e) => setOperatorEmail(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Operator Password</label>
-                  <Input
-                    type="password"
-                    placeholder="Temporary password"
-                    value={operatorPassword}
-                    onChange={(e) => setOperatorPassword(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Operator Phone (optional)</label>
-                  <Input placeholder="+xxx..." value={operatorPhone} onChange={(e) => setOperatorPhone(e.target.value)} />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Operator Name</label>
+                      <Input placeholder="Operator full name" value={operatorName} onChange={(e) => setOperatorName(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Operator Email</label>
+                      <Input
+                        type="email"
+                        placeholder="operator@email.com"
+                        value={operatorEmail}
+                        onChange={(e) => setOperatorEmail(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Operator Phone (optional)</label>
+                      <Input placeholder="+xxx..." value={operatorPhone} onChange={(e) => setOperatorPhone(e.target.value)} />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Operator Password</label>
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Temporary password"
+                        value={operatorPassword}
+                        onChange={(e) => setOperatorPassword(e.target.value)}
+                        className="pr-20"
+                      />
+                      <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex gap-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="h-8 w-8 p-0"
+                        >
+                          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={generatePassword}
+                          disabled={generatingPassword}
+                          className="h-8 w-8 p-0"
+                          title="Generate secure password"
+                        >
+                          <RefreshCw size={16} className={generatingPassword ? "animate-spin" : ""} />
+                        </Button>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Click the refresh icon to generate a secure password</p>
+                  </div>
                 </div>
               </div>
               <div className="flex justify-end gap-2">

@@ -54,6 +54,7 @@ const defaultNurseries: Nursery[] = [
     offers_contracts: true,
     is_active: true,
     is_verified: true,
+    operator_id: "1",
   },
   {
     id: "2",
@@ -69,6 +70,7 @@ const defaultNurseries: Nursery[] = [
     offers_contracts: false,
     is_active: true,
     is_verified: true,
+    operator_id: "2",
   },
   {
     id: "3",
@@ -84,5 +86,6 @@ const defaultNurseries: Nursery[] = [
     offers_contracts: false,
     is_active: true,
     is_verified: false,
+    operator_id: "3",
   },
 ];

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ProtectedRoute } from "@/components/auth/protected-route";
@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { SkeletonCard } from "@/components/ui/skeleton";
+import { SkeletonAdminLayout } from "@/components/ui/skeleton";
 import { ArrowLeft, Plus, TreePine, MapPin, HeartPulse, Calendar, Eye, Edit, Trash2 } from "lucide-react";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import api, { MotherTree, Species, CreateMotherTreeRequest, UpdateMotherTreeRequest } from "@/src/api/client";
@@ -29,7 +29,6 @@ interface MotherTreeFormState {
   dbh: string;
   crown_diameter: string;
   health_status: string;
-  notes: string;
 }
 
 const emptyTreeForm = (): MotherTreeFormState => ({
@@ -44,7 +43,6 @@ const emptyTreeForm = (): MotherTreeFormState => ({
   dbh: "",
   crown_diameter: "",
   health_status: "",
-  notes: "",
 });
 
 export default function SpeciesTreesPage() {
@@ -63,7 +61,7 @@ export default function SpeciesTreesPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<MotherTreeFormState>(emptyTreeForm());
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -75,16 +73,16 @@ export default function SpeciesTreesPage() {
       setTrees(treesRes);
     } catch (err) {
       console.error("Failed to load species trees:", err);
-      setError("Failed to load species and mother trees.");
+      setError("Failed to load data. Please try again.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [speciesId]);
 
   useEffect(() => {
     if (!speciesId) return;
     void loadData();
-  }, [speciesId]);
+  }, [speciesId, loadData]);
 
   const stats = useMemo(() => {
     const total = trees.length;
@@ -123,6 +121,7 @@ export default function SpeciesTreesPage() {
     {
       key: "health_status",
       header: "Health",
+      className: "align-middle",
       render: (item) => <Badge className="bg-primary/10 text-primary">{item.health_status || "Not set"}</Badge>,
     },
     {
@@ -149,7 +148,6 @@ export default function SpeciesTreesPage() {
         dbh: formData.dbh ? parseFloat(formData.dbh) : undefined,
         crown_diameter: formData.crown_diameter ? parseFloat(formData.crown_diameter) : undefined,
         health_status: formData.health_status || undefined,
-        notes: formData.notes || undefined,
       };
       if (modalMode === "edit" && selectedTree) {
         await api.updateMotherTree(selectedTree.id, payload as UpdateMotherTreeRequest);
@@ -178,13 +176,12 @@ export default function SpeciesTreesPage() {
       region: item.region || "",
       district: item.district || "",
       village: item.village || "",
-      ecological_zone: item.ecological_zone || "",
+      ecological_zone: item.region || "",
       age: item.age ? String(item.age) : "",
       height: item.height ? String(item.height) : "",
-      dbh: item.dbh ? String(item.dbh) : "",
-      crown_diameter: item.crown_diameter ? String(item.crown_diameter) : "",
+      dbh: "",
+      crown_diameter: "",
       health_status: item.health_status || "",
-      notes: item.notes || "",
     });
     setIsModalOpen(true);
   };
@@ -210,13 +207,7 @@ export default function SpeciesTreesPage() {
     return (
       <ProtectedRoute allowedRoles={["admin"]}>
         <DashboardLayout>
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <SkeletonCard key={i} />
-              ))}
-            </div>
-          </div>
+          <SkeletonAdminLayout />
         </DashboardLayout>
       </ProtectedRoute>
     );
@@ -234,7 +225,7 @@ export default function SpeciesTreesPage() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <h1 className="text-h4 mb-1">{species?.scientific_name || "Species"}</h1>
-                <p className="text-caption text-[var(--very-dark-color)]/60">
+                <p className="text-caption text-(--very-dark-color)/60">
                   Mother trees management for this species.
                 </p>
               </div>
@@ -369,10 +360,6 @@ export default function SpeciesTreesPage() {
                   onChange={(e) => setFormData((p) => ({ ...p, health_status: e.target.value }))}
                 />
               </div>
-              <div>
-                <label className="block text-label mb-2">Notes</label>
-                <Input value={formData.notes} onChange={(e) => setFormData((p) => ({ ...p, notes: e.target.value }))} />
-              </div>
               <div className="flex justify-end gap-3 pt-2">
                 <Button type="button" variant="pale" onClick={() => setIsModalOpen(false)}>
                   Cancel
@@ -387,16 +374,15 @@ export default function SpeciesTreesPage() {
           <Modal isOpen={isViewOpen} onClose={() => setIsViewOpen(false)} title="Mother tree details" size="md">
             {selectedTree ? (
               <div className="p-6 space-y-2 text-body-sm">
-                <p><span className="text-[var(--very-dark-color)]/40">Tree ID:</span> {selectedTree.tree_id || selectedTree.id}</p>
-                <p><span className="text-[var(--very-dark-color)]/40">Species:</span> {selectedTree.species?.scientific_name || species?.scientific_name || "N/A"}</p>
-                <p><span className="text-[var(--very-dark-color)]/40">Region:</span> {selectedTree.region || "N/A"}</p>
-                <p><span className="text-[var(--very-dark-color)]/40">District:</span> {selectedTree.district || "N/A"}</p>
-                <p><span className="text-[var(--very-dark-color)]/40">Village:</span> {selectedTree.village || "N/A"}</p>
-                <p><span className="text-[var(--very-dark-color)]/40">Coordinates:</span> {selectedTree.latitude}, {selectedTree.longitude}</p>
-                <p><span className="text-[var(--very-dark-color)]/40">Age:</span> {selectedTree.age || "N/A"}</p>
-                <p><span className="text-[var(--very-dark-color)]/40">Height:</span> {selectedTree.height || "N/A"}</p>
-                <p><span className="text-[var(--very-dark-color)]/40">Health:</span> {selectedTree.health_status || "N/A"}</p>
-                <p><span className="text-[var(--very-dark-color)]/40">Notes:</span> {selectedTree.notes || "N/A"}</p>
+                <p><span className="text-(--very-dark-color)/40">Tree ID:</span> {selectedTree.tree_id || selectedTree.id}</p>
+                <p><span className="text-(--very-dark-color)/40">Species:</span> {selectedTree.species?.scientific_name || species?.scientific_name || "N/A"}</p>
+                <p><span className="text-(--very-dark-color)/40">Region:</span> {selectedTree.region || "N/A"}</p>
+                <p><span className="text-(--very-dark-color)/40">District:</span> {selectedTree.district || "N/A"}</p>
+                <p><span className="text-(--very-dark-color)/40">Village:</span> {selectedTree.village || "N/A"}</p>
+                <p><span className="text-(--very-dark-color)/40">Coordinates:</span> {selectedTree.latitude}, {selectedTree.longitude}</p>
+                <p><span className="text-(--very-dark-color)/40">Age:</span> {selectedTree.age || "N/A"}</p>
+                <p><span className="text-(--very-dark-color)/40">Height:</span> {selectedTree.height || "N/A"}</p>
+                <p><span className="text-(--very-dark-color)/40">Health:</span> {selectedTree.health_status || "N/A"}</p>
               </div>
             ) : null}
           </Modal>

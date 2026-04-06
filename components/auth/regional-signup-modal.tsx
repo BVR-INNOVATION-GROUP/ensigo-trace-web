@@ -27,8 +27,8 @@ interface RegionalSignupModalProps {
 const titles = ["Create account", "Your regional nursery", "Review and submit"];
 
 /** Step 2 needs the wide map + details grid; steps 1 and 3 match a single-column form width. */
-function modalSizeForStep(step: number): "md" | "full" {
-  return step === 2 ? "full" : "md";
+function modalSizeForStep(step: number): "lg" | "full" {
+  return step === 2 ? "full" : "lg";
 }
 
 export function RegionalSignupModal({ isOpen, onClose }: RegionalSignupModalProps) {
@@ -215,7 +215,7 @@ export function RegionalSignupModal({ isOpen, onClose }: RegionalSignupModalProp
 
         <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
           {step === 1 && (
-            <div className="p-6 sm:p-8 overflow-y-auto w-full space-y-6">
+            <div className="p-6 sm:p-8  overflow-y-auto w-full space-y-6">
               <p className="text-body-sm text-[var(--very-dark-color)]/70">
                 Register as a regional nursery operator. An admin will verify your site before full access.
               </p>

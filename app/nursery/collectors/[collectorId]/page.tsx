@@ -8,6 +8,7 @@ import { SummaryCard } from "@/components/dashboard/summary-card";
 import { ChartCard } from "@/components/dashboard/chart-card";
 import { DataTable, type Column } from "@/components/dashboard/data-table";
 import { Button } from "@/components/ui/button";
+import { UnitCostModal } from "@/components/ui/unit-cost-modal";
 import { CheckCircle2, Clock3, Package, Trees } from "lucide-react";
 import { NURSERY_ROLES } from "@/src/models/User";
 import api, { Nursery, SeedBatch, SeedCollection, User } from "@/src/api/client";
@@ -29,6 +30,8 @@ export default function CollectorCollectionsPage() {
   const [loading, setLoading] = useState(true);
   const [actingId, setActingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isUnitCostModalOpen, setIsUnitCostModalOpen] = useState(false);
+  const [selectedCollection, setSelectedCollection] = useState<SeedCollection | null>(null);
 
   const resolveRegionalNursery = useCallback(async (): Promise<Nursery | null> => {
     const rawUser = localStorage.getItem("user");
@@ -86,11 +89,21 @@ export default function CollectorCollectionsPage() {
 
   const approveToInventory = useCallback(
     async (item: SeedCollection) => {
-      if (!regionalNursery || !item.id) return;
-      setActingId(item.id);
+      setSelectedCollection(item);
+      setIsUnitCostModalOpen(true);
+    },
+    []
+  );
+
+  const confirmApproval = useCallback(
+    async (unitCost: number, currency: string) => {
+      if (!regionalNursery || !selectedCollection?.id) return;
+      setActingId(selectedCollection.id);
       setError(null);
       try {
-        await api.acceptCollection(item.id, regionalNursery.id);
+        await api.acceptCollection(selectedCollection.id, regionalNursery.id, unitCost, currency);
+        setIsUnitCostModalOpen(false);
+        setSelectedCollection(null);
         await load();
       } catch (e) {
         setError(e instanceof Error ? e.message : "Failed approving collection");
@@ -98,8 +111,15 @@ export default function CollectorCollectionsPage() {
         setActingId(null);
       }
     },
-    [regionalNursery, load]
+    [regionalNursery, selectedCollection, load]
   );
+
+  const handleModalClose = useCallback(() => {
+    if (!actingId) {
+      setIsUnitCostModalOpen(false);
+      setSelectedCollection(null);
+    }
+  }, [actingId]);
 
   const rows = useMemo<CollectionRow[]>(
     () =>
@@ -180,6 +200,15 @@ export default function CollectorCollectionsPage() {
               ) : null
             }
             emptyMessage={loading ? "Loading collections..." : "No collections submitted by this collector yet"}
+          />
+
+          <UnitCostModal
+            isOpen={isUnitCostModalOpen}
+            onClose={handleModalClose}
+            onConfirm={confirmApproval}
+            loading={!!actingId}
+            collectionNumber={selectedCollection?.collection_number}
+            speciesName={selectedCollection?.species?.scientific_name || selectedCollection?.species_name}
           />
         </div>
       </DashboardLayout>

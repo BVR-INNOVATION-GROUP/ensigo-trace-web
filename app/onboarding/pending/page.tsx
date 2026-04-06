@@ -19,7 +19,7 @@ export default function PendingVerificationPage() {
     }
     try {
       const parsed: User = JSON.parse(stored);
-      setUser(parsed);
+      setTimeout(() => setUser(parsed), 0);
 
       if (parsed.is_verified) {
         // If already verified, send to their dashboard
@@ -46,33 +46,33 @@ export default function PendingVerificationPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-pale px-4">
-      <div className="max-w-md w-full bg-paper rounded-2xl shadow-custom p-8 space-y-6">
+      <div className="max-w-xl flex flex-col gap-6 w-full bg-paper rounded-2xl shadow-custom p-16 space-y-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-white">
+          {/* <div className="w-10 h-10 rounded-lg bg-linear-to-tr from-primary to-secondary flex items-center justify-center text-white">
             <Clock size={20} />
-          </div>
+          </div> */}
           <div>
             <h1 className="text-h4">Account pending verification</h1>
-            <p className="text-caption text-[var(--very-dark-color)]/70">
+            <p className="text-caption text-(--very-dark-color)/70">
               Thanks for registering your regional nursery. A super admin is
               reviewing your details.
             </p>
           </div>
         </div>
 
-        <div className="rounded-lg border border-[var(--very-dark-color)]/10 bg-pale px-4 py-3 space-y-1">
+        <div className="rounded-lg border border-(--very-dark-color)/10 bg-pale px-4 py-3 space-y-1">
           <p className="text-body-sm font-medium">
             {user?.business_name || "Your nursery"}
           </p>
-          <p className="text-caption text-[var(--very-dark-color)]/70">
+          <p className="text-caption text-(--very-dark-color)/70">
             Region: {user?.region || "Not specified"}
           </p>
-          <p className="text-caption text-[var(--very-dark-color)]/70">
+          <p className="text-caption text-(--very-dark-color)/70">
             Contact: {user?.email}
           </p>
         </div>
 
-        <ul className="space-y-2 text-body-sm text-[var(--very-dark-color)]/80">
+        <ul className="space-y-2 text-body-sm text-(--very-dark-color)/80">
           <li className="flex gap-2">
             <CheckCircle2 className="text-primary" size={16} />
             <span>
@@ -94,15 +94,15 @@ export default function PendingVerificationPage() {
         </ul>
 
         <div className="flex items-center justify-between gap-3">
-          <Button variant="pale" size="sm" onClick={handleLogout}>
+          <Button className="w-full" onClick={handleLogout}>
             Log out
           </Button>
-          <Link
+          {/* <Link
             href="/login"
             className="text-caption text-primary hover:underline"
           >
             Back to sign in
-          </Link>
+          </Link> */}
         </div>
       </div>
     </div>

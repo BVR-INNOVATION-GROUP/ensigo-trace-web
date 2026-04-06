@@ -9,7 +9,8 @@ import type { SeedCollectionI } from "../models/SeedCollection";
 
 export class SeedCollectionRepository {
   private storageKey = "seed_collections";
-  private allowOfflineFallback = process.env.NEXT_PUBLIC_ENABLE_OFFLINE_FALLBACK === "true";
+  private allowOfflineFallback =
+    process.env.NEXT_PUBLIC_ENABLE_OFFLINE_FALLBACK === "true";
 
   async getAll(): Promise<SeedCollectionI[]> {
     try {
@@ -33,13 +34,13 @@ export class SeedCollectionRepository {
     // Last-resort mock data only when explicit offline fallback is enabled.
     localStorage.setItem(
       this.storageKey,
-      JSON.stringify(seedCollectionsMockData)
+      JSON.stringify(seedCollectionsMockData),
     );
     return seedCollectionsMockData;
   }
 
   async create(
-    collection: Omit<SeedCollectionI, "id">
+    collection: Omit<SeedCollectionI, "id">,
   ): Promise<SeedCollectionI> {
     try {
       const request: CreateCollectionRequest = {
@@ -58,9 +59,12 @@ export class SeedCollectionRepository {
         additional_info: collection.additionalInfo,
         photos: collection.photos,
       };
-      const created = await api.createCollection(request);
-      return this.mapToLegacyFormat(created);
+      console.log("Creating collection with request:", request);
+      const response = await api.createCollection(request);
+      console.log("API response:", response);
+      return this.mapToLegacyFormat(response.data);
     } catch (err) {
+      console.error("API error in create:", err);
       if (!this.allowOfflineFallback) {
         throw err;
       }
@@ -82,15 +86,15 @@ export class SeedCollectionRepository {
 
   async update(
     id: string,
-    updates: Partial<Omit<SeedCollectionI, "id">>
+    updates: Partial<Omit<SeedCollectionI, "id">>,
   ): Promise<SeedCollectionI | null> {
     try {
-      const updated = await api.updateCollection(id, {
+      const response = await api.updateCollection(id, {
         status: updates.status,
         review_notes: updates.review_notes,
         quality_rating: updates.quality_rating,
       });
-      return this.mapToLegacyFormat(updated);
+      return this.mapToLegacyFormat(response.data);
     } catch (err) {
       if (!this.allowOfflineFallback) {
         throw err;
@@ -187,7 +191,10 @@ export class SeedCollectionRepository {
       } catch {
         const normalized = raw.trim();
         if (!normalized) return undefined;
-        if (normalized.startsWith("http://") || normalized.startsWith("https://")) {
+        if (
+          normalized.startsWith("http://") ||
+          normalized.startsWith("https://")
+        ) {
           return [normalized];
         }
         const split = normalized

@@ -10,6 +10,7 @@ export interface Column<T> {
   header: string;
   render?: (item: T, index: number) => React.ReactNode;
   className?: string;
+  sortable?: boolean;
 }
 
 interface DataTableProps<T> {
@@ -79,19 +80,19 @@ export function DataTable<T extends { id?: string | number }>({
   return (
     <div className="bg-paper rounded-lg shadow-custom overflow-hidden">
       {(title || searchable) && (
-        <div className="p-4 border-b border-[var(--very-dark-color)]/10">
+        <div className="p-4 border-b border-(--very-dark-color)/10">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             {title && (
               <div>
                 <h3 className="text-h5">{title}</h3>
                 {description && (
-                  <p className="text-caption text-[var(--very-dark-color)]/60">{description}</p>
+                  <p className="text-caption text-(--very-dark-color)/60">{description}</p>
                 )}
               </div>
             )}
             {searchable && (
               <div className="relative w-full sm:w-auto">
-                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--very-dark-color)]/40" />
+                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-(--very-dark-color)/40" />
                 <input
                   type="text"
                   placeholder={searchPlaceholder}
@@ -108,12 +109,12 @@ export function DataTable<T extends { id?: string | number }>({
       <div className="overflow-auto" style={{ maxHeight }}>
         <table className="w-full min-w-[520px] md:min-w-[680px]">
           <thead className="sticky top-0 bg-paper z-10">
-            <tr className="border-b border-[var(--very-dark-color)]/10">
+            <tr className="border-b border-(--very-dark-color)/10">
               {columns.map((column) => (
                 <th
                   key={String(column.key)}
                   className={cn(
-                    "px-4 py-3 text-left text-label font-medium text-[var(--very-dark-color)]/70 whitespace-nowrap",
+                    "px-4 py-3 text-left text-label font-medium text-(--very-dark-color)/70 whitespace-nowrap",
                     column.className
                   )}
                 >
@@ -121,7 +122,7 @@ export function DataTable<T extends { id?: string | number }>({
                 </th>
               ))}
               {actions && (
-                <th className="px-4 py-3 text-right text-label font-medium text-[var(--very-dark-color)]/70">
+                <th className="px-4 py-3 text-right text-label font-medium text-(--very-dark-color)/70">
                   Actions
                 </th>
               )}
@@ -132,7 +133,7 @@ export function DataTable<T extends { id?: string | number }>({
               <tr>
                 <td
                   colSpan={columns.length + (actions ? 1 : 0)}
-                  className="px-4 py-12 text-center text-[var(--very-dark-color)]/50"
+                  className="px-4 py-12 text-center text-(--very-dark-color)/50"
                 >
                   {emptyMessage}
                 </td>
@@ -145,7 +146,7 @@ export function DataTable<T extends { id?: string | number }>({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2, delay: Math.min(index * 0.03, 0.3) }}
                   className={cn(
-                    "border-b border-[var(--very-dark-color)]/5 hover:bg-pale/50 transition-colors",
+                    "border-b border-(--very-dark-color)/5 hover:bg-pale/50 transition-colors",
                     onRowClick && "cursor-pointer",
                     index === filteredData.length - 1 && "border-b-0"
                   )}
@@ -156,12 +157,12 @@ export function DataTable<T extends { id?: string | number }>({
                       {column.render
                         ? column.render(item, index)
                         : (() => {
-                            const value = (item as Record<string, unknown>)[String(column.key)];
-                            if (typeof value === "number") {
-                              return formatCellNumber(value);
-                            }
-                            return String(value ?? "");
-                          })()}
+                          const value = (item as Record<string, unknown>)[String(column.key)];
+                          if (typeof value === "number") {
+                            return formatCellNumber(value);
+                          }
+                          return String(value ?? "");
+                        })()}
                     </td>
                   ))}
                   {actions && (
@@ -175,7 +176,7 @@ export function DataTable<T extends { id?: string | number }>({
       </div>
 
       {filteredData.length > 0 && (
-        <div className="px-4 py-3 border-t border-[var(--very-dark-color)]/10 text-caption text-[var(--very-dark-color)]/60">
+        <div className="px-4 py-3 border-t border-(--very-dark-color)/10 text-caption text-(--very-dark-color)/60">
           Showing {filteredData.length} of {data.length} items
         </div>
       )}

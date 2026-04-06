@@ -38,7 +38,7 @@ class APIClient {
 
   private async request<T>(
     endpoint: string,
-    options: RequestOptions = {}
+    options: RequestOptions = {},
   ): Promise<T> {
     const { method = "GET", body, headers = {} } = options;
 
@@ -119,10 +119,13 @@ class APIClient {
 
   // Collections
   async createCollection(data: CreateCollectionRequest) {
-    return this.request<SeedCollection>("/collections", {
-      method: "POST",
-      body: data,
-    });
+    return this.request<{ success: boolean; data: SeedCollection }>(
+      "/collections",
+      {
+        method: "POST",
+        body: data,
+      },
+    );
   }
 
   async getCollections(params?: {
@@ -135,7 +138,7 @@ class APIClient {
     if (params?.limit) query.set("limit", params.limit.toString());
     if (params?.offset) query.set("offset", params.offset.toString());
     return this.request<PaginatedResponse<SeedCollection>>(
-      `/collections?${query}`
+      `/collections?${query}`,
     );
   }
 
@@ -144,19 +147,19 @@ class APIClient {
     if (params?.limit) query.set("limit", params.limit.toString());
     if (params?.offset) query.set("offset", params.offset.toString());
     return this.request<PaginatedResponse<SeedCollection>>(
-      `/collections/me?${query}`
+      `/collections/me?${query}`,
     );
   }
 
   async getCollectorCollections(
     collectorId: string,
-    params?: { limit?: number; offset?: number }
+    params?: { limit?: number; offset?: number },
   ) {
     const query = new URLSearchParams();
     if (params?.limit) query.set("limit", params.limit.toString());
     if (params?.offset) query.set("offset", params.offset.toString());
     return this.request<PaginatedResponse<SeedCollection>>(
-      `/collections/collector/${collectorId}?${query}`
+      `/collections/collector/${collectorId}?${query}`,
     );
   }
 
@@ -169,10 +172,13 @@ class APIClient {
   }
 
   async updateCollection(id: string, data: UpdateCollectionRequest) {
-    return this.request<SeedCollection>(`/collections/${id}`, {
-      method: "PUT",
-      body: data,
-    });
+    return this.request<{ success: boolean; data: SeedCollection }>(
+      `/collections/${id}`,
+      {
+        method: "PUT",
+        body: data,
+      },
+    );
   }
 
   async deleteCollection(id: string) {
@@ -181,10 +187,19 @@ class APIClient {
     });
   }
 
-  async acceptCollection(id: string, nurseryId: string) {
+  async acceptCollection(
+    id: string,
+    nurseryId: string,
+    unitCost?: number,
+    currency?: string,
+  ) {
     return this.request<SeedBatch>(`/collections/${id}/accept`, {
       method: "POST",
-      body: { nursery_id: nurseryId },
+      body: {
+        nursery_id: nurseryId,
+        unit_cost: unitCost || 0,
+        currency: currency || "USD",
+      },
     });
   }
 
@@ -219,13 +234,13 @@ class APIClient {
 
   async getNurseryBatches(
     nurseryId: string,
-    params?: { limit?: number; offset?: number }
+    params?: { limit?: number; offset?: number },
   ) {
     const query = new URLSearchParams();
     if (params?.limit) query.set("limit", params.limit.toString());
     if (params?.offset) query.set("offset", params.offset.toString());
     return this.request<PaginatedResponse<SeedBatch>>(
-      `/collections/nursery/${nurseryId}/batches?${query}`
+      `/collections/nursery/${nurseryId}/batches?${query}`,
     );
   }
 
@@ -256,7 +271,7 @@ class APIClient {
     if (params?.max_germination)
       query.set("max_germination", params.max_germination.toString());
     return this.request<PaginatedResponse<SeedBatch>>(
-      `/public/batches?${query}`
+      `/public/batches?${query}`,
     );
   }
 
@@ -295,7 +310,7 @@ class APIClient {
 
   async getNurseryCollectors(nurseryId: string) {
     return this.request<NurseryCollector[]>(
-      `/nurseries/${nurseryId}/collectors`
+      `/nurseries/${nurseryId}/collectors`,
     );
   }
 
@@ -307,14 +322,14 @@ class APIClient {
 
   async createCollectorForNursery(
     nurseryId: string,
-    data: CreateCollectorForNurseryRequest
+    data: CreateCollectorForNurseryRequest,
   ) {
     return this.request<{ success: boolean; collector?: User }>(
       `/nurseries/${nurseryId}/collectors`,
       {
         method: "POST",
         body: data,
-      }
+      },
     );
   }
 
@@ -336,7 +351,7 @@ class APIClient {
     if (params.limit) query.set("limit", params.limit.toString());
     if (params.offset) query.set("offset", params.offset.toString());
     return this.request<PaginatedResponse<InventoryRequest>>(
-      `/inventory-requests?${query}`
+      `/inventory-requests?${query}`,
     );
   }
 
@@ -397,7 +412,7 @@ class APIClient {
 
   async updateSalePaymentStatus(
     id: string,
-    data: UpdateSalePaymentStatusRequest
+    data: UpdateSalePaymentStatusRequest,
   ) {
     return this.request<Sale>(`/sales/${id}/payment-status`, {
       method: "PATCH",
@@ -419,7 +434,7 @@ class APIClient {
 
   async searchSpecies(query: string, limit = 20) {
     return this.request<Species[]>(
-      `/species/search?q=${encodeURIComponent(query)}&limit=${limit}`
+      `/species/search?q=${encodeURIComponent(query)}&limit=${limit}`,
     );
   }
 
@@ -449,7 +464,7 @@ class APIClient {
     if (params?.limit) query.set("limit", params.limit.toString());
     if (params?.offset) query.set("offset", params.offset.toString());
     return this.request<PaginatedResponse<MotherTree>>(
-      `/mother-trees?${query}`
+      `/mother-trees?${query}`,
     );
   }
 
@@ -475,7 +490,7 @@ class APIClient {
 
   async getNearbyMotherTrees(lat: number, lng: number, radius = 10) {
     return this.request<MotherTree[]>(
-      `/mother-trees/nearby?lat=${lat}&lng=${lng}&radius=${radius}`
+      `/mother-trees/nearby?lat=${lat}&lng=${lng}&radius=${radius}`,
     );
   }
 
@@ -497,13 +512,13 @@ class APIClient {
 
   async getMessages(
     roomId: string,
-    params?: { limit?: number; offset?: number }
+    params?: { limit?: number; offset?: number },
   ) {
     const query = new URLSearchParams();
     if (params?.limit) query.set("limit", params.limit.toString());
     if (params?.offset) query.set("offset", params.offset.toString());
     return this.request<ChatMessage[]>(
-      `/chat/rooms/${roomId}/messages?${query}`
+      `/chat/rooms/${roomId}/messages?${query}`,
     );
   }
 
@@ -542,7 +557,7 @@ class APIClient {
     if (params?.limit) query.set("limit", params.limit.toString());
     if (params?.offset) query.set("offset", params.offset.toString());
     return this.request<PaginatedResponse<SeedCollection>>(
-      `/collections?${query}`
+      `/collections?${query}`,
     );
   }
 
@@ -563,7 +578,7 @@ class APIClient {
     if (params?.limit) query.set("limit", params.limit.toString());
     if (params?.offset) query.set("offset", params.offset.toString());
     return this.request<PaginatedResponse<MotherTree>>(
-      `/mother-trees?${query}`
+      `/mother-trees?${query}`,
     );
   }
 
@@ -589,7 +604,7 @@ class APIClient {
     // Aggregate stats from multiple endpoints
     const [collections, nurseries, motherTrees, species] = await Promise.all([
       this.request<PaginatedResponse<SeedCollection>>(
-        "/collections?limit=1000"
+        "/collections?limit=1000",
       ),
       this.request<PaginatedResponse<Nursery>>("/nurseries?limit=100"),
       this.request<PaginatedResponse<MotherTree>>("/mother-trees?limit=100"),
@@ -598,7 +613,7 @@ class APIClient {
 
     const totalQuantity = collections.data.reduce(
       (sum, c) => sum + (c.quantity || 0),
-      0
+      0,
     );
     const totalPlanted = collections.data
       .filter((c) => c.status === "planted")
@@ -610,7 +625,7 @@ class APIClient {
       .map((n) => this.getNurseryStats(n.id).catch(() => null));
     const nurseryStats = await Promise.all(nurseryStatsPromises);
     const validStats = nurseryStats.filter(
-      (s): s is NurseryStats => s !== null
+      (s): s is NurseryStats => s !== null,
     );
 
     // Calculate aggregate germination rate from nursery stats
@@ -624,11 +639,11 @@ class APIClient {
     // Calculate survival rate based on distributed vs current stock
     const totalDistributed = validStats.reduce(
       (sum, s) => sum + (s.distributed_count || 0),
-      0
+      0,
     );
     const totalSeedlings = validStats.reduce(
       (sum, s) => sum + (s.total_seedlings || 0),
-      0
+      0,
     );
     const survivalRate =
       totalSeedlings > 0 && totalDistributed > 0
@@ -880,6 +895,12 @@ export interface SeedBatch {
   longitude?: number;
   photo_url?: string;
   collection_date?: string;
+  unit_cost?: number;
+  currency?: string;
+  collection?: {
+    id: string;
+    photos?: string;
+  };
 }
 
 export interface InventoryRequest {
@@ -1093,6 +1114,14 @@ export interface CreateNurseryRequest {
   super_operator_password?: string;
   super_operator_phone?: string;
   super_operator_address?: string;
+
+  // Provision a dedicated user account that can log in as `community_nursery`
+  // and manage the created community nursery.
+  community_operator_name?: string;
+  community_operator_email?: string;
+  community_operator_password?: string;
+  community_operator_phone?: string;
+  community_operator_address?: string;
 }
 
 export interface UpdateNurseryRequest {

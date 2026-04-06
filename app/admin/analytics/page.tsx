@@ -7,7 +7,7 @@ import { ChartCard } from "@/components/dashboard/chart-card";
 import { DataTable, Column } from "@/components/dashboard/data-table";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { SkeletonSummaryCard } from "@/components/ui/skeleton";
+import { SkeletonAnalyticsLayout } from "@/components/ui/skeleton";
 import { Activity, Database, Sprout, Leaf, TrendingUp, Building2 } from "lucide-react";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import api, { SeedCollection } from "@/src/api/client";
@@ -55,7 +55,7 @@ export default function AnalyticsPage() {
   const monthlyTrendsData = useMemo(() => {
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const monthCounts: Record<string, number> = {};
-    
+
     collections.forEach(c => {
       const date = new Date(c.collection_date);
       const key = monthNames[date.getMonth()];
@@ -86,9 +86,9 @@ export default function AnalyticsPage() {
     collections.forEach(c => {
       counts[c.status] = (counts[c.status] || 0) + 1;
     });
-    return Object.entries(counts).map(([label, value]) => ({ 
-      label: label.replace("_", " "), 
-      value 
+    return Object.entries(counts).map(([label, value]) => ({
+      label: label.replace("_", " "),
+      value
     }));
   }, [collections]);
 
@@ -163,13 +163,7 @@ export default function AnalyticsPage() {
     return (
       <ProtectedRoute allowedRoles={["admin"]}>
         <DashboardLayout>
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <SkeletonSummaryCard key={i} />
-              ))}
-            </div>
-          </div>
+          <SkeletonAnalyticsLayout />
         </DashboardLayout>
       </ProtectedRoute>
     );
@@ -182,7 +176,7 @@ export default function AnalyticsPage() {
           {/* Header */}
           <div>
             <h1 className="text-h4 mb-1">Analytics Dashboard</h1>
-            <p className="text-caption text-[var(--very-dark-color)]/60">
+            <p className="text-caption text-(--very-dark-color)/60">
               Performance metrics and insights for West Nile pilot region
             </p>
           </div>

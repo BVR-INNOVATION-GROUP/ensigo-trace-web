@@ -58,7 +58,16 @@ const Popup = dynamic(
 );
 
 interface ProvenanceMapProps {
-  trees: MotherTree[];
+  trees: Array<{
+    id: string;
+    species: string;
+    gpsCoordinates: { lat: number; lng: number };
+    age: number;
+    height: number;
+    ecologicalZone: string;
+    healthStatus: string;
+    registeredDate: string;
+  }>;
 }
 
 export function ProvenanceMap({ trees }: ProvenanceMapProps) {
@@ -135,7 +144,7 @@ export function ProvenanceMap({ trees }: ProvenanceMapProps) {
           </Marker>
         ))}
       </MapContainer>
-      <div className="absolute bottom-4 left-4 bg-paper p-3 rounded shadow-custom z-[1000]">
+      <div className="absolute bottom-4 left-4 bg-paper p-3 rounded shadow-custom z-1000">
         <p className="text-label font-medium">West Nile Provenance Zone</p>
         <p className="text-caption opacity-75">{trees.length} verified mother trees</p>
       </div>

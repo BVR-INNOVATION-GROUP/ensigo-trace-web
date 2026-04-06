@@ -25,7 +25,7 @@ export default function InventoryPage() {
   const [batches, setBatches] = useState<SeedBatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentRole, setCurrentRole] = useState<NURSERY_ROLES[number] | null>(null);
+  const [currentRole, setCurrentRole] = useState<typeof NURSERY_ROLES[number] | null>(null);
 
   const resolveMyNursery = useCallback(async (currentUser: User & { nursery_id?: string; business_name?: string }) => {
     const typeMap: Record<UserRole, "regional" | "super" | "community"> = {

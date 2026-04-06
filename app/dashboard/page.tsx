@@ -104,11 +104,14 @@ export default function DashboardPage() {
                 result = await seedService.addCollection(data);
             }
 
+            console.log("Form submission result:", result);
             if (result.success) {
                 setIsFormModalOpen(false);
                 setEditingCollection(null);
                 // Immediately refresh to show updated stats
                 await loadCollections();
+            } else {
+                console.error("Collection save failed:", result.error);
             }
         } catch (error) {
             console.error("Error saving collection:", error);
@@ -165,7 +168,7 @@ export default function DashboardPage() {
                             onClick={handleAdd}
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-primary hover:bg-primary-dark text-white dark:text-[var(--background)] text-body font-medium transition-all"
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-primary hover:bg-primary-dark text-white dark:text-(--background) text-body font-medium transition-all"
                         >
                             <Plus size={16} />
                             <span className="hidden sm:inline">Add Collection</span>
@@ -237,12 +240,13 @@ export default function DashboardPage() {
                                 ...c,
                                 collection_date: c.collection_date || c.submitted_at || new Date().toISOString(),
                                 collection_number: c.collection_number || c.id,
-                                status: c.status || "pending",
-                                collector_id: c.collector_id || "",
+                                species: typeof c.species === 'string' ? undefined : c.species,
+                                status: c.status || 'pending' as const,
+                                collector_id: c.collector_id || '',
                                 submitted_at: c.submitted_at || new Date().toISOString(),
+                                photos: Array.isArray(c.photos) ? c.photos[0] : c.photos,
                             }))}
-                            height="300px"
-                            showClusters={(locations?.length ?? 0) > 5}
+                            height="400px"
                         />
                     )}
                 </motion.div>

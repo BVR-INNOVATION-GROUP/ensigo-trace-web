@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
-import { SkeletonCard } from "@/components/ui/skeleton";
+import { SkeletonAdminLayout, SkeletonCard } from "@/components/ui/skeleton";
 import { Sprout, Plus, CheckCircle, Building2, Edit, Trash2, Eye, CheckCircle2, Clock } from "lucide-react";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { useConfirm } from "@/components/ui/confirm-dialog";
@@ -98,7 +98,7 @@ export default function NurseriesPage() {
       super: "bg-blue-500/10 text-blue-600",
       community: "bg-green-500/10 text-green-600",
     };
-    return colors[type] || "bg-pale text-[var(--very-dark-color)]";
+    return colors[type] || "bg-pale text-(--very-dark-color)";
   };
 
   const handleOpenModal = () => {
@@ -315,7 +315,7 @@ export default function NurseriesPage() {
         const op = item.operator;
         if (!op) {
           return (
-            <span className="text-caption text-[var(--very-dark-color)]/50">
+            <span className="text-caption text-(--very-dark-color)/50">
               {item.contact_email || "—"}
             </span>
           );
@@ -323,7 +323,7 @@ export default function NurseriesPage() {
         return (
           <div className="flex flex-col gap-0.5">
             <span className="text-body-sm font-medium">{op.name}</span>
-            <span className="text-caption text-[var(--very-dark-color)]/60">{op.email}</span>
+            <span className="text-caption text-(--very-dark-color)/60">{op.email}</span>
           </div>
         );
       },
@@ -354,6 +354,7 @@ export default function NurseriesPage() {
     {
       key: "is_verified",
       header: "Status",
+      className: "align-middle",
       render: (item) => (
         <Badge className={item.is_verified ? "bg-green-500/10 text-green-600" : "bg-yellow-500/10 text-yellow-600"}>
           {item.is_verified ? "Verified" : "Pending"}
@@ -371,13 +372,7 @@ export default function NurseriesPage() {
     return (
       <ProtectedRoute allowedRoles={["admin"]}>
         <DashboardLayout>
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <SkeletonCard key={i} />
-              ))}
-            </div>
-          </div>
+          <SkeletonAdminLayout />
         </DashboardLayout>
       </ProtectedRoute>
     );
@@ -391,11 +386,11 @@ export default function NurseriesPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 py-5 sm:py-6">
             <div className="min-w-0">
               <h1 className="text-xl sm:text-h4 mb-1">Nursery Network</h1>
-              <p className="text-caption text-[var(--very-dark-color)]/60">
+              <p className="text-caption text-(--very-dark-color)/60">
                 Self-service sign-ups create regional nursery records here. Approve pending sites, then manage stock, capacity, and hierarchy across the network.
               </p>
             </div>
-            <Button onClick={handleOpenModal} className="self-start sm:self-auto sm:flex-shrink-0">
+            <Button onClick={handleOpenModal} className="self-start sm:self-auto sm:shrink-0">
               <Plus size={16} className="mr-2" />
               Add Nursery
             </Button>
@@ -452,7 +447,7 @@ export default function NurseriesPage() {
               <CardContent className="p-6">
                 <div className="mb-4">
                   <h3 className="text-h5">Geo Distribution</h3>
-                  <p className="text-caption text-[var(--very-dark-color)]/60">
+                  <p className="text-caption text-(--very-dark-color)/60">
                     Nursery locations and stock across the network
                   </p>
                 </div>
@@ -516,7 +511,7 @@ export default function NurseriesPage() {
                 onGetLocation={handleGetLocation}
               />
 
-              <div className="flex justify-end gap-4 p-6 border-t border-[var(--border)] bg-paper shrink-0">
+              <div className="flex justify-end gap-4 p-6 border-t border-(--border) bg-paper shrink-0">
                 <Button type="button" variant="pale" onClick={handleCloseModal} disabled={isSubmitting}>
                   Cancel
                 </Button>
@@ -536,28 +531,28 @@ export default function NurseriesPage() {
             {detailNursery ? (
               <div className="h-full flex flex-col min-h-0">
                 <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 min-h-0">
-                  <div className="bg-pale p-6 sm:p-8 flex flex-col border-b lg:border-b-0 lg:border-r border-[var(--border)] overflow-y-auto scrollbar-thin">
-                    <h3 className="text-h5 mb-6 text-[var(--very-dark-color)]">Site location</h3>
+                  <div className="bg-pale p-6 sm:p-8 flex flex-col border-b lg:border-b-0 lg:border-r border-(--border) overflow-y-auto scrollbar-thin">
+                    <h3 className="text-h5 mb-6 text-(--very-dark-color)">Site location</h3>
                     <div className="mb-6 space-y-2">
-                      <p className="text-label text-[var(--very-dark-color)]">Address / location</p>
+                      <p className="text-label text-(--very-dark-color)">Address / location</p>
                       <p className="text-body-sm">{detailNursery.location || "N/A"}</p>
-                      <p className="text-caption text-[var(--very-dark-color)]/70">
+                      <p className="text-caption text-(--very-dark-color)/70">
                         {detailNursery.region || "N/A"} {detailNursery.district ? `, ${detailNursery.district}` : ""}
                       </p>
                     </div>
-                    <div className="flex-1 min-h-[300px] rounded-lg overflow-hidden border border-[var(--border)]">
+                    <div className="flex-1 min-h-[300px] rounded-lg overflow-hidden border border-(--border)">
                       <NurseryLocationsMap nurseries={[detailNursery]} height="100%" />
                     </div>
                     <div className="grid grid-cols-2 gap-4 sm:gap-6 mt-6">
                       <div>
-                        <p className="block text-label mb-2 text-[var(--very-dark-color)]/40">Latitude</p>
-                        <div className="text-body-sm text-[var(--very-dark-color)]">
+                        <p className="block text-label mb-2 text-(--very-dark-color)/40">Latitude</p>
+                        <div className="text-body-sm text-(--very-dark-color)">
                           {typeof detailNursery.latitude === "number" ? detailNursery.latitude.toFixed(2) : "N/A"}
                         </div>
                       </div>
                       <div>
-                        <p className="block text-label mb-2 text-[var(--very-dark-color)]/40">Longitude</p>
-                        <div className="text-body-sm text-[var(--very-dark-color)]">
+                        <p className="block text-label mb-2 text-(--very-dark-color)/40">Longitude</p>
+                        <div className="text-body-sm text-(--very-dark-color)">
                           {typeof detailNursery.longitude === "number" ? detailNursery.longitude.toFixed(2) : "N/A"}
                         </div>
                       </div>
@@ -565,7 +560,7 @@ export default function NurseriesPage() {
                   </div>
 
                   <div className="bg-paper p-6 sm:p-8 overflow-y-auto scrollbar-thin">
-                    <h3 className="text-h5 mb-6 text-[var(--very-dark-color)]">Nursery details</h3>
+                    <h3 className="text-h5 mb-6 text-(--very-dark-color)">Nursery details</h3>
 
                     {viewLoading ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -577,59 +572,59 @@ export default function NurseriesPage() {
 
                     <div className="space-y-6">
                       <div>
-                        <p className="block text-label mb-2 text-[var(--very-dark-color)]/40">Nursery name</p>
-                        <div className="text-body-sm text-[var(--very-dark-color)]">
+                        <p className="block text-label mb-2 text-(--very-dark-color)/40">Nursery name</p>
+                        <div className="text-body-sm text-(--very-dark-color)">
                           {detailNursery.name || "N/A"}
                         </div>
                       </div>
 
                       <div>
-                        <p className="block text-label mb-2 text-[var(--very-dark-color)]/40">Description</p>
-                        <div className="text-body-sm text-[var(--very-dark-color)]">
+                        <p className="block text-label mb-2 text-(--very-dark-color)/40">Description</p>
+                        <div className="text-body-sm text-(--very-dark-color)">
                           {detailNursery.description || "N/A"}
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div>
-                          <p className="block text-label mb-2 text-[var(--very-dark-color)]/40">Region</p>
-                          <div className="text-body-sm text-[var(--very-dark-color)]">
+                          <p className="block text-label mb-2 text-(--very-dark-color)/40">Region</p>
+                          <div className="text-body-sm text-(--very-dark-color)">
                             {detailNursery.region || "N/A"}
                           </div>
                         </div>
                         <div>
-                          <p className="block text-label mb-2 text-[var(--very-dark-color)]/40">District</p>
-                          <div className="text-body-sm text-[var(--very-dark-color)]">
+                          <p className="block text-label mb-2 text-(--very-dark-color)/40">District</p>
+                          <div className="text-body-sm text-(--very-dark-color)">
                             {detailNursery.district || "N/A"}
                           </div>
                         </div>
                       </div>
 
-                      <div>
-                        <p className="block text-label mb-2 text-[var(--very-dark-color)]/40">Capacity (seedlings)</p>
-                        <div className="text-body-sm text-[var(--very-dark-color)]">
+                      <div className="">
+                        <p className="block text-label mb-2 text-(--very-dark-color)/40">Capacity (seedlings)</p>
+                        <div className="text-body-sm text-(--very-dark-color)">
                           {detailNursery.capacity.toLocaleString()}
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div>
-                          <p className="block text-label mb-2 text-[var(--very-dark-color)]/40">Contact email</p>
-                          <div className="text-body-sm text-[var(--very-dark-color)]">
+                          <p className="block text-label mb-2 text-(--very-dark-color)/40">Contact email</p>
+                          <div className="text-body-sm text-(--very-dark-color)">
                             {detailNursery.contact_email || detailNursery.operator?.email || "N/A"}
                           </div>
                         </div>
                         <div>
-                          <p className="block text-label mb-2 text-[var(--very-dark-color)]/40">Contact phone</p>
-                          <div className="text-body-sm text-[var(--very-dark-color)]">
+                          <p className="block text-label mb-2 text-(--very-dark-color)/40">Contact phone</p>
+                          <div className="text-body-sm text-(--very-dark-color)">
                             {detailNursery.contact_phone || detailNursery.operator?.phone || "N/A"}
                           </div>
                         </div>
                       </div>
 
                       <div>
-                        <p className="block text-label mb-2 text-[var(--very-dark-color)]/40">Operations snapshot</p>
-                        <div className="text-body-sm text-[var(--very-dark-color)] space-y-1">
+                        <p className="block text-label mb-2 text-(--very-dark-color)/40">Operations snapshot</p>
+                        <div className="text-body-sm text-(--very-dark-color) space-y-1">
                           <p>Stock: {detailNursery.current_stock.toLocaleString()}</p>
                           <p>Utilization: {utilization.toFixed(2)}%</p>
                           <p>
@@ -652,7 +647,7 @@ export default function NurseriesPage() {
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-4 p-6 border-t border-[var(--border)] bg-paper shrink-0">
+                <div className="flex justify-end gap-4 p-6 border-t border-(--border) bg-paper shrink-0">
                   <Button type="button" variant="pale" onClick={handleCloseViewModal}>
                     Close
                   </Button>

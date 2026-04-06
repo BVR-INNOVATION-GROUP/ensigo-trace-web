@@ -18,7 +18,7 @@ import {
     Ruler,
     Heart,
 } from "lucide-react";
-import api, { MotherTree, Species } from "@/src/api/client";
+import api, { MotherTree } from "@/src/api/client";
 import { useSpecies } from "@/src/hooks/useSpecies";
 import { useTheme } from "@/components/theme/theme-provider";
 
@@ -84,7 +84,7 @@ export default function MotherTreesPage() {
             tree.tree_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
             tree.species?.scientific_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             tree.region?.toLowerCase().includes(searchQuery.toLowerCase());
-        
+
         const matchesSpecies = !selectedSpecies || tree.species_id === selectedSpecies;
         const matchesRegion = !selectedRegion || tree.region === selectedRegion;
 
@@ -115,7 +115,7 @@ export default function MotherTreesPage() {
             case "poor":
                 return "bg-red-500/10 text-red-600 dark:text-red-400";
             default:
-                return "bg-pale text-[var(--very-dark-color)]";
+                return "bg-pale text-(--very-dark-color)";
         }
     };
 
@@ -147,11 +147,11 @@ export default function MotherTreesPage() {
                 </div>
 
                 {/* Filters */}
-                <div className="bg-paper rounded-lg p-4 mb-6 shadow-sm border border-[var(--very-dark-color)]/10">
+                <div className="bg-paper rounded-lg p-4 mb-6 shadow-sm border border-(--very-dark-color)/10">
                     <div className="flex flex-col sm:flex-row gap-4">
                         <div className="flex-1">
                             <div className="relative">
-                                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--very-dark-color)]/40" />
+                                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-(--very-dark-color)/40" />
                                 <Input
                                     placeholder="Search by ID, species, or region..."
                                     value={searchQuery}
@@ -201,7 +201,7 @@ export default function MotherTreesPage() {
                     </div>
                 ) : viewMode === "map" ? (
                     /* Map View */
-                    <div className="h-[500px] rounded-lg overflow-hidden border border-[var(--very-dark-color)]/10">
+                    <div className="h-[500px] rounded-lg overflow-hidden border border-(--very-dark-color)/10">
                         <MapContainer
                             center={[3.0, 30.9]}
                             zoom={8}
@@ -224,7 +224,7 @@ export default function MotherTreesPage() {
                                         <div className="text-sm">
                                             <p className="font-bold">{tree.tree_id}</p>
                                             <p>{tree.species?.scientific_name}</p>
-                                            <p className="text-[var(--very-dark-color)]/50">{tree.region}</p>
+                                            <p className="text-(--very-dark-color)/50">{tree.region}</p>
                                             <p className={`inline-block px-2 py-0.5 rounded-full text-xs mt-1 ${getHealthColor(tree.health_status)}`}>
                                                 {tree.health_status}
                                             </p>
@@ -243,7 +243,7 @@ export default function MotherTreesPage() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.05 }}
-                                className="bg-paper rounded-lg p-4 shadow-sm border border-[var(--very-dark-color)]/10 hover:shadow-md transition-shadow"
+                                className="bg-paper rounded-lg p-4 shadow-sm border border-(--very-dark-color)/10 hover:shadow-md transition-shadow"
                             >
                                 <div className="flex items-start justify-between mb-3">
                                     <div>
@@ -254,7 +254,7 @@ export default function MotherTreesPage() {
                                             {tree.species?.scientific_name || "Unknown Species"}
                                         </h3>
                                         {tree.species?.common_name && (
-                                            <p className="text-sm text-[var(--very-dark-color)]/50">
+                                            <p className="text-sm text-(--very-dark-color)/50">
                                                 {tree.species.common_name}
                                             </p>
                                         )}
@@ -264,7 +264,7 @@ export default function MotherTreesPage() {
                                     </span>
                                 </div>
 
-                                <div className="space-y-2 text-sm text-[var(--very-dark-color)]/60">
+                                <div className="space-y-2 text-sm text-(--very-dark-color)/60">
                                     <div className="flex items-center gap-2">
                                         <MapPin size={14} />
                                         <span>{tree.region || tree.district || "Unknown location"}</span>
@@ -283,12 +283,12 @@ export default function MotherTreesPage() {
                                     )}
                                     <div className="flex items-center gap-2">
                                         <Heart size={14} />
-                                        <span>{tree.total_collections || 0} collections</span>
+                                        <span>0 collections</span>
                                     </div>
                                 </div>
 
                                 <div className="mt-4 pt-3 border-t border-[var(--very-dark-color)]/10 flex justify-between items-center">
-                                    <span className="text-xs text-[var(--very-dark-color)]/40">
+                                    <span className="text-xs text-(--very-dark-color)/40">
                                         Registered {new Date(tree.registered_date).toLocaleDateString()}
                                     </span>
                                     <Button variant="pale" size="sm">
@@ -301,7 +301,7 @@ export default function MotherTreesPage() {
                 )}
 
                 {filteredTrees.length === 0 && !loading && (
-                    <div className="text-center py-12 text-[var(--very-dark-color)]/50">
+                    <div className="text-center py-12 text-(--very-dark-color)/50">
                         <TreeDeciduous size={48} className="mx-auto mb-4 opacity-50" />
                         <p>No mother trees found matching your criteria</p>
                     </div>
@@ -325,7 +325,6 @@ const mockMotherTrees: MotherTree[] = [
         age: 25,
         height: 18,
         health_status: "excellent",
-        total_collections: 12,
         registered_date: "2024-06-15",
     },
     {
@@ -340,7 +339,6 @@ const mockMotherTrees: MotherTree[] = [
         age: 18,
         height: 15,
         health_status: "good",
-        total_collections: 8,
         registered_date: "2024-07-20",
     },
     {
@@ -355,7 +353,6 @@ const mockMotherTrees: MotherTree[] = [
         age: 40,
         height: 25,
         health_status: "excellent",
-        total_collections: 15,
         registered_date: "2024-08-10",
     },
 ];

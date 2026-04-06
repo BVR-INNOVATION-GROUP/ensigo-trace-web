@@ -9,6 +9,8 @@ import { ChartCard } from "@/components/dashboard/chart-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
+import { SkeletonCollectorLayout } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Eye, EyeOff, Sparkles, UserCheck, Users, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { NURSERY_ROLES } from "@/src/models/User";
@@ -198,8 +200,26 @@ export default function RegionalCollectorsPage() {
       { key: "collector_phone", header: "Phone" },
       { key: "collector_region", header: "Region" },
       { key: "collector_address", header: "Address" },
-      { key: "account_state", header: "Account" },
-      { key: "verification_state", header: "Verified" },
+      {
+        key: "account_state",
+        header: "Account",
+        className: "align-middle",
+        render: (row) => (
+          <Badge className={row.account_state === "Active" ? "bg-green-500/10 text-green-600" : "bg-gray-500/10 text-gray-600"}>
+            {row.account_state}
+          </Badge>
+        )
+      },
+      {
+        key: "verification_state",
+        header: "Verified",
+        className: "align-middle",
+        render: (row) => (
+          <Badge className={row.verification_state === "Verified" ? "bg-green-500/10 text-green-600" : row.verification_state === "Pending" ? "bg-yellow-500/10 text-yellow-600" : "bg-red-500/10 text-red-600"}>
+            {row.verification_state}
+          </Badge>
+        )
+      },
       { key: "joined_label", header: "Joined" },
       { key: "status", header: "Status", render: (row) => row.status || "-" },
     ],
@@ -230,6 +250,16 @@ export default function RegionalCollectorsPage() {
     () => !!regionalNursery && !!form.name.trim() && !!form.email.trim() && !!form.password.trim(),
     [regionalNursery, form.email, form.name, form.password]
   );
+
+  if (loading) {
+    return (
+      <ProtectedRoute allowedRoles={NURSERY_ROLES}>
+        <DashboardLayout>
+          <SkeletonCollectorLayout />
+        </DashboardLayout>
+      </ProtectedRoute>
+    );
+  }
 
   return (
     <ProtectedRoute allowedRoles={NURSERY_ROLES}>
@@ -311,7 +341,7 @@ export default function RegionalCollectorsPage() {
 
           <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="Add Collector" size="lg">
             <div className="p-6 space-y-4">
-              <p className="text-caption text-[var(--very-dark-color)]/70">Create a new collector user account and assign it to this regional nursery.</p>
+              <p className="text-caption text-(--very-dark-color)/70">Create a new collector user account and assign it to this regional nursery.</p>
               {error && <p className="text-sm text-red-500">{error}</p>}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-2">
@@ -335,7 +365,7 @@ export default function RegionalCollectorsPage() {
                     <button
                       type="button"
                       aria-label={showPassword ? "Hide password" : "Show password"}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--very-dark-color)]/60 hover:text-[var(--very-dark-color)]"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-(--very-dark-color)/60 hover:text-(--very-dark-color)"
                       onClick={() => setShowPassword((prev) => !prev)}
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -344,7 +374,7 @@ export default function RegionalCollectorsPage() {
                     <button
                       type="button"
                       aria-label="Generate password"
-                      className="absolute right-10 top-1/2 -translate-y-1/2 text-[var(--very-dark-color)]/60 hover:text-[var(--very-dark-color)]"
+                      className="absolute right-10 top-1/2 -translate-y-1/2 text-(--very-dark-color)/60 hover:text-(--very-dark-color)"
                       onClick={generatePassword}
                     >
                       <Sparkles size={18} />

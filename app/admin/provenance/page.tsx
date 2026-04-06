@@ -8,7 +8,7 @@ import { DataTable, Column } from "@/components/dashboard/data-table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { SkeletonCard, Skeleton } from "@/components/ui/skeleton";
+import { SkeletonAdminLayout } from "@/components/ui/skeleton";
 import { TreePine, Heart, Eye, Leaf, CheckCircle, Edit, Trash2 } from "lucide-react";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { useConfirm } from "@/components/ui/confirm-dialog";
@@ -22,7 +22,7 @@ interface MapTree {
   age: number;
   height: number;
   ecologicalZone: string;
-  healthStatus: string;
+  healthStatus: "good" | "excellent" | "fair" | "poor" | string;
   registeredDate: string;
 }
 
@@ -53,12 +53,12 @@ export default function ProvenancePage() {
   // Calculate stats
   const stats = useMemo(() => {
     const total = motherTrees.length;
-    const verified = motherTrees.filter(t => t.is_verified).length;
-    const avgAge = motherTrees.length > 0 
+    const healthy = motherTrees.filter(t => t.health_status === 'good' || t.health_status === 'excellent').length;
+    const avgAge = motherTrees.length > 0
       ? Math.round(motherTrees.reduce((sum, t) => sum + (t.age || 0), 0) / motherTrees.length)
       : 0;
     const uniqueSpecies = new Set(motherTrees.map(t => t.species?.scientific_name)).size;
-    return { total, verified, avgAge, uniqueSpecies };
+    return { total, healthy, avgAge, uniqueSpecies };
   }, [motherTrees]);
 
   // Chart data
@@ -100,7 +100,7 @@ export default function ProvenancePage() {
     age: tree.age || 0,
     height: tree.height || 0,
     ecologicalZone: tree.region || "Unknown",
-    healthStatus: tree.health_status || "good",
+    healthStatus: (tree.health_status as "good" | "excellent" | "fair" | "poor") || "good",
     registeredDate: tree.registered_date,
   }));
 
@@ -167,13 +167,7 @@ export default function ProvenancePage() {
     return (
       <ProtectedRoute allowedRoles={["admin"]}>
         <DashboardLayout>
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <SkeletonCard key={i} />
-              ))}
-            </div>
-          </div>
+          <SkeletonAdminLayout />
         </DashboardLayout>
       </ProtectedRoute>
     );
@@ -186,7 +180,7 @@ export default function ProvenancePage() {
           {/* Header */}
           <div>
             <h1 className="text-h4 mb-1">Provenance Database</h1>
-            <p className="text-caption text-[var(--very-dark-color)]/60">
+            <p className="text-caption text-(--very-dark-color)/60">
               Verified mother trees and seed source mapping
             </p>
           </div>
@@ -205,7 +199,7 @@ export default function ProvenancePage() {
           {/* Stat Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <SummaryCard title="Total Trees" value={stats.total} icon={<TreePine size={20} />} index={0} />
-            <SummaryCard title="Verified" value={stats.verified} icon={<CheckCircle size={20} />} index={1} />
+            <SummaryCard title="Healthy" value={stats.healthy} icon={<CheckCircle size={20} />} index={1} />
             <SummaryCard title="Avg Age" value={`${stats.avgAge} yrs`} icon={<Heart size={20} />} index={2} />
             <SummaryCard title="Species" value={stats.uniqueSpecies} icon={<Leaf size={20} />} index={3} />
           </div>
@@ -217,12 +211,12 @@ export default function ProvenancePage() {
               <CardDescription>Geographical distribution of certified mother trees</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[400px] rounded-lg overflow-hidden border border-[var(--very-dark-color)]/10">
+              <div className="h-[400px] rounded-lg overflow-hidden border border-(--very-dark-color)/10">
                 {mapTrees.length > 0 ? (
                   <ProvenanceMap trees={mapTrees} />
                 ) : (
                   <div className="flex items-center justify-center h-full bg-pale">
-                    <p className="text-caption text-[var(--very-dark-color)]/60">
+                    <p className="text-caption text-(--very-dark-color)/60">
                       No mother trees registered yet.
                     </p>
                   </div>

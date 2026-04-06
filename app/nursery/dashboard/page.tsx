@@ -8,7 +8,6 @@ import { ChartCard } from "@/components/dashboard/chart-card";
 import { DataTable, Column } from "@/components/dashboard/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import {
   Building2,
@@ -184,7 +183,7 @@ export default function NurseryDashboardPage() {
                 {getNurseryTypeLabel(nursery?.type)}
               </Badge>
               {nursery?.nursery_id && (
-                <span className="text-caption font-mono text-[var(--very-dark-color)]/50">
+                <span className="text-caption font-mono text-(--very-dark-color)/50">
                   {nursery.nursery_id}
                 </span>
               )}

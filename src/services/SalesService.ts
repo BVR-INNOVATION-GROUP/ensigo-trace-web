@@ -1,14 +1,21 @@
-import api, { type CreateSaleRequest, type Sale as ApiSale } from "../api/client";
+import api, {
+  type CreateSaleRequest,
+  type Sale as ApiSale,
+} from "../api/client";
 import type { Sale } from "../models/Sale";
 
 export class SalesService {
   async getAllSales(nurseryId?: string): Promise<Sale[]> {
-    const res = await api.getSales({ nursery_id: nurseryId, limit: 500, offset: 0 });
+    const res = await api.getSales({
+      nursery_id: nurseryId,
+      limit: 500,
+      offset: 0,
+    });
     return (res.data || []).map(this.toUiSale);
   }
 
   async createSale(
-    saleData: Omit<Sale, "id" | "saleNumber" | "totalAmount" | "paymentStatus">
+    saleData: Omit<Sale, "id" | "saleNumber" | "totalAmount" | "paymentStatus">,
   ): Promise<{ success: boolean; data?: Sale; error?: string }> {
     if (!saleData.batchId) {
       return { success: false, error: "Batch ID is required" };
@@ -19,7 +26,11 @@ export class SalesService {
     if (!saleData.pricePerUnit || saleData.pricePerUnit <= 0) {
       return { success: false, error: "Price per unit must be greater than 0" };
     }
-    if (!saleData.customerName || !saleData.customerEmail || !saleData.customerPhone) {
+    if (
+      !saleData.customerName ||
+      !saleData.customerEmail ||
+      !saleData.customerPhone
+    ) {
       return { success: false, error: "Customer information is required" };
     }
 
@@ -37,14 +48,17 @@ export class SalesService {
       const sale = await api.createSale(payload);
       return { success: true, data: this.toUiSale(sale) };
     } catch (error) {
-      return { success: false, error: error instanceof Error ? error.message : "Failed to create sale" };
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to create sale",
+      };
     }
   }
 
   async updatePaymentStatus(
     saleId: string,
     status: Sale["paymentStatus"],
-    transactionReference?: string
+    transactionReference?: string,
   ): Promise<{ success: boolean; data?: Sale; error?: string }> {
     try {
       const updated = await api.updateSalePaymentStatus(saleId, {
@@ -81,16 +95,23 @@ export class SalesService {
       id: sale.id,
       saleNumber: sale.sale_number,
       batchId: sale.batch_id,
-      species: sale.species?.scientific_name || sale.batch?.species?.scientific_name || "Unknown species",
+      species:
+        sale.species?.scientific_name ||
+        sale.batch?.species?.scientific_name ||
+        "Unknown species",
       quantity: sale.quantity,
-      unit: sale.unit === "count" ? "seeds" : sale.unit,
+      unit:
+        sale.unit === "count" ? "seeds" : sale.unit === "g" ? "kg" : sale.unit,
       pricePerUnit: sale.price_per_unit,
       totalAmount: sale.total_amount,
       customerName: sale.customer_name || "",
       customerEmail: sale.customer_email || "",
       customerPhone: sale.customer_phone || "",
       paymentStatus: sale.payment_status,
-      paymentMethod: sale.payment_method === "mobile_money" ? "flutterwave" : sale.payment_method,
+      paymentMethod:
+        sale.payment_method === "mobile_money"
+          ? "flutterwave"
+          : sale.payment_method,
       transactionReference: sale.transaction_reference,
       saleDate: sale.sale_date,
       notes: sale.notes,
@@ -98,4 +119,3 @@ export class SalesService {
     };
   }
 }
-

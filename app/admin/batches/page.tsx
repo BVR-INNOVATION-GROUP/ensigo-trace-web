@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { CustomSelect } from "@/components/ui/custom-select";
-import { SkeletonCard } from "@/components/ui/skeleton";
+import { SkeletonAdminLayout } from "@/components/ui/skeleton";
 import { CheckCircle, XCircle, Plus, Database, Clock, Package, Edit, Trash2, Undo2, MapPin, Map } from "lucide-react";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { useConfirm } from "@/components/ui/confirm-dialog";
@@ -310,13 +310,7 @@ export default function SeedBatchesPage() {
     return (
       <ProtectedRoute allowedRoles={["admin"]}>
         <DashboardLayout>
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <SkeletonCard key={i} />
-              ))}
-            </div>
-          </div>
+          <SkeletonAdminLayout />
         </DashboardLayout>
       </ProtectedRoute>
     );
@@ -328,19 +322,19 @@ export default function SeedBatchesPage() {
         <div className="space-y-6">
           {/* Header - taller on mobile, stacks for small screens */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 py-5 sm:py-6 min-h-[120px] sm:min-h-0">
-            <div className="min-w-0 flex-shrink-0">
+            <div className="min-w-0 shrink-0">
               <h1 className="text-xl sm:text-h4 mb-1">Seed Batch Management</h1>
-              <p className="text-caption text-[var(--very-dark-color)]/60">
+              <p className="text-caption text-(--very-dark-color)/60">
                 Review, validate, and track all seed collection batches
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 sm:flex-shrink-0">
+            <div className="flex flex-col sm:flex-row gap-2 sm:shrink-0">
               <Button variant="pale" onClick={() => setIsMapModalOpen(true)} className="min-h-[44px] justify-center sm:justify-start">
-                <Map size={16} className="mr-2 flex-shrink-0" />
+                <Map size={16} className="mr-2 shrink-0" />
                 Regions Map
               </Button>
               <Button onClick={handleOpenModal} className="min-h-[44px] justify-center sm:justify-start">
-                <Plus size={16} className="mr-2 flex-shrink-0" />
+                <Plus size={16} className="mr-2 shrink-0" />
                 Create Collection
               </Button>
             </div>
@@ -532,7 +526,7 @@ export default function SeedBatchesPage() {
                     onChange={(e) => setFormData({ ...formData, additional_info: e.target.value })}
                   />
                 </div>
-                <div className="flex justify-end gap-4 pt-6 border-t border-[var(--very-dark-color)]/10">
+                <div className="flex justify-end gap-4 pt-6 border-t border-(--very-dark-color)/10">
                   <Button type="button" variant="pale" onClick={handleCloseModal} disabled={isSubmitting}>
                     Cancel
                   </Button>
@@ -626,7 +620,7 @@ export default function SeedBatchesPage() {
                     onChange={(e) => setFormData({ ...formData, additional_info: e.target.value })}
                   />
                 </div>
-                <div className="flex justify-end gap-4 pt-6 border-t border-[var(--very-dark-color)]/10">
+                <div className="flex justify-end gap-4 pt-6 border-t border-(--very-dark-color)/10">
                   <Button type="button" variant="pale" onClick={handleCloseEditModal} disabled={isSubmitting}>
                     Cancel
                   </Button>
