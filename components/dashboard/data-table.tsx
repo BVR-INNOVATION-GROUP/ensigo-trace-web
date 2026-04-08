@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Search } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface Column<T> {
@@ -25,6 +25,12 @@ interface DataTableProps<T> {
   onRowClick?: (item: T) => void;
   emptyMessage?: string;
   maxHeight?: string;
+  pagination?: {
+    currentPage: number;
+    totalItems: number;
+    pageSize: number;
+    onPageChange: (page: number) => void;
+  };
 }
 
 function formatCellNumber(value: number): string {
@@ -54,6 +60,7 @@ export function DataTable<T extends { id?: string | number }>({
   onRowClick,
   emptyMessage = "No data available",
   maxHeight = "500px",
+  pagination,
 }: DataTableProps<T>) {
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -176,8 +183,34 @@ export function DataTable<T extends { id?: string | number }>({
       </div>
 
       {filteredData.length > 0 && (
-        <div className="px-4 py-3 border-t border-(--very-dark-color)/10 text-caption text-(--very-dark-color)/60">
-          Showing {filteredData.length} of {data.length} items
+        <div className="px-4 py-3 border-t border-(--very-dark-color)/10 flex items-center justify-between">
+          <div className="text-caption text-(--very-dark-color)/60">
+            {pagination
+              ? `Showing ${(pagination.currentPage - 1) * pagination.pageSize + 1}-${Math.min(pagination.currentPage * pagination.pageSize, pagination.totalItems)} of ${pagination.totalItems} items`
+              : `Showing ${filteredData.length} of ${data.length} items`
+            }
+          </div>
+          {pagination && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => pagination.onPageChange(pagination.currentPage - 1)}
+                disabled={pagination.currentPage === 1}
+                className="p-2 rounded-md border border-(--very-dark-color)/20 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-pale/50 transition-colors"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <span className="text-sm text-(--very-dark-color)/70 px-2">
+                Page {pagination.currentPage} of {Math.ceil(pagination.totalItems / pagination.pageSize)}
+              </span>
+              <button
+                onClick={() => pagination.onPageChange(pagination.currentPage + 1)}
+                disabled={pagination.currentPage >= Math.ceil(pagination.totalItems / pagination.pageSize)}
+                className="p-2 rounded-md border border-(--very-dark-color)/20 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-pale/50 transition-colors"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

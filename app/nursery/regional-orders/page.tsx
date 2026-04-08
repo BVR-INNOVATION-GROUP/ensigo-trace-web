@@ -33,6 +33,12 @@ interface DeclineModalProps {
   loading: boolean;
 }
 
+interface ViewModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  order: Sale | null;
+}
+
 function ApproveModal({ isOpen, onClose, onApprove, loading }: ApproveModalProps) {
   const [notes, setNotes] = useState("");
 
@@ -108,6 +114,7 @@ function DeclineModal({ isOpen, onClose, onDecline, loading }: DeclineModalProps
   );
 }
 
+
 export default function RegionalOrdersPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -118,7 +125,10 @@ export default function RegionalOrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState<Sale | null>(null);
   const [approveModalOpen, setApproveModalOpen] = useState(false);
   const [declineModalOpen, setDeclineModalOpen] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(20);
 
   const resolveMyNursery = useCallback(async (currentUser: User & { nursery_id?: string; business_name?: string }) => {
     const typeMap: Record<UserRole, "regional" | "super" | "community"> = {
@@ -145,24 +155,26 @@ export default function RegionalOrdersPage() {
     );
   }, []);
 
-  const loadOrders = useCallback(async () => {
+  const loadOrders = useCallback(async (page: number = currentPage) => {
     if (!user || !myNursery) return;
 
     try {
       setLoading(true);
+      const offset = (page - 1) * pageSize;
       const result = await api.getOnlineOrders({
         nursery_id: myNursery.id,
-        limit: 20,
-        offset: 0,
+        limit: pageSize,
+        offset: offset,
       });
       setOrders(result.data || []);
       setTotal(result.total || 0);
+      setCurrentPage(page);
     } catch (error) {
       console.error("Failed to load orders:", error);
     } finally {
       setLoading(false);
     }
-  }, [user, myNursery]);
+  }, [user, myNursery, currentPage, pageSize]);
 
   const loadContext = useCallback(async () => {
     const raw = localStorage.getItem("user");
@@ -199,6 +211,22 @@ export default function RegionalOrdersPage() {
     return Object.entries(counts).map(([label, value]) => ({ label, value }));
   }, [orders]);
 
+  // Revenue chart data
+  const revenueChartData = useMemo(() => {
+    const monthlyRevenue: Record<string, number> = {};
+    orders.forEach(order => {
+      // Include paid orders and fulfilled orders in revenue calculation
+      // Fulfilled orders should contribute to revenue regardless of payment status
+      if (order.payment_status === "paid" || order.order_status === "fulfilled") {
+        const month = new Date(order.sale_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        monthlyRevenue[month] = (monthlyRevenue[month] || 0) + order.total_amount;
+      }
+    });
+    return Object.entries(monthlyRevenue)
+      .sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
+      .map(([label, value]) => ({ label, value }));
+  }, [orders]);
+
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
       pending: "bg-yellow-500/10 text-yellow-600",
@@ -230,7 +258,7 @@ export default function RegionalOrdersPage() {
     try {
       setActionLoading(true);
       await api.approveOrder(selectedOrder.id, { notes });
-      await loadOrders();
+      await loadOrders(currentPage);
       setApproveModalOpen(false);
       setSelectedOrder(null);
     } catch (error) {
@@ -246,7 +274,7 @@ export default function RegionalOrdersPage() {
     try {
       setActionLoading(true);
       await api.declineOrder(selectedOrder.id, { reason });
-      await loadOrders();
+      await loadOrders(currentPage);
       setDeclineModalOpen(false);
       setSelectedOrder(null);
     } catch (error) {
@@ -260,13 +288,101 @@ export default function RegionalOrdersPage() {
     try {
       setActionLoading(true);
       await api.fulfillOrder(order.id);
-      await loadOrders();
+      await loadOrders(currentPage);
     } catch (error) {
       console.error("Error fulfilling order:", error);
     } finally {
       setActionLoading(false);
     }
   };
+
+  const handlePageChange = (page: number) => {
+    loadOrders(page);
+  };
+
+  function ViewModal({ isOpen, onClose, order }: ViewModalProps) {
+    if (!order) return null;
+
+    return (
+      <Modal isOpen={isOpen} onClose={onClose} title="Order Details" size="lg">
+        <div className="p-6 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-label block mb-1">Order Number</label>
+              <p className="font-mono text-primary">{order.sale_number}</p>
+            </div>
+            <div>
+              <label className="text-label block mb-1">Order Status</label>
+              <Badge className={getStatusColor(order.order_status || "unknown")}>
+                {order.order_status || "unknown"}
+              </Badge>
+            </div>
+            <div>
+              <label className="text-label block mb-1">Customer Name</label>
+              <p>{order.customer_name}</p>
+            </div>
+            <div>
+              <label className="text-label block mb-1">Customer Email</label>
+              <p>{order.customer_email}</p>
+            </div>
+            <div>
+              <label className="text-label block mb-1">Customer Phone</label>
+              <p>{order.customer_phone}</p>
+            </div>
+            <div>
+              <label className="text-label block mb-1">Order Date</label>
+              <p>{new Date(order.sale_date).toLocaleDateString()}</p>
+            </div>
+            <div>
+              <label className="text-label block mb-1">Species</label>
+              <p>{order.species?.scientific_name || "Unknown"}</p>
+            </div>
+            <div>
+              <label className="text-label block mb-1">Quantity</label>
+              <p>{order.quantity} {order.unit}</p>
+            </div>
+            <div>
+              <label className="text-label block mb-1">Price per Unit</label>
+              <p>{formatCurrency(order.price_per_unit, 'UGX')}</p>
+            </div>
+            <div>
+              <label className="text-label block mb-1">Total Amount</label>
+              <p className="font-semibold">{formatCurrency(order.total_amount, 'UGX')}</p>
+            </div>
+            <div>
+              <label className="text-label block mb-1">Payment Status</label>
+              <Badge variant={order.payment_status === "paid" ? "default" : "secondary"}>
+                {order.payment_status}
+              </Badge>
+            </div>
+            {order.payment_method && (
+              <div>
+                <label className="text-label block mb-1">Payment Method</label>
+                <p>{order.payment_method}</p>
+              </div>
+            )}
+            {order.transaction_reference && (
+              <div>
+                <label className="text-label block mb-1">Transaction Reference</label>
+                <p className="font-mono text-sm">{order.transaction_reference}</p>
+              </div>
+            )}
+          </div>
+          {order.notes && (
+            <div>
+              <label className="text-label block mb-1">Notes</label>
+              <p className="text-sm">{order.notes}</p>
+            </div>
+          )}
+          <div className="flex justify-end pt-4">
+            <Button type="button" variant="pale" onClick={onClose}>
+              Close
+            </Button>
+          </div>
+        </div>
+      </Modal>
+    );
+  }
 
   const pendingCount = orders.filter(o => o.order_status === "pending").length;
   const approvedCount = orders.filter(o => o.order_status === "approved").length;
@@ -275,11 +391,11 @@ export default function RegionalOrdersPage() {
 
   const columns: Column<Sale>[] = [
     {
-      key: "saleNumber",
+      key: "sale_number",
       header: "Order #",
-      render: (item) => <span className="font-mono text-primary">{item.saleNumber}</span>,
+      render: (item) => <span className="font-mono text-primary">{item.sale_number}</span>,
     },
-    { key: "customerName", header: "Customer" },
+    { key: "customer_name", header: "Customer" },
     { key: "species", header: "Species", render: (item) => item.species?.scientific_name || "Unknown" },
     {
       key: "quantity",
@@ -287,36 +403,44 @@ export default function RegionalOrdersPage() {
       render: (item) => `${item.quantity} ${item.unit}`,
     },
     {
-      key: "totalAmount",
+      key: "total_amount",
       header: "Amount",
-      render: (item) => formatCurrency(item.totalAmount, 'UGX'),
+      render: (item) => formatCurrency(item.total_amount, 'UGX'),
     },
     {
-      key: "orderStatus",
+      key: "order_status",
       header: "Status",
       render: (item) => (
-        <Badge className={getStatusColor(item.orderStatus || "unknown")}>
+        <Badge className={getStatusColor(item.order_status || "unknown")}>
           <div className="flex items-center gap-1">
-            {getStatusIcon(item.orderStatus || "unknown")}
-            <span>{item.orderStatus || "unknown"}</span>
+            {getStatusIcon(item.order_status || "unknown")}
+            <span>{item.order_status || "unknown"}</span>
           </div>
         </Badge>
       ),
     },
     {
-      key: "saleDate",
+      key: "sale_date",
       header: "Date",
-      render: (item) => new Date(item.saleDate).toLocaleDateString(),
+      render: (item) => new Date(item.sale_date).toLocaleDateString(),
     },
     {
       key: "actions",
       header: "Actions",
       render: (item) => (
         <div className="flex gap-1 justify-end">
-          <Button size="sm" variant="pale" title="View Details">
+          <Button
+            size="sm"
+            variant="pale"
+            title="View Details"
+            onClick={() => {
+              setSelectedOrder(item);
+              setViewModalOpen(true);
+            }}
+          >
             <Eye size={14} />
           </Button>
-          {item.orderStatus === "pending" && (
+          {item.order_status === "pending" && (
             <>
               <Button
                 size="sm"
@@ -331,7 +455,7 @@ export default function RegionalOrdersPage() {
               </Button>
               <Button
                 size="sm"
-                variant="danger"
+                variant="destructive"
                 onClick={() => {
                   setSelectedOrder(item);
                   setDeclineModalOpen(true);
@@ -342,7 +466,7 @@ export default function RegionalOrdersPage() {
               </Button>
             </>
           )}
-          {item.orderStatus === "approved" && (
+          {item.order_status === "approved" && (
             <Button
               size="sm"
               variant="default"
@@ -398,27 +522,12 @@ export default function RegionalOrdersPage() {
               type="donut"
               data={statusChartData}
             />
-            <div className="bg-card rounded-lg border border-[var(--border)] p-6">
-              <h3 className="text-h6 mb-4">Quick Actions</h3>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 text-sm text-foreground">
-                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                  <span>Pending Orders: {pendingCount}</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-foreground">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                  <span>Approved Orders: {approvedCount}</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-foreground">
-                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                  <span>Declined Orders: {declinedCount}</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-foreground">
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  <span>Fulfilled Orders: {fulfilledCount}</span>
-                </div>
-              </div>
-            </div>
+            <ChartCard
+              title="Monthly Revenue"
+              description="Revenue from paid orders by month"
+              type="line"
+              data={revenueChartData}
+            />
           </div>
 
           {/* Data Table */}
@@ -431,6 +540,12 @@ export default function RegionalOrdersPage() {
             searchPlaceholder="Search orders..."
             searchKeys={["sale_number", "customer_name", "species", "sale_date"] as (keyof Sale)[]}
             emptyMessage="No online orders yet"
+            pagination={{
+              currentPage,
+              totalItems: total,
+              pageSize,
+              onPageChange: handlePageChange,
+            }}
           />
 
           {/* Modals */}
@@ -452,6 +567,15 @@ export default function RegionalOrdersPage() {
             }}
             onDecline={handleDecline}
             loading={actionLoading}
+          />
+
+          <ViewModal
+            isOpen={viewModalOpen}
+            onClose={() => {
+              setViewModalOpen(false);
+              setSelectedOrder(null);
+            }}
+            order={selectedOrder}
           />
         </div>
       </DashboardLayout>
