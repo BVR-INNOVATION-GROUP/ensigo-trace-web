@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { X, ShoppingCart, MapPin, Mail, Phone, User, ArrowLeft, ArrowRight, Trash2 } from "lucide-react";
 import { formatCurrency } from "@/src/utils/currency";
+import { useToast } from "@/src/hooks/use-toast";
+import api, { CreateOnlineOrderRequest } from "@/src/api/client";
 
 interface CartItem {
   id: string;
@@ -40,6 +42,7 @@ export default function CartModal({ isOpen, onClose, cartItems, products, onUpda
     notes: "",
   });
   const [placingOrder, setPlacingOrder] = useState(false);
+  const { toast } = useToast();
 
   // Cart is fully client-side, no backend sync needed
 
@@ -89,19 +92,55 @@ export default function CartModal({ isOpen, onClose, cartItems, products, onUpda
   const handleCheckout = () => {
     // Validate
     if (!contactInfo.firstName.trim() || !contactInfo.lastName.trim()) {
-      alert("Please enter your name");
+      toast({
+        title: "Validation Error",
+        description: "Please enter your first and last name",
+        variant: "destructive",
+      });
       return;
     }
     if (!contactInfo.email.trim() || !contactInfo.phone.trim()) {
-      alert("Please enter your email and phone number");
+      toast({
+        title: "Validation Error",
+        description: "Please enter your email and phone number",
+        variant: "destructive",
+      });
       return;
     }
 
     setPlacingOrder(true);
 
-    // Simulate order placement with backend sync
+    // Show processing toast
+    toast({
+      title: "Processing Order",
+      description: "Placing your order and sending notifications...",
+    });
+
+    // Create order with backend integration
     const placeOrder = async () => {
       try {
+        // Create individual orders for each cart item (as required by backend API)
+        const orderPromises = cart.map(async (item) => {
+          const orderData = {
+            batch_id: item.id,
+            customer_name: `${contactInfo.firstName} ${contactInfo.lastName}`,
+            customer_email: contactInfo.email,
+            customer_phone: contactInfo.phone,
+            quantity: item.quantity,
+            price_per_unit: item.pricePerUnit,
+            payment_method: "cash", // Default payment method
+            transaction_reference: "",
+            notes: contactInfo.notes || "",
+            order_type: "online" as const
+          };
+
+          return await api.createOnlineOrder(orderData as CreateOnlineOrderRequest);
+        });
+
+        // Wait for all orders to be created
+        const orderResponses = await Promise.all(orderPromises);
+
+        // Store order details locally for reference
         const orderDetails = {
           items: cart.map((item) => {
             return {
@@ -118,16 +157,24 @@ export default function CartModal({ isOpen, onClose, cartItems, products, onUpda
           }),
           contactInfo,
           total,
-          orderNumber: `ORD-${Date.now()}`,
+          orderNumbers: orderResponses.map(order => order.sale_number),
           createdAt: new Date().toISOString(),
         };
 
-        // TODO: Replace with actual backend API call for order creation
-        // await api.createOrder(orderDetails);
-
-        // For now, just store order locally and clear cart
+        // Store order details locally
         localStorage.setItem("lastOrder", JSON.stringify(orderDetails));
         localStorage.removeItem("shopCart");
+
+        // Success toast with email notification info
+        const orderNumbersText = orderDetails.orderNumbers.length > 1
+          ? `Orders ${orderDetails.orderNumbers.join(", ")} have been received.`
+          : `Order ${orderDetails.orderNumbers[0]} has been received.`;
+
+        toast({
+          title: "Order Placed Successfully!",
+          description: `${orderNumbersText} The regional nursery will review your order and you'll receive email confirmation shortly.`,
+          variant: "success",
+        });
 
         setStep("success");
         setPlacingOrder(false);
@@ -140,11 +187,16 @@ export default function CartModal({ isOpen, onClose, cartItems, products, onUpda
 
       } catch (err) {
         console.error("Error placing order:", err);
+        toast({
+          title: "Order Failed",
+          description: "There was an error placing your order. Please try again or contact support.",
+          variant: "destructive",
+        });
         setPlacingOrder(false);
       }
     };
 
-    setTimeout(() => placeOrder(), 1500);
+    placeOrder();
   };
 
   if (!isOpen) return null;

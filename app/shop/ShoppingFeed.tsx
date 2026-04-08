@@ -13,6 +13,7 @@ import { ThemeToggle } from "@/components/theme/theme-toggle";
 import api, { type SeedBatch } from "@/src/api/client";
 import { formatCurrency } from "@/src/utils/currency";
 import CartModal from "@/components/shop/CartModal";
+import { Toaster } from "@/components/ui/toaster";
 
 interface ShopProduct {
     id: string;
@@ -1267,6 +1268,9 @@ export default function PublicShopPage() {
                     </>
                 )}
             </AnimatePresence>
+
+            {/* Toast Notifications */}
+            <Toaster />
         </div>
     );
 }

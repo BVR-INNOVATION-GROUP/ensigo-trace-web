@@ -193,7 +193,7 @@
 
   /* Base font size 12.5px; app-wide maximum 15px */
   html {
-    font-size: 12.5px;
+    font-size: 12px;
     font-family: var(--font-body);
   }
 
@@ -203,8 +203,12 @@
     line-height: var(--line-height-loose);
     color: var(--very-dark-color); /* Default text color */
     background-color: var(--background);
-    transition: background-color 0.2s ease, color 0.2s ease;
-    transition: background-color 0.3s, color 0.3s;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
+    transition:
+      background-color 0.3s,
+      color 0.3s;
     min-height: 100dvh;
     -webkit-tap-highlight-color: transparent;
   }
@@ -437,107 +441,107 @@
     scrollbar-gutter: stable;
   }
 
-/* Keep Leaflet layers below app overlays (notifications, modals, drawers). */
-.nursery-geo-map .leaflet-container,
-.collector-geo-map .leaflet-container {
-  position: relative;
-  z-index: 0;
-}
+  /* Keep Leaflet layers below app overlays (notifications, modals, drawers). */
+  .nursery-geo-map .leaflet-container,
+  .collector-geo-map .leaflet-container {
+    position: relative;
+    z-index: 0;
+  }
 
-.nursery-geo-map .leaflet-pane,
-.collector-geo-map .leaflet-pane,
-.nursery-geo-map .leaflet-tile-pane,
-.collector-geo-map .leaflet-tile-pane,
-.nursery-geo-map .leaflet-overlay-pane,
-.collector-geo-map .leaflet-overlay-pane,
-.nursery-geo-map .leaflet-shadow-pane,
-.collector-geo-map .leaflet-shadow-pane,
-.nursery-geo-map .leaflet-marker-pane,
-.collector-geo-map .leaflet-marker-pane,
-.nursery-geo-map .leaflet-tooltip-pane,
-.collector-geo-map .leaflet-tooltip-pane,
-.nursery-geo-map .leaflet-popup-pane {
-  z-index: 1;
-}
+  .nursery-geo-map .leaflet-pane,
+  .collector-geo-map .leaflet-pane,
+  .nursery-geo-map .leaflet-tile-pane,
+  .collector-geo-map .leaflet-tile-pane,
+  .nursery-geo-map .leaflet-overlay-pane,
+  .collector-geo-map .leaflet-overlay-pane,
+  .nursery-geo-map .leaflet-shadow-pane,
+  .collector-geo-map .leaflet-shadow-pane,
+  .nursery-geo-map .leaflet-marker-pane,
+  .collector-geo-map .leaflet-marker-pane,
+  .nursery-geo-map .leaflet-tooltip-pane,
+  .collector-geo-map .leaflet-tooltip-pane,
+  .nursery-geo-map .leaflet-popup-pane {
+    z-index: 1;
+  }
 
-.collector-geo-map .leaflet-popup-pane,
-.nursery-geo-map .leaflet-control-container,
-.collector-geo-map .leaflet-control-container {
-  z-index: 2;
-}
+  .collector-geo-map .leaflet-popup-pane,
+  .nursery-geo-map .leaflet-control-container,
+  .collector-geo-map .leaflet-control-container {
+    z-index: 2;
+  }
 
-.dark .collector-geo-map .leaflet-popup-content-wrapper,
-.dark .collector-geo-map .leaflet-popup-tip,
-.dark .nursery-geo-map .leaflet-popup-content-wrapper,
-.dark .nursery-geo-map .leaflet-popup-tip {
-  background: var(--card);
-  color: var(--very-dark-color);
-  border: 1px solid var(--border);
-}
+  .dark .collector-geo-map .leaflet-popup-content-wrapper,
+  .dark .collector-geo-map .leaflet-popup-tip,
+  .dark .nursery-geo-map .leaflet-popup-content-wrapper,
+  .dark .nursery-geo-map .leaflet-popup-tip {
+    background: var(--card);
+    color: var(--very-dark-color);
+    border: 1px solid var(--border);
+  }
 
-.dark .collector-geo-map .leaflet-control-zoom a,
-.dark .nursery-geo-map .leaflet-control-zoom a {
-  background: var(--card);
-  color: var(--very-dark-color);
-  border-color: var(--border);
-}
+  .dark .collector-geo-map .leaflet-control-zoom a,
+  .dark .nursery-geo-map .leaflet-control-zoom a {
+    background: var(--card);
+    color: var(--very-dark-color);
+    border-color: var(--border);
+  }
 
-.dark .collector-geo-map .leaflet-control-zoom a:hover,
-.dark .nursery-geo-map .leaflet-control-zoom a:hover,
-.dark .collector-geo-map .leaflet-bar a:hover,
-.dark .nursery-geo-map .leaflet-bar a:hover,
-.dark .collector-geo-map .leaflet-bar a:focus,
-.dark .nursery-geo-map .leaflet-bar a:focus {
-  background: color-mix(in srgb, var(--card) 82%, var(--primary) 18%);
-  color: var(--very-dark-color);
-}
+  .dark .collector-geo-map .leaflet-control-zoom a:hover,
+  .dark .nursery-geo-map .leaflet-control-zoom a:hover,
+  .dark .collector-geo-map .leaflet-bar a:hover,
+  .dark .nursery-geo-map .leaflet-bar a:hover,
+  .dark .collector-geo-map .leaflet-bar a:focus,
+  .dark .nursery-geo-map .leaflet-bar a:focus {
+    background: color-mix(in srgb, var(--card) 82%, var(--primary) 18%);
+    color: var(--very-dark-color);
+  }
 
-.dark .collector-geo-map .leaflet-control-attribution,
-.dark .nursery-geo-map .leaflet-control-attribution {
-  background: color-mix(in srgb, var(--card) 88%, transparent);
-  color: color-mix(in srgb, var(--very-dark-color) 80%, transparent);
-}
+  .dark .collector-geo-map .leaflet-control-attribution,
+  .dark .nursery-geo-map .leaflet-control-attribution {
+    background: color-mix(in srgb, var(--card) 88%, transparent);
+    color: color-mix(in srgb, var(--very-dark-color) 80%, transparent);
+  }
 
-.dark .collector-geo-map .leaflet-control-attribution a,
-.dark .nursery-geo-map .leaflet-control-attribution a {
-  color: var(--primary);
-}
+  .dark .collector-geo-map .leaflet-control-attribution a,
+  .dark .nursery-geo-map .leaflet-control-attribution a {
+    color: var(--primary);
+  }
 
-.dark .collector-geo-map .leaflet-tooltip,
-.dark .nursery-geo-map .leaflet-tooltip {
-  background: var(--card);
-  color: var(--very-dark-color);
-  border: 1px solid var(--border);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
-}
+  .dark .collector-geo-map .leaflet-tooltip,
+  .dark .nursery-geo-map .leaflet-tooltip {
+    background: var(--card);
+    color: var(--very-dark-color);
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+  }
 
-.dark .collector-geo-map .leaflet-tooltip-top:before,
-.dark .nursery-geo-map .leaflet-tooltip-top:before {
-  border-top-color: var(--card);
-}
+  .dark .collector-geo-map .leaflet-tooltip-top:before,
+  .dark .nursery-geo-map .leaflet-tooltip-top:before {
+    border-top-color: var(--card);
+  }
 
-.dark .collector-geo-map .leaflet-tooltip-bottom:before,
-.dark .nursery-geo-map .leaflet-tooltip-bottom:before {
-  border-bottom-color: var(--card);
-}
+  .dark .collector-geo-map .leaflet-tooltip-bottom:before,
+  .dark .nursery-geo-map .leaflet-tooltip-bottom:before {
+    border-bottom-color: var(--card);
+  }
 
-.dark .collector-geo-map .leaflet-tooltip-left:before,
-.dark .nursery-geo-map .leaflet-tooltip-left:before {
-  border-left-color: var(--card);
-}
+  .dark .collector-geo-map .leaflet-tooltip-left:before,
+  .dark .nursery-geo-map .leaflet-tooltip-left:before {
+    border-left-color: var(--card);
+  }
 
-.dark .collector-geo-map .leaflet-tooltip-right:before,
-.dark .nursery-geo-map .leaflet-tooltip-right:before {
-  border-right-color: var(--card);
-}
+  .dark .collector-geo-map .leaflet-tooltip-right:before,
+  .dark .nursery-geo-map .leaflet-tooltip-right:before {
+    border-right-color: var(--card);
+  }
 
-/* Ensure primary action buttons use ground-color text in dark mode. */
-.dark [data-slot="button"].bg-primary {
-  color: var(--background) !important;
-}
+  /* Ensure primary action buttons use ground-color text in dark mode. */
+  .dark [data-slot="button"].bg-primary {
+    color: var(--background) !important;
+  }
 
-.dark [data-slot="button"].bg-primary svg,
-.dark [data-slot="button"].bg-primary span {
-  color: var(--background) !important;
-}
+  .dark [data-slot="button"].bg-primary svg,
+  .dark [data-slot="button"].bg-primary span {
+    color: var(--background) !important;
+  }
 }

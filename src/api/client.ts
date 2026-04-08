@@ -420,6 +420,46 @@ class APIClient {
     });
   }
 
+  // Online Orders
+  async createOnlineOrder(data: CreateOnlineOrderRequest) {
+    return this.request<Sale>("/online-orders", {
+      method: "POST",
+      body: data,
+    });
+  }
+
+  async getOnlineOrders(params?: {
+    nursery_id?: string;
+    limit?: number;
+    offset?: number;
+  }) {
+    const query = new URLSearchParams();
+    if (params?.nursery_id) query.set("nursery_id", params.nursery_id);
+    if (params?.limit) query.set("limit", params.limit.toString());
+    if (params?.offset) query.set("offset", params.offset.toString());
+    return this.request<PaginatedResponse<Sale>>(`/online-orders?${query}`);
+  }
+
+  async approveOrder(id: string, data: { notes: string }) {
+    return this.request<Sale>(`/online-orders/${id}/approve`, {
+      method: "PUT",
+      body: data,
+    });
+  }
+
+  async declineOrder(id: string, data: { reason: string }) {
+    return this.request<Sale>(`/online-orders/${id}/decline`, {
+      method: "PUT",
+      body: data,
+    });
+  }
+
+  async fulfillOrder(id: string) {
+    return this.request<Sale>(`/online-orders/${id}/fulfill`, {
+      method: "PUT",
+    });
+  }
+
   // Species
   async getSpecies(params?: { limit?: number; offset?: number }) {
     const query = new URLSearchParams();
@@ -943,6 +983,7 @@ export interface Sale {
   customer_phone: string;
   nursery_id: string;
   payment_status: "pending" | "paid" | "failed" | "refunded";
+  order_status?: "pending" | "approved" | "declined" | "fulfilled";
   payment_method?: "flutterwave" | "cash" | "bank_transfer" | "mobile_money";
   transaction_reference?: string;
   paid_at?: string;
@@ -1159,6 +1200,10 @@ export interface CreateSaleRequest {
   payment_method?: "flutterwave" | "cash" | "bank_transfer" | "mobile_money";
   transaction_reference?: string;
   notes?: string;
+}
+
+export interface CreateOnlineOrderRequest extends CreateSaleRequest {
+  order_type: "online";
 }
 
 export interface UpdateSalePaymentStatusRequest {

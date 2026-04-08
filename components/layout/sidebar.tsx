@@ -12,6 +12,7 @@ import {
     TreePine,
     Package,
     ShoppingCart,
+    ClipboardList,
     Target,
     X,
 } from "lucide-react";
@@ -39,6 +40,7 @@ const allMenuItems: MenuItem[] = [
     // Nursery role-specific flow
     { href: "/nursery/collectors", label: "Collectors", icon: User, roles: ["regional_nursery"] },
     { href: "/nursery/regional-inventory", label: "Regional Inventory", icon: Package, roles: ["regional_nursery"] },
+    { href: "/nursery/regional-orders", label: "Regional Orders", icon: ClipboardList, roles: ["regional_nursery"] },
     { href: "/nursery/super-nurseries", label: "Super Nurseries", icon: Building2, roles: ["regional_nursery"] },
     { href: "/nursery/requests", label: "Inventory Requests", icon: Package, roles: NURSERY_ROLES },
     { href: "/nursery/inventory", label: "Inventory", icon: Sprout, roles: ["super_nursery", "community_nursery"] },
@@ -118,7 +120,7 @@ function SidebarContent({ onNavigate, onClose }: { onNavigate?: () => void; onCl
                                             : "text-body hover:bg-pale"
                                     )}
                                 >
-                                    <Icon size={16} className="flex-shrink-0" />
+                                    <Icon size={16} />
                                     <span className="text-body truncate">{item.label}</span>
                                 </Link>
                             );
